@@ -1,6 +1,6 @@
 TEMPLATE    = app
 #CONFIG     += silent
-TARGET      = edb
+TARGET      = yad64
 DEPENDPATH  += ./widgets ../include
 INCLUDEPATH += ./widgets ../include D:/MinGW/boost_1_50_0
 RESOURCES   = debugger.qrc
@@ -10,7 +10,7 @@ INSTALLS    += target
 QT          += xml
 
 TRANSLATIONS += \
-	lang/edb_en.ts
+        lang/yad64_en.ts
 
 HEADERS += \
 	API.h \
@@ -66,7 +66,6 @@ HEADERS += \
 	TabWidget.h \
 	Types.h \
 	Util.h \
-	symbols.h \
 	version.h
 
 FORMS += \
@@ -119,7 +118,6 @@ SOURCES += \
 	SymbolManager.cpp \
 	SyntaxHighlighter.cpp \
 	TabWidget.cpp \
-	symbols.cpp \
 	main.cpp
 
 DEPENDPATH  += ./qhexview
@@ -158,96 +156,6 @@ win32 {
 		DEPENDPATH  += os/win64 ../include/os/win64 arch/x86_64 ../include/arch/x86_64 edisassm
                 INCLUDEPATH += os/win64 ../include/os/win64 arch/x86_64 ../include/arch/x86_64 edisassm "D:\\MinGW\\boost_1_50_0"
 		DEFINES     += _CRT_SECURE_NO_WARNINGS QJSON_MAKEDLL
-		RC_FILE     = edb.rc
-	}
-	
-	win32-msvc*:contains(QMAKE_HOST.arch, x86):{
-		DEPENDPATH  += os/win32 ../include/os/win32 arch/i386 ../include/arch/i386 edisassm
-		INCLUDEPATH += os/win32 ../include/os/win32 arch/i386 ../include/arch/i386 edisassm "C:\\Program Files\\boost\\boost_1_47"
-		DEFINES     += _CRT_SECURE_NO_WARNINGS QJSON_MAKEDLL
-		RC_FILE     = edb.rc
-	}
-}
-
-unix {
-	graph {
-		DEPENDPATH  += ./graph
-		INCLUDEPATH += ./graph
-		HEADERS     += GraphEdge.h   GraphWidgetBase.h   GraphWidget.h   GraphNode.h
-		SOURCES     += GraphEdge.cpp GraphWidgetBase.cpp GraphWidget.cpp GraphNode.cpp
-		LIBS        += -lgvc
-	}
-
-	!isEmpty(DEFAULT_PLUGIN_PATH) {
-		DEFINES += DEFAULT_PLUGIN_PATH=$$DEFAULT_PLUGIN_PATH
-	}
-
-	!isEmpty(DEFAULT_SYMBOL_PATH) {
-		DEFINES += DEFAULT_SYMBOL_PATH=$$DEFAULT_SYMBOL_PATH
-	}
-
-	!isEmpty(DEFAULT_SESSION_PATH) {
-		DEFINES += DEFAULT_SESSION_PATH=DEFAULT_SESSION_PATH
-	}
-
-
-	DEPENDPATH  += os/unix ../include/os/unix edisassm
-	INCLUDEPATH += os/unix ../include/os/unix edisassm
-
-	linux-* {
-		DEPENDPATH  += os/unix/linux ../include/os/unix/linux
-		INCLUDEPATH += os/unix/linux ../include/os/unix/linux
-	}
-
-	openbsd-* {
-		DEPENDPATH  += os/unix/openbsd ../include/os/unix/openbsd
-		INCLUDEPATH += os/unix/openbsd ../include/os/unix/openbsd /usr/local/include
-	}
-
-	freebsd-* {
-		DEPENDPATH  += os/unix/freebsd ../include/os/unix/freebsd
-		INCLUDEPATH += os/unix/freebsd ../include/os/unix/freebsd
-	}
-
-	macx-* {
-		DEPENDPATH  += os/unix/osx ../include/os/unix/osx
-		INCLUDEPATH += os/unix/osx ../include/os/unix/osx /opt/local/include
-	}
-
-	macx {
-		DEPENDPATH  += arch/x86_64 ../include/arch/x86_64
-		INCLUDEPATH += arch/x86_64 ../include/arch/x86_64
-	}
-
-	!macx {
-		DEPENDPATH  += arch/$$QT_ARCH ../include/arch/$$QT_ARCH
-		INCLUDEPATH += arch/$$QT_ARCH ../include/arch/$$QT_ARCH
-	}
-
-	*-g++* {
-		QMAKE_CXXFLAGS       += -ansi -pedantic -W -Wall -Wno-long-long -Wnon-virtual-dtor
-		QMAKE_CXXFLAGS_DEBUG += -g3
-	}
-
-	linux-g++*:		QMAKE_CXXFLAGS += -fvisibility=hidden -Wstrict-null-sentinel
-
-	linux-g++*:		QMAKE_LFLAGS += -rdynamic
-	openbsd-g++*:	QMAKE_LFLAGS += -lkvm -Wl,--export-dynamic
-	freebsd-g++*:	QMAKE_LFLAGS += -lkvm -Wl,--export-dynamic
-	macx-g++*:		QMAKE_LFLAGS += -rdynamic
-	
-	debug {
-		OBJECTS_DIR = $${OUT_PWD}/.debug-shared/obj
-		MOC_DIR     = $${OUT_PWD}/.debug-shared/moc
-		RCC_DIR     = $${OUT_PWD}/.debug-shared/rcc
-		UI_DIR      = $${OUT_PWD}/.debug-shared/uic
-		DEFINES += QT_SHAREDPOINTER_TRACK_POINTERS
-	}
-	
-	release {
-		OBJECTS_DIR = $${OUT_PWD}/.release-shared/obj
-		MOC_DIR     = $${OUT_PWD}/.release-shared/moc
-		RCC_DIR     = $${OUT_PWD}/.release-shared/rcc
-		UI_DIR      = $${OUT_PWD}/.release-shared/uic
+                RC_FILE     = yad64.rc
 	}
 }

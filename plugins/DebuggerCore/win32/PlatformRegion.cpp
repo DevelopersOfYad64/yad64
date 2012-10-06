@@ -12,7 +12,7 @@ namespace {
 	const IRegion::permissions_t KNOWN_PERMISSIONS = (PAGE_NOACCESS | PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 }
 
-PlatformRegion::PlatformRegion(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, permissions_t permissions) : start_(start), end_(end), base_(base), name_(name), permissions_(permissions) {
+PlatformRegion::PlatformRegion(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, permissions_t permissions) : start_(start), end_(end), base_(base), name_(name), permissions_(permissions) {
 }
 
 PlatformRegion::~PlatformRegion() {
@@ -62,12 +62,12 @@ bool PlatformRegion::executable() const {
 	}
 }
 
-edb::address_t PlatformRegion::size() const {
+yad64::address_t PlatformRegion::size() const {
 	return end_ - start_;
 }
 
 void PlatformRegion::set_permissions(bool read, bool write, bool execute) {
-	if(HANDLE ph = OpenProcess(PROCESS_VM_OPERATION, FALSE, edb::v1::debugger_core->pid())) {
+	if(HANDLE ph = OpenProcess(PROCESS_VM_OPERATION, FALSE, yad64::v1::debugger_core->pid())) {
 		DWORD prot = PAGE_NOACCESS;
 
 		switch((static_cast<int>(read) << 2) | (static_cast<int>(write) << 1) | static_cast<int>(execute)) {
@@ -92,15 +92,15 @@ void PlatformRegion::set_permissions(bool read, bool write, bool execute) {
 	}
 }
 
-edb::address_t PlatformRegion::start() const {
+yad64::address_t PlatformRegion::start() const {
 	return start_;
 }
 
-edb::address_t PlatformRegion::end() const {
+yad64::address_t PlatformRegion::end() const {
 	return end_;
 }
 
-edb::address_t PlatformRegion::base() const {
+yad64::address_t PlatformRegion::base() const {
 	return base_;
 }
 

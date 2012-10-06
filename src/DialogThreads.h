@@ -31,7 +31,7 @@ public:
 	virtual ~DialogThreads();
 
 public:
-	edb::tid_t selected_thread();
+	yad64::tid_t selected_thread();
 
 public:
 	void showEvent(QShowEvent *);

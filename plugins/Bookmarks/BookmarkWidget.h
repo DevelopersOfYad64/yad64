@@ -41,12 +41,12 @@ public Q_SLOTS:
 	void shortcut(int index);
 
 public:
-	void add_address(edb::address_t address);
-	QList<edb::address_t> entries() const { return entries_.toList(); }
+	void add_address(yad64::address_t address);
+	QList<yad64::address_t> entries() const { return entries_.toList(); }
 
 private:
 	Ui::Bookmarks *      ui;
-	QSet<edb::address_t> entries_;
+	QSet<yad64::address_t> entries_;
 };
 
 #endif

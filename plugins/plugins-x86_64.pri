@@ -1,1 +1,1 @@
-target.path = /lib64/edb/
+target.path = /lib64/yad64/

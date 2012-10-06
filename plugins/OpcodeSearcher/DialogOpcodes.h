@@ -49,15 +49,15 @@ private:
 		quint8  data[sizeof(quint64)];
 	};
 
-	void test_esp_add_0(const OpcodeData &data, edb::address_t start_address);
-	void test_esp_add_regx1(const OpcodeData &data, edb::address_t start_address);
-	void test_esp_add_regx2(const OpcodeData &data, edb::address_t start_address);
-	void test_esp_sub_regx1(const OpcodeData &data, edb::address_t start_address);
+	void test_esp_add_0(const OpcodeData &data, yad64::address_t start_address);
+	void test_esp_add_regx1(const OpcodeData &data, yad64::address_t start_address);
+	void test_esp_add_regx2(const OpcodeData &data, yad64::address_t start_address);
+	void test_esp_sub_regx1(const OpcodeData &data, yad64::address_t start_address);
 	void do_find();
-	void add_result(QList<edb::Instruction> instructions, edb::address_t rva);
+	void add_result(QList<yad64::Instruction> instructions, yad64::address_t rva);
 
-	template <edb::Operand::Register REG>
-	void test_reg_to_ip(const OpcodeData &data, edb::address_t start_address);
+	template <yad64::Operand::Register REG>
+	void test_reg_to_ip(const OpcodeData &data, yad64::address_t start_address);
 
 private:
 	virtual void showEvent(QShowEvent *event);

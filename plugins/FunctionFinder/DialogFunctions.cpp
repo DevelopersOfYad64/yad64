@@ -59,8 +59,8 @@ void DialogFunctions::on_tableWidget_cellDoubleClicked(int row, int column) {
 	Q_UNUSED(column);
 
 	QTableWidgetItem *const item = ui->tableWidget->item(row, 0);
-	const edb::address_t addr = item->data(Qt::UserRole).toULongLong();
-	edb::v1::jump_to_address(addr);
+	const yad64::address_t addr = item->data(Qt::UserRole).toULongLong();
+	yad64::v1::jump_to_address(addr);
 }
 
 //------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void DialogFunctions::on_tableWidget_cellDoubleClicked(int row, int column) {
 //------------------------------------------------------------------------------
 void DialogFunctions::showEvent(QShowEvent *) {
 	filter_model_->setFilterKeyColumn(3);
-	filter_model_->setSourceModel(&edb::v1::memory_regions());
+	filter_model_->setSourceModel(&yad64::v1::memory_regions());
 	ui->tableView->setModel(filter_model_);
 
 	ui->progressBar->setValue(0);
@@ -82,7 +82,7 @@ void DialogFunctions::showEvent(QShowEvent *) {
 //------------------------------------------------------------------------------
 void DialogFunctions::do_find() {
 
-	if(IAnalyzer *const analyzer = edb::v1::analyzer()) {
+	if(IAnalyzer *const analyzer = yad64::v1::analyzer()) {
 		const QItemSelectionModel *const selModel = ui->tableView->selectionModel();
 		const QModelIndexList sel = selModel->selectedRows();
 
@@ -120,13 +120,13 @@ void DialogFunctions::do_find() {
 					ui->tableWidget->insertRow(row);
 
 					// entry point
-					QTableWidgetItem *const p = new QTableWidgetItem(edb::v1::format_pointer(info.entry_address));
+					QTableWidgetItem *const p = new QTableWidgetItem(yad64::v1::format_pointer(info.entry_address));
 					p->setData(Qt::UserRole, info.entry_address);
 					ui->tableWidget->setItem(row, 0, p);
 
 					// upper bound of the function
 					if(info.reference_count >= MIN_REFCOUNT) {
-						ui->tableWidget->setItem(row, 1, new QTableWidgetItem(edb::v1::format_pointer(info.end_address)));
+						ui->tableWidget->setItem(row, 1, new QTableWidgetItem(yad64::v1::format_pointer(info.end_address)));
 
 						QTableWidgetItem *const size_item = new QTableWidgetItem;
 						size_item->setData(Qt::DisplayRole, info.end_address - info.entry_address + 1);

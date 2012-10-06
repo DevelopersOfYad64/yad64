@@ -33,10 +33,10 @@ public:
 public:
 	virtual const QList<Symbol::pointer> symbols() const = 0;
 	virtual const Symbol::pointer find(const QString &name) const = 0;
-	virtual const Symbol::pointer find(edb::address_t address) const = 0;
-	virtual const Symbol::pointer find_near_symbol(edb::address_t address) const = 0;
+	virtual const Symbol::pointer find(yad64::address_t address) const = 0;
+	virtual const Symbol::pointer find_near_symbol(yad64::address_t address) const = 0;
 	virtual void clear() = 0;
-	virtual void load_symbol_file(const QString &filename, edb::address_t base) = 0;
+	virtual void load_symbol_file(const QString &filename, yad64::address_t base) = 0;
 	virtual void load_symbols(const QString &symbol_directory) = 0;
 	virtual void add_symbol(const Symbol::pointer &symbol) = 0;
 };

@@ -25,9 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ui_dialoghwbreakpoints.h"
 
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	#define MAX_HEX "8"
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	#define MAX_HEX "16"
 #endif
 
@@ -97,7 +97,7 @@ void DialogHWBreakpoints::showEvent(QShowEvent *event) {
 	Q_UNUSED(event);
 
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 
 	const bool bp1_enabled = (state.debug_register(7) & 0x00000001) != 0;
 	const bool bp2_enabled = (state.debug_register(7) & 0x00000004) != 0;
@@ -110,18 +110,18 @@ void DialogHWBreakpoints::showEvent(QShowEvent *event) {
 	ui->chkBP4->setChecked(bp4_enabled);
 
 	if(bp1_enabled) {
-		ui->txtBP1->setText(edb::v1::format_pointer(state.debug_register(0)));
+		ui->txtBP1->setText(yad64::v1::format_pointer(state.debug_register(0)));
 	}
 
 	if(bp2_enabled) {
-		ui->txtBP2->setText(edb::v1::format_pointer(state.debug_register(1)));
+		ui->txtBP2->setText(yad64::v1::format_pointer(state.debug_register(1)));
 	}
 
 	if(bp3_enabled) {
-		ui->txtBP3->setText(edb::v1::format_pointer(state.debug_register(2)));
+		ui->txtBP3->setText(yad64::v1::format_pointer(state.debug_register(2)));
 	}
 
 	if(bp4_enabled) {
-		ui->txtBP4->setText(edb::v1::format_pointer(state.debug_register(3)));
+		ui->txtBP4->setText(yad64::v1::format_pointer(state.debug_register(3)));
 	}
 }

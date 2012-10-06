@@ -146,19 +146,19 @@ void CheckVersion::requestFinished(QNetworkReply *reply) {
 		const QByteArray result = reply->readAll();
 		const QString s = result;
 
-		qDebug("comparing versions: [%d] [%d]", edb::v1::int_version(s), edb::v1::edb_version());
+		qDebug("comparing versions: [%d] [%d]", yad64::v1::int_version(s), yad64::v1::yad64_version());
 
-		if(edb::v1::int_version(s) > edb::v1::edb_version()) {
+		if(yad64::v1::int_version(s) > yad64::v1::yad64_version()) {
 			QMessageBox::information(
 				0,
 				tr("New Version Available"),
-				tr("There is a newer version of edb available: <strong>%1</strong>").arg(s));
+				tr("There is a newer version of yad64 available: <strong>%1</strong>").arg(s));
 		} else {
 			if(!initial_check_) {
 				QMessageBox::information(
 					0,
 					tr("You are up to date"),
-					tr("You are running the latest version of edb"));
+					tr("You are running the latest version of yad64"));
 			}
 		}
 	}

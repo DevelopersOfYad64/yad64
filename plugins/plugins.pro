@@ -20,15 +20,3 @@ SUBDIRS += \
 	SessionManager \
 	StringSearcher \
 	SymbolViewer
-
-
-
-unix {
-	!macx {
-		SUBDIRS += HeapAnalyzer
-	}
-
-	linux-* {
-		SUBDIRS += OpenFiles 
-	}
-}

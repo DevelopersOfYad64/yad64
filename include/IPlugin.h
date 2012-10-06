@@ -48,11 +48,11 @@ public:
 	virtual QWidget *options_page() { return 0; }
 
 private:
-	// optional init, overload this to have edb run it after loading the plugin
+	// optional init, overload this to have yad64 run it after loading the plugin
 	virtual void private_init() {
 	}
 };
 
-Q_DECLARE_INTERFACE(IPlugin, "EDB.IPlugin/1.0")
+Q_DECLARE_INTERFACE(IPlugin, "YAD64.IPlugin/1.0")
 
 #endif

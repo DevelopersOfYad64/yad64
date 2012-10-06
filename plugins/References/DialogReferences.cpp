@@ -60,54 +60,54 @@ void DialogReferences::showEvent(QShowEvent *) {
 //------------------------------------------------------------------------------
 void DialogReferences::do_find() {
 	bool ok;
-	const edb::address_t address   = edb::v1::string_to_address(ui->txtAddress->text(), ok);
-	const edb::address_t page_size = edb::v1::debugger_core->page_size();
+	const yad64::address_t address   = yad64::v1::string_to_address(ui->txtAddress->text(), ok);
+	const yad64::address_t page_size = yad64::v1::debugger_core->page_size();
 
 	if(ok) {
-		edb::v1::memory_regions().sync();
-		const QList<MemoryRegion> regions = edb::v1::memory_regions().regions();
+		yad64::v1::memory_regions().sync();
+		const QList<MemoryRegion> regions = yad64::v1::memory_regions().regions();
 
 		int i = 0;
 		Q_FOREACH(const MemoryRegion &region, regions) {
 			// a short circut for speading things up
 			if(region.accessible() || !ui->chkSkipNoAccess->isChecked()) {
 
-				const edb::address_t size_in_pages = region.size() / page_size;
+				const yad64::address_t size_in_pages = region.size() / page_size;
 
 				try {
 
 					QVector<quint8> pages(size_in_pages * page_size);
 					const quint8 *const pages_end = &pages[0] + region.size();
 
-					if(edb::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
+					if(yad64::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
 						const quint8 *p = &pages[0];
 						while(p != pages_end) {
 
-							if(static_cast<std::size_t>(pages_end - p) < sizeof(edb::address_t)) {
+							if(static_cast<std::size_t>(pages_end - p) < sizeof(yad64::address_t)) {
 								break;
 							}
 
-							const edb::address_t addr = p - &pages[0] + region.start();
+							const yad64::address_t addr = p - &pages[0] + region.start();
 
-							edb::address_t test_address;
-							memcpy(&test_address, p, sizeof(edb::address_t));
+							yad64::address_t test_address;
+							memcpy(&test_address, p, sizeof(yad64::address_t));
 
 							if(test_address == address) {
 
-								QListWidgetItem *const item = new QListWidgetItem(edb::v1::format_pointer(addr));
+								QListWidgetItem *const item = new QListWidgetItem(yad64::v1::format_pointer(addr));
 								item->setData(Qt::UserRole, 'D');
 								ui->listWidget->addItem(item);
 							}
 
-							edb::Instruction insn(p, pages_end, addr, std::nothrow);
+							yad64::Instruction insn(p, pages_end, addr, std::nothrow);
 							if(insn.valid()) {
 								switch(insn.type()) {
-								case edb::Instruction::OP_JMP:
-								case edb::Instruction::OP_CALL:
-								case edb::Instruction::OP_JCC:
-									if(insn.operand(0).general_type() == edb::Operand::TYPE_REL) {
+								case yad64::Instruction::OP_JMP:
+								case yad64::Instruction::OP_CALL:
+								case yad64::Instruction::OP_JCC:
+									if(insn.operand(0).general_type() == yad64::Operand::TYPE_REL) {
 										if(insn.operand(0).relative_target() == address) {
-											QListWidgetItem *const item = new QListWidgetItem(edb::v1::format_pointer(addr));
+											QListWidgetItem *const item = new QListWidgetItem(yad64::v1::format_pointer(addr));
 											item->setData(Qt::UserRole, 'C');
 											ui->listWidget->addItem(item);
 										}
@@ -155,12 +155,12 @@ void DialogReferences::on_btnFind_clicked() {
 //------------------------------------------------------------------------------
 void DialogReferences::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 	bool ok;
-	const edb::address_t addr = edb::v1::string_to_address(item->text(), ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(item->text(), ok);
 	if(ok) {
 		if(item->data(Qt::UserRole).toChar() == 'D') {
-			edb::v1::dump_data(addr, false);
+			yad64::v1::dump_data(addr, false);
 		} else {
-			edb::v1::jump_to_address(addr);
+			yad64::v1::jump_to_address(addr);
 		}
 	}
 }

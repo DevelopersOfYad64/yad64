@@ -52,8 +52,8 @@ void MemoryRegions::sync() {
 
 	QList<MemoryRegion> regions;
 	
-	if(edb::v1::debugger_core) {
-		regions = edb::v1::debugger_core->memory_regions();
+	if(yad64::v1::debugger_core) {
+		regions = yad64::v1::debugger_core->memory_regions();
 		Q_FOREACH(const MemoryRegion &region, regions) {
 			// if the region has a name, is mapped starting
 			// at the beginning of the file, and is executable, sounds
@@ -61,7 +61,7 @@ void MemoryRegions::sync() {
 			if(!region.name().isEmpty()) {
 				if(region.base() == 0) {
 					if(region.executable()) {
-						edb::v1::symbol_manager().load_symbol_file(region.name(), region.start());
+						yad64::v1::symbol_manager().load_symbol_file(region.name(), region.start());
 					}
 				}
 			}
@@ -78,10 +78,10 @@ void MemoryRegions::sync() {
 }
 
 //------------------------------------------------------------------------------
-// Name: find_region(edb::address_t address) const
+// Name: find_region(yad64::address_t address) const
 // Desc:
 //------------------------------------------------------------------------------
-bool MemoryRegions::find_region(edb::address_t address) const {
+bool MemoryRegions::find_region(yad64::address_t address) const {
 	Q_FOREACH(const MemoryRegion &i, regions_) {
 		if(i.contains(address)) {
 			return true;
@@ -91,10 +91,10 @@ bool MemoryRegions::find_region(edb::address_t address) const {
 }
 
 //------------------------------------------------------------------------------
-// Name: find_region(edb::address_t address, MemoryRegion &region) const
+// Name: find_region(yad64::address_t address, MemoryRegion &region) const
 // Desc:
 //------------------------------------------------------------------------------
-bool MemoryRegions::find_region(edb::address_t address, MemoryRegion &region) const {
+bool MemoryRegions::find_region(yad64::address_t address, MemoryRegion &region) const {
 	Q_FOREACH(const MemoryRegion &i, regions_) {
 		if(i.contains(address)) {
 			region = i;
@@ -115,8 +115,8 @@ QVariant MemoryRegions::data(const QModelIndex &index, int role) const {
 		const MemoryRegion &region = regions_[index.row()];
 
 		switch(index.column()) {
-		case 0: return edb::v1::format_pointer(region.start());
-		case 1: return edb::v1::format_pointer(region.end());
+		case 0: return yad64::v1::format_pointer(region.start());
+		case 1: return yad64::v1::format_pointer(region.end());
 		case 2: return QString("%1%2%3").arg(region.readable() ? 'r' : '-').arg(region.writable() ? 'w' : '-').arg(region.executable() ? 'x' : '-');
 		case 3: return region.name();
 		}

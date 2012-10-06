@@ -61,9 +61,9 @@ void DialogBinaryString::do_find() {
 	if(sz != 0) {
 		ByteShiftArray bsa(sz);
 
-		edb::v1::memory_regions().sync();
-		const QList<MemoryRegion> regions = edb::v1::memory_regions().regions();
-		const edb::address_t page_size = edb::v1::debugger_core->page_size();
+		yad64::v1::memory_regions().sync();
+		const QList<MemoryRegion> regions = yad64::v1::memory_regions().regions();
+		const yad64::address_t page_size = yad64::v1::debugger_core->page_size();
 
 		int i = 0;
 		Q_FOREACH(const MemoryRegion &region, regions) {
@@ -76,12 +76,12 @@ void DialogBinaryString::do_find() {
 				continue;
 			}
 
-			const edb::address_t size_in_pages = region.size() / page_size;
+			const yad64::address_t size_in_pages = region.size() / page_size;
 			try {
 				QVector<quint8> pages(size_in_pages * page_size);
 				const quint8 *const pages_end = &pages[0] + region.size();
 
-				if(edb::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
+				if(yad64::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
 					const quint8 *p = &pages[0];
 					QString temp;
 					while(p != pages_end) {
@@ -90,11 +90,11 @@ void DialogBinaryString::do_find() {
 
 						// compare values..
 						if(std::memcmp(bsa.data(), b.constData(), sz) == 0) {
-							const edb::address_t addr = (p - &pages[0] + region.start()) - sz + 1;
-							const edb::address_t align = 1 << (ui->cmbAlignment->currentIndex() + 1);
+							const yad64::address_t addr = (p - &pages[0] + region.start()) - sz + 1;
+							const yad64::address_t align = 1 << (ui->cmbAlignment->currentIndex() + 1);
 
 							if(!ui->chkAlignment->isChecked() || (addr % align) == 0) {
-								ui->listWidget->addItem(edb::v1::format_pointer(addr));
+								ui->listWidget->addItem(yad64::v1::format_pointer(addr));
 							}
 						}
 
@@ -133,8 +133,8 @@ void DialogBinaryString::on_btnFind_clicked() {
 //------------------------------------------------------------------------------
 void DialogBinaryString::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 	bool ok;
-	const edb::address_t addr = edb::v1::string_to_address(item->text(), ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(item->text(), ok);
 	if(ok) {
-		edb::v1::dump_data(addr, false);
+		yad64::v1::dump_data(addr, false);
 	}
 }

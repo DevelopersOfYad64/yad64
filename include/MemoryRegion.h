@@ -28,9 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class MemoryRegions;
 
-class EDB_EXPORT MemoryRegion {
+class YAD64_EXPORT MemoryRegion {
 public:
-	MemoryRegion(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, IRegion::permissions_t permissions);
+	MemoryRegion(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, IRegion::permissions_t permissions);
 	MemoryRegion();
 	~MemoryRegion();
 
@@ -40,7 +40,7 @@ public:
 
 	bool operator==(const MemoryRegion &rhs) const;
 	bool operator!=(const MemoryRegion &rhs) const;
-	bool contains(edb::address_t address) const;
+	bool contains(yad64::address_t address) const;
 
 	void swap(MemoryRegion &other);
 
@@ -49,13 +49,13 @@ public:
 	bool readable() const;
 	bool writable() const;
 	bool executable() const;
-	edb::address_t size() const;
+	yad64::address_t size() const;
 	void set_permissions(bool read, bool write, bool execute);
 	
 public:
-	edb::address_t start() const;
-	edb::address_t end() const;
-	edb::address_t base() const;
+	yad64::address_t start() const;
+	yad64::address_t end() const;
+	yad64::address_t base() const;
 	QString name() const;
 	IRegion::permissions_t permissions() const;
 

@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "IDebuggerCore.h"
 #include "IArchProcessor.h"
 
-namespace edb {
+namespace yad64 {
 	namespace detail {
 
 		//----------------------------------------------------------------------
@@ -35,20 +35,20 @@ namespace edb {
 		void step_over(F1 run_func, F2 step_func) {
 			
 			State state;
-			edb::v1::debugger_core->get_state(state);
+			yad64::v1::debugger_core->get_state(state);
 			
-			const edb::address_t ip = state.instruction_pointer();
+			const yad64::address_t ip = state.instruction_pointer();
 
-			quint8 buffer[edb::Instruction::MAX_SIZE];
+			quint8 buffer[yad64::Instruction::MAX_SIZE];
 			int sz = sizeof(buffer);
 
-			if(edb::v1::get_instruction_bytes(ip, buffer, sz)) {
-				edb::Instruction insn(buffer, buffer + sz, 0, std::nothrow);
-				if(insn.valid() && edb::v1::arch_processor().can_step_over(insn)) {
+			if(yad64::v1::get_instruction_bytes(ip, buffer, sz)) {
+				yad64::Instruction insn(buffer, buffer + sz, 0, std::nothrow);
+				if(insn.valid() && yad64::v1::arch_processor().can_step_over(insn)) {
 
 					// add a temporary breakpoint at the instruction just
 					// after the call
-					IBreakpoint::pointer bp = edb::v1::debugger_core->add_breakpoint(ip + insn.size());
+					IBreakpoint::pointer bp = yad64::v1::debugger_core->add_breakpoint(ip + insn.size());
 					bp->set_internal(true);
 					bp->set_one_time(true);
 

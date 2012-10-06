@@ -17,14 +17,14 @@ bool PE32::validate_header() {
 }
 
 bool PE32::native() const {
-#ifdef EDB_X86
+#ifdef YAD64_X86
     return true;
 #else
     return false;
 #endif
 }
 
-edb::address_t PE32::entry_point() {
+yad64::address_t PE32::entry_point() {
     return 0;
 }
 
@@ -32,11 +32,11 @@ size_t PE32::header_size() const {
     return 0;
 }
 
-edb::address_t PE32::debug_pointer() {
+yad64::address_t PE32::debug_pointer() {
     return 0;
 }
 
-edb::address_t PE32::calculate_main() {
+yad64::address_t PE32::calculate_main() {
     return 0;
 }
 
@@ -44,7 +44,7 @@ void PE32::read_header() {
     if(lpDosHeader == NULL) {
         /*header_ = new Elf32_Ehdr;
 
-        if(!edb::v1::debugger_core->read_bytes(region_.start(), header_, sizeof(Elf32_Ehdr))) {
+        if(!yad64::v1::debugger_core->read_bytes(region_.start(), header_, sizeof(Elf32_Ehdr))) {
             std::memset(header_, 0, sizeof(Elf32_Ehdr));
         }*/
     }

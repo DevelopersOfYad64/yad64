@@ -32,10 +32,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui_dialogopcodes.h"
 
 namespace {
-#if defined(EDB_X86)
-	const edb::Operand::Register STACK_REG = edb::Operand::REG_ESP;
-#elif defined(EDB_X86_64)
-	const edb::Operand::Register STACK_REG = edb::Operand::REG_RSP;
+#if defined(YAD64_X86)
+	const yad64::Operand::Register STACK_REG = yad64::Operand::REG_ESP;
+#elif defined(YAD64_X86_64)
+	const yad64::Operand::Register STACK_REG = yad64::Operand::REG_RSP;
 #endif
 }
 
@@ -51,7 +51,7 @@ DialogOpcodes::DialogOpcodes(QWidget *parent) : QDialog(parent), ui(new Ui::Dial
 	filter_model_ = new QSortFilterProxyModel(this);
 	connect(ui->txtSearch, SIGNAL(textChanged(const QString &)), filter_model_, SLOT(setFilterFixedString(const QString &)));
 
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	ui->comboBox->addItem("EAX -> EIP", 1);
 	ui->comboBox->addItem("EBX -> EIP", 2);
 	ui->comboBox->addItem("ECX -> EIP", 3);
@@ -65,7 +65,7 @@ DialogOpcodes::DialogOpcodes(QWidget *parent) : QDialog(parent), ui(new Ui::Dial
 	ui->comboBox->addItem("[ESP + 4] -> EIP", 19);
 	ui->comboBox->addItem("[ESP + 8] -> EIP", 20);
 	ui->comboBox->addItem("[ESP - 4] -> EIP", 21);
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	ui->comboBox->addItem("RAX -> RIP", 1);
 	ui->comboBox->addItem("RBX -> RIP", 2);
 	ui->comboBox->addItem("RCX -> RIP", 3);
@@ -104,9 +104,9 @@ DialogOpcodes::~DialogOpcodes() {
 //------------------------------------------------------------------------------
 void DialogOpcodes::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 	bool ok;
-	const edb::address_t addr = item->data(Qt::UserRole).toULongLong(&ok);
+	const yad64::address_t addr = item->data(Qt::UserRole).toULongLong(&ok);
 	if(ok) {
-		edb::v1::jump_to_address(addr);
+		yad64::v1::jump_to_address(addr);
 	}
 }
 
@@ -116,26 +116,26 @@ void DialogOpcodes::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 //------------------------------------------------------------------------------
 void DialogOpcodes::showEvent(QShowEvent *) {
 	filter_model_->setFilterKeyColumn(3);
-	filter_model_->setSourceModel(&edb::v1::memory_regions());
+	filter_model_->setSourceModel(&yad64::v1::memory_regions());
 	ui->tableView->setModel(filter_model_);
 	ui->progressBar->setValue(0);
 	ui->listWidget->clear();
 }
 
 //------------------------------------------------------------------------------
-// Name: add_result(QList<edb::Instruction> instructions, edb::address_t rva)
+// Name: add_result(QList<yad64::Instruction> instructions, yad64::address_t rva)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogOpcodes::add_result(QList<edb::Instruction> instructions, edb::address_t rva) {
+void DialogOpcodes::add_result(QList<yad64::Instruction> instructions, yad64::address_t rva) {
 	if(!instructions.isEmpty()) {
-		const edb::Instruction insn1 = instructions.takeFirst();
+		const yad64::Instruction insn1 = instructions.takeFirst();
 
 		QString instruction_string = QString("%1: %2").arg(
-			edb::v1::format_pointer(rva),
+			yad64::v1::format_pointer(rva),
 			QString::fromStdString(edisassm::to_string(insn1)));
 
 
-		Q_FOREACH(const edb::Instruction &instruction, instructions) {
+		Q_FOREACH(const yad64::Instruction &instruction, instructions) {
 			instruction_string.append(QString("; %1").arg(QString::fromStdString(edisassm::to_string(instruction))));
 		}
 
@@ -147,56 +147,56 @@ void DialogOpcodes::add_result(QList<edb::Instruction> instructions, edb::addres
 }
 
 //------------------------------------------------------------------------------
-// Name: test_reg_to_ip(const DialogOpcodes::OpcodeData &data, edb::address_t start_address)
+// Name: test_reg_to_ip(const DialogOpcodes::OpcodeData &data, yad64::address_t start_address)
 // Desc:
 //------------------------------------------------------------------------------
-template <edb::Operand::Register REG>
-void DialogOpcodes::test_reg_to_ip(const DialogOpcodes::OpcodeData &data, edb::address_t start_address) {
+template <yad64::Operand::Register REG>
+void DialogOpcodes::test_reg_to_ip(const DialogOpcodes::OpcodeData &data, yad64::address_t start_address) {
 
 	const quint8 *p = data.data;
 	const quint8 *last = p + sizeof(data);
 
-	edb::Instruction insn(p, last, 0, std::nothrow);
+	yad64::Instruction insn(p, last, 0, std::nothrow);
 
 	if(insn.valid()) {
-		const edb::Operand &op1 = insn.operand(0);
+		const yad64::Operand &op1 = insn.operand(0);
 		switch(insn.type()) {
-		case edb::Instruction::OP_JMP:
-		case edb::Instruction::OP_CALL:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER) {
+		case yad64::Instruction::OP_JMP:
+		case yad64::Instruction::OP_CALL:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER) {
 				if(op1.reg() == REG) {
-					add_result((QList<edb::Instruction>() << insn), start_address);
+					add_result((QList<yad64::Instruction>() << insn), start_address);
 					return;
 				}
 			}
 			break;
 
-		case edb::Instruction::OP_PUSH:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER) {
+		case yad64::Instruction::OP_PUSH:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER) {
 				if(op1.reg() == REG) {
 
 					p += insn.size();
-					edb::Instruction insn2(p, last, 0, std::nothrow);
+					yad64::Instruction insn2(p, last, 0, std::nothrow);
 					if(insn2.valid()) {
-						const edb::Operand &op2 = insn2.operand(0);
+						const yad64::Operand &op2 = insn2.operand(0);
 						switch(insn2.type()) {
-						case edb::Instruction::OP_RET:
-							add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+						case yad64::Instruction::OP_RET:
+							add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							break;
-						case edb::Instruction::OP_JMP:
-						case edb::Instruction::OP_CALL:
+						case yad64::Instruction::OP_JMP:
+						case yad64::Instruction::OP_CALL:
 
-							if(op2.general_type() == edb::Operand::TYPE_EXPRESSION) {
+							if(op2.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
-								if(op2.expression().displacement_type == edb::Operand::DISP_NONE) {
+								if(op2.expression().displacement_type == yad64::Operand::DISP_NONE) {
 
-									if(op2.expression().base == STACK_REG && op2.expression().index == edb::Operand::REG_NULL) {
-										add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+									if(op2.expression().base == STACK_REG && op2.expression().index == yad64::Operand::REG_NULL) {
+										add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 										return;
 									}
 
-									if(op2.expression().index == STACK_REG && op2.expression().base == edb::Operand::REG_NULL) {
-										add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+									if(op2.expression().index == STACK_REG && op2.expression().base == yad64::Operand::REG_NULL) {
+										add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 										return;
 									}
 								}
@@ -216,56 +216,56 @@ void DialogOpcodes::test_reg_to_ip(const DialogOpcodes::OpcodeData &data, edb::a
 }
 
 //------------------------------------------------------------------------------
-// Name: test_esp_add_0(const OpcodeData &data, edb::address_t start_address)
+// Name: test_esp_add_0(const OpcodeData &data, yad64::address_t start_address)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogOpcodes::test_esp_add_0(const OpcodeData &data, edb::address_t start_address) {
+void DialogOpcodes::test_esp_add_0(const OpcodeData &data, yad64::address_t start_address) {
 
 	const quint8 *p = data.data;
 	const quint8 *last = p + sizeof(data);
 
-	edb::Instruction insn(p, last, 0, std::nothrow);
+	yad64::Instruction insn(p, last, 0, std::nothrow);
 
 	if(insn.valid()) {
-		const edb::Operand &op1 = insn.operand(0);
+		const yad64::Operand &op1 = insn.operand(0);
 		switch(insn.type()) {
-		case edb::Instruction::OP_RET:
-			add_result((QList<edb::Instruction>() << insn), start_address);
+		case yad64::Instruction::OP_RET:
+			add_result((QList<yad64::Instruction>() << insn), start_address);
 			break;
 
-		case edb::Instruction::OP_CALL:
-		case edb::Instruction::OP_JMP:
-			if(op1.general_type() == edb::Operand::TYPE_EXPRESSION) {
+		case yad64::Instruction::OP_CALL:
+		case yad64::Instruction::OP_JMP:
+			if(op1.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
-				if(op1.expression().displacement_type == edb::Operand::DISP_NONE) {
+				if(op1.expression().displacement_type == yad64::Operand::DISP_NONE) {
 
-					if(op1.expression().base == STACK_REG && op1.expression().index == edb::Operand::REG_NULL) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
+					if(op1.expression().base == STACK_REG && op1.expression().index == yad64::Operand::REG_NULL) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
 						return;
 					}
 
-					if(op1.expression().index == STACK_REG && op1.expression().base == edb::Operand::REG_NULL) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
+					if(op1.expression().index == STACK_REG && op1.expression().base == yad64::Operand::REG_NULL) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
 						return;
 					}
 				}
 			}
 			break;
-		case edb::Instruction::OP_POP:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER) {
+		case yad64::Instruction::OP_POP:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER) {
 
 				p += insn.size();
-				edb::Instruction insn2(p, last, 0, std::nothrow);
+				yad64::Instruction insn2(p, last, 0, std::nothrow);
 				if(insn2.valid()) {
-					const edb::Operand &op2 = insn2.operand(0);
+					const yad64::Operand &op2 = insn2.operand(0);
 					switch(insn2.type()) {
-					case edb::Instruction::OP_JMP:
-					case edb::Instruction::OP_CALL:
+					case yad64::Instruction::OP_JMP:
+					case yad64::Instruction::OP_CALL:
 
-						if(op2.general_type() == edb::Operand::TYPE_REGISTER) {
+						if(op2.general_type() == yad64::Operand::TYPE_REGISTER) {
 
 							if(op1.reg() == op2.reg()) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 						break;
@@ -283,58 +283,58 @@ void DialogOpcodes::test_esp_add_0(const OpcodeData &data, edb::address_t start_
 }
 
 //------------------------------------------------------------------------------
-// Name: test_esp_add_regx1(const OpcodeData &data, edb::address_t start_address)
+// Name: test_esp_add_regx1(const OpcodeData &data, yad64::address_t start_address)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogOpcodes::test_esp_add_regx1(const OpcodeData &data, edb::address_t start_address) {
+void DialogOpcodes::test_esp_add_regx1(const OpcodeData &data, yad64::address_t start_address) {
 
 	const quint8 *p = data.data;
 	const quint8 *last = p + sizeof(data);
 
-	edb::Instruction insn(p, last, 0, std::nothrow);
+	yad64::Instruction insn(p, last, 0, std::nothrow);
 
 	if(insn.valid()) {
-		const edb::Operand &op1 = insn.operand(0);
+		const yad64::Operand &op1 = insn.operand(0);
 		switch(insn.type()) {
-		case edb::Instruction::OP_POP:
+		case yad64::Instruction::OP_POP:
 
-			if(op1.general_type() != edb::Operand::TYPE_REGISTER || op1.reg() != STACK_REG) {
+			if(op1.general_type() != yad64::Operand::TYPE_REGISTER || op1.reg() != STACK_REG) {
 				p += insn.size();
-				edb::Instruction insn2(p, last, 0, std::nothrow);
+				yad64::Instruction insn2(p, last, 0, std::nothrow);
 				if(insn2.valid()) {
-					if(insn2.type() == edb::Instruction::OP_RET) {
-						add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+					if(insn2.type() == yad64::Instruction::OP_RET) {
+						add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 					}
 				}
 			}
 			break;
-		case edb::Instruction::OP_JMP:
-		case edb::Instruction::OP_CALL:
+		case yad64::Instruction::OP_JMP:
+		case yad64::Instruction::OP_CALL:
 
-			if(op1.general_type() == edb::Operand::TYPE_EXPRESSION) {
+			if(op1.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
 				if(op1.displacement() == 4) {
-					if(op1.expression().base == STACK_REG && op1.expression().index == edb::Operand::REG_NULL) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
-					} else if(op1.expression().base == edb::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
+					if(op1.expression().base == STACK_REG && op1.expression().index == yad64::Operand::REG_NULL) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
+					} else if(op1.expression().base == yad64::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
 					}
 
 				}
 			}
 			break;
-		case edb::Instruction::OP_SUB:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_SUB:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == -static_cast<int>(sizeof(edb::reg_t))) {
+					if(op2.immediate() == -static_cast<int>(sizeof(yad64::reg_t))) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -342,18 +342,18 @@ void DialogOpcodes::test_esp_add_regx1(const OpcodeData &data, edb::address_t st
 			}
 			break;
 
-		case edb::Instruction::OP_ADD:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_ADD:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == sizeof(edb::reg_t)) {
+					if(op2.immediate() == sizeof(yad64::reg_t)) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -368,36 +368,36 @@ void DialogOpcodes::test_esp_add_regx1(const OpcodeData &data, edb::address_t st
 }
 
 //------------------------------------------------------------------------------
-// Name: test_esp_add_regx2(const OpcodeData &data, edb::address_t start_address)
+// Name: test_esp_add_regx2(const OpcodeData &data, yad64::address_t start_address)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogOpcodes::test_esp_add_regx2(const OpcodeData &data, edb::address_t start_address) {
+void DialogOpcodes::test_esp_add_regx2(const OpcodeData &data, yad64::address_t start_address) {
 
 
 	const quint8 *p = data.data;
 	const quint8 *last = p + sizeof(data);
 
-	edb::Instruction insn(p, last, 0, std::nothrow);
+	yad64::Instruction insn(p, last, 0, std::nothrow);
 
 	if(insn.valid()) {
-		const edb::Operand &op1 = insn.operand(0);
+		const yad64::Operand &op1 = insn.operand(0);
 		switch(insn.type()) {
-		case edb::Instruction::OP_POP:
+		case yad64::Instruction::OP_POP:
 
-			if(op1.general_type() != edb::Operand::TYPE_REGISTER || op1.reg() != STACK_REG) {
+			if(op1.general_type() != yad64::Operand::TYPE_REGISTER || op1.reg() != STACK_REG) {
 				p += insn.size();
-				edb::Instruction insn2(p, last, 0, std::nothrow);
+				yad64::Instruction insn2(p, last, 0, std::nothrow);
 				if(insn2.valid()) {
-					const edb::Operand &op2 = insn2.operand(0);
+					const yad64::Operand &op2 = insn2.operand(0);
 					switch(insn2.type()) {
-					case edb::Instruction::OP_POP:
+					case yad64::Instruction::OP_POP:
 
-						if(op2.general_type() != edb::Operand::TYPE_REGISTER || op2.reg() != STACK_REG) {
+						if(op2.general_type() != yad64::Operand::TYPE_REGISTER || op2.reg() != STACK_REG) {
 							p += insn2.size();
-							edb::Instruction insn3(p, last, 0, std::nothrow);
+							yad64::Instruction insn3(p, last, 0, std::nothrow);
 							if(insn3.valid()) {
-								if(insn3.type() == edb::Instruction::OP_RET) {
-									add_result((QList<edb::Instruction>() << insn << insn2 << insn3), start_address);
+								if(insn3.type() == yad64::Instruction::OP_RET) {
+									add_result((QList<yad64::Instruction>() << insn << insn2 << insn3), start_address);
 								}
 							}
 						}
@@ -409,33 +409,33 @@ void DialogOpcodes::test_esp_add_regx2(const OpcodeData &data, edb::address_t st
 			}
 			break;
 
-		case edb::Instruction::OP_JMP:
-		case edb::Instruction::OP_CALL:
-			if(op1.general_type() == edb::Operand::TYPE_EXPRESSION) {
+		case yad64::Instruction::OP_JMP:
+		case yad64::Instruction::OP_CALL:
+			if(op1.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
-				if(op1.displacement() == (sizeof(edb::reg_t) * 2)) {
-					if(op1.expression().base == STACK_REG && op1.expression().index == edb::Operand::REG_NULL) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
-					} else if(op1.expression().base == edb::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
+				if(op1.displacement() == (sizeof(yad64::reg_t) * 2)) {
+					if(op1.expression().base == STACK_REG && op1.expression().index == yad64::Operand::REG_NULL) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
+					} else if(op1.expression().base == yad64::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
 					}
 
 				}
 			}
 			break;
 
-		case edb::Instruction::OP_SUB:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_SUB:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == -static_cast<int>(sizeof(edb::reg_t) * 2)) {
+					if(op2.immediate() == -static_cast<int>(sizeof(yad64::reg_t) * 2)) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -443,18 +443,18 @@ void DialogOpcodes::test_esp_add_regx2(const OpcodeData &data, edb::address_t st
 			}
 			break;
 
-		case edb::Instruction::OP_ADD:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_ADD:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == (sizeof(edb::reg_t) * 2)) {
+					if(op2.immediate() == (sizeof(yad64::reg_t) * 2)) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -469,46 +469,46 @@ void DialogOpcodes::test_esp_add_regx2(const OpcodeData &data, edb::address_t st
 }
 
 //------------------------------------------------------------------------------
-// Name: test_esp_sub_regx1(const OpcodeData &data, edb::address_t start_address)
+// Name: test_esp_sub_regx1(const OpcodeData &data, yad64::address_t start_address)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogOpcodes::test_esp_sub_regx1(const OpcodeData &data, edb::address_t start_address) {
+void DialogOpcodes::test_esp_sub_regx1(const OpcodeData &data, yad64::address_t start_address) {
 
 	const quint8 *p = data.data;
 	const quint8 *last = p + sizeof(data);
 
-	edb::Instruction insn(p, last, 0, std::nothrow);
+	yad64::Instruction insn(p, last, 0, std::nothrow);
 
 	if(insn.valid()) {
-		const edb::Operand &op1 = insn.operand(0);
+		const yad64::Operand &op1 = insn.operand(0);
 		switch(insn.type()) {
-		case edb::Instruction::OP_JMP:
-		case edb::Instruction::OP_CALL:
-			if(op1.general_type() == edb::Operand::TYPE_EXPRESSION) {
+		case yad64::Instruction::OP_JMP:
+		case yad64::Instruction::OP_CALL:
+			if(op1.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
-				if(op1.displacement() == -static_cast<int>(sizeof(edb::reg_t))) {
-					if(op1.expression().base == STACK_REG && op1.expression().index == edb::Operand::REG_NULL) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
-					} else if(op1.expression().base == edb::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
-						add_result((QList<edb::Instruction>() << insn), start_address);
+				if(op1.displacement() == -static_cast<int>(sizeof(yad64::reg_t))) {
+					if(op1.expression().base == STACK_REG && op1.expression().index == yad64::Operand::REG_NULL) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
+					} else if(op1.expression().base == yad64::Operand::REG_NULL && op1.expression().index == STACK_REG && op1.expression().scale == 1) {
+						add_result((QList<yad64::Instruction>() << insn), start_address);
 					}
 
 				}
 			}
 			break;
 
-		case edb::Instruction::OP_SUB:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_SUB:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == static_cast<int>(sizeof(edb::reg_t))) {
+					if(op2.immediate() == static_cast<int>(sizeof(yad64::reg_t))) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -516,18 +516,18 @@ void DialogOpcodes::test_esp_sub_regx1(const OpcodeData &data, edb::address_t st
 			}
 			break;
 
-		case edb::Instruction::OP_ADD:
-			if(op1.general_type() == edb::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
+		case yad64::Instruction::OP_ADD:
+			if(op1.general_type() == yad64::Operand::TYPE_REGISTER && op1.reg() == STACK_REG) {
 
-				const edb::Operand &op2 = insn.operand(1);
-				if(op2.general_type() == edb::Operand::TYPE_IMMEDIATE) {
+				const yad64::Operand &op2 = insn.operand(1);
+				if(op2.general_type() == yad64::Operand::TYPE_IMMEDIATE) {
 
-					if(op2.immediate() == -static_cast<int>(sizeof(edb::reg_t))) {
+					if(op2.immediate() == -static_cast<int>(sizeof(yad64::reg_t))) {
 						p += insn.size();
-						edb::Instruction insn2(p, last, 0, std::nothrow);
+						yad64::Instruction insn2(p, last, 0, std::nothrow);
 						if(insn2.valid()) {
-							if(insn2.type() == edb::Instruction::OP_RET) {
-								add_result((QList<edb::Instruction>() << insn << insn2), start_address);
+							if(insn2.type() == yad64::Instruction::OP_RET) {
+								add_result((QList<yad64::Instruction>() << insn << insn2), start_address);
 							}
 						}
 					}
@@ -564,9 +564,9 @@ void DialogOpcodes::do_find() {
 			const QModelIndex index = filter_model_->mapToSource(selected_item);
 			const MemoryRegion *const region = reinterpret_cast<const MemoryRegion *>(index.internalPointer());
 
-			edb::address_t start_address     = region->start();
-			const edb::address_t end_address = region->end();
-			const edb::address_t orig_start  = start_address;
+			yad64::address_t start_address     = region->start();
+			const yad64::address_t end_address = region->end();
+			const yad64::address_t orig_start  = start_address;
 			ByteShiftArray bsa(sizeof(OpcodeData));
 
 			// create a reference to the bsa's data so we can pass it to the testXXXX functions
@@ -583,66 +583,66 @@ void DialogOpcodes::do_find() {
 				if(start_address >= end_address) {
 					byte = 0x00;
 				} else {
-					edb::v1::debugger_core->read_bytes(start_address, &byte, 1);
+					yad64::v1::debugger_core->read_bytes(start_address, &byte, 1);
 				}
 				bsa <<  byte;
 
 				switch(classtype) {
-			#if defined(EDB_X86)
-				case 1: test_reg_to_ip<edb::Operand::REG_EAX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 2: test_reg_to_ip<edb::Operand::REG_EBX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 3: test_reg_to_ip<edb::Operand::REG_ECX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 4: test_reg_to_ip<edb::Operand::REG_EDX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 5: test_reg_to_ip<edb::Operand::REG_EBP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 6: test_reg_to_ip<edb::Operand::REG_ESP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 7: test_reg_to_ip<edb::Operand::REG_ESI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 8: test_reg_to_ip<edb::Operand::REG_EDI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-			#elif defined(EDB_X86_64)
-				case 1: test_reg_to_ip<edb::Operand::REG_RAX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 2: test_reg_to_ip<edb::Operand::REG_RBX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 3: test_reg_to_ip<edb::Operand::REG_RCX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 4: test_reg_to_ip<edb::Operand::REG_RDX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 5: test_reg_to_ip<edb::Operand::REG_RBP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 6: test_reg_to_ip<edb::Operand::REG_RSP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 7: test_reg_to_ip<edb::Operand::REG_RSI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 8: test_reg_to_ip<edb::Operand::REG_RDI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 9: test_reg_to_ip<edb::Operand::REG_R8>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 10: test_reg_to_ip<edb::Operand::REG_R9>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 11: test_reg_to_ip<edb::Operand::REG_R10>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 12: test_reg_to_ip<edb::Operand::REG_R11>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 13: test_reg_to_ip<edb::Operand::REG_R12>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 14: test_reg_to_ip<edb::Operand::REG_R13>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 15: test_reg_to_ip<edb::Operand::REG_R14>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
-				case 16: test_reg_to_ip<edb::Operand::REG_R15>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+			#if defined(YAD64_X86)
+				case 1: test_reg_to_ip<yad64::Operand::REG_EAX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 2: test_reg_to_ip<yad64::Operand::REG_EBX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 3: test_reg_to_ip<yad64::Operand::REG_ECX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 4: test_reg_to_ip<yad64::Operand::REG_EDX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 5: test_reg_to_ip<yad64::Operand::REG_EBP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 6: test_reg_to_ip<yad64::Operand::REG_ESP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 7: test_reg_to_ip<yad64::Operand::REG_ESI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 8: test_reg_to_ip<yad64::Operand::REG_EDI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+			#elif defined(YAD64_X86_64)
+				case 1: test_reg_to_ip<yad64::Operand::REG_RAX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 2: test_reg_to_ip<yad64::Operand::REG_RBX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 3: test_reg_to_ip<yad64::Operand::REG_RCX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 4: test_reg_to_ip<yad64::Operand::REG_RDX>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 5: test_reg_to_ip<yad64::Operand::REG_RBP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 6: test_reg_to_ip<yad64::Operand::REG_RSP>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 7: test_reg_to_ip<yad64::Operand::REG_RSI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 8: test_reg_to_ip<yad64::Operand::REG_RDI>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 9: test_reg_to_ip<yad64::Operand::REG_R8>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 10: test_reg_to_ip<yad64::Operand::REG_R9>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 11: test_reg_to_ip<yad64::Operand::REG_R10>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 12: test_reg_to_ip<yad64::Operand::REG_R11>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 13: test_reg_to_ip<yad64::Operand::REG_R12>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 14: test_reg_to_ip<yad64::Operand::REG_R13>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 15: test_reg_to_ip<yad64::Operand::REG_R14>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
+				case 16: test_reg_to_ip<yad64::Operand::REG_R15>(opcode, start_address - (sizeof(OpcodeData) - 1)); break;
 			#endif
 
 				case 17:
-				#if defined(EDB_X86)
-					test_reg_to_ip<edb::Operand::REG_EAX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_EBX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_ECX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_EDX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_EBP>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_ESP>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_ESI>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_EDI>(opcode, start_address - (sizeof(OpcodeData) - 1));
-				#elif defined(EDB_X86_64)
-					test_reg_to_ip<edb::Operand::REG_RAX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RBX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RCX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RDX>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RBP>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RSP>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RSI>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_RDI>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R8>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R9>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R10>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R11>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R12>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R13>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R14>(opcode, start_address - (sizeof(OpcodeData) - 1));
-					test_reg_to_ip<edb::Operand::REG_R15>(opcode, start_address - (sizeof(OpcodeData) - 1));
+				#if defined(YAD64_X86)
+					test_reg_to_ip<yad64::Operand::REG_EAX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_EBX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_ECX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_EDX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_EBP>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_ESP>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_ESI>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_EDI>(opcode, start_address - (sizeof(OpcodeData) - 1));
+				#elif defined(YAD64_X86_64)
+					test_reg_to_ip<yad64::Operand::REG_RAX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RBX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RCX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RDX>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RBP>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RSP>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RSI>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_RDI>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R8>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R9>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R10>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R11>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R12>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R13>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R14>(opcode, start_address - (sizeof(OpcodeData) - 1));
+					test_reg_to_ip<yad64::Operand::REG_R15>(opcode, start_address - (sizeof(OpcodeData) - 1));
 				#endif
 					break;
 				case 18:

@@ -57,7 +57,7 @@ QMenu *StringSearcher::menu(QWidget *parent) {
 void StringSearcher::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogStrings(edb::v1::debugger_ui);
+		dialog_ = new DialogStrings(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

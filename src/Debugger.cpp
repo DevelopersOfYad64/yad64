@@ -58,8 +58,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ui_debuggerui.h"
 
-IDebuggerCore *edb::v1::debugger_core = 0;
-QWidget       *edb::v1::debugger_ui   = 0;
+IDebuggerCore *yad64::v1::debugger_core = 0;
+QWidget       *yad64::v1::debugger_ui   = 0;
 
 namespace {
 
@@ -74,13 +74,13 @@ namespace {
 	QHash<QString, FunctionInfo>       g_FunctionDB;
 	
 	DebuggerMain *ui() {
-		return qobject_cast<DebuggerMain *>(edb::v1::debugger_ui);
+		return qobject_cast<DebuggerMain *>(yad64::v1::debugger_ui);
 	}
 
-	bool function_symbol_base(edb::address_t address, QString &value, int &offset) {
+	bool function_symbol_base(yad64::address_t address, QString &value, int &offset) {
 		bool ret = false;
 		offset = 0;
-		const Symbol::pointer s = edb::v1::symbol_manager().find_near_symbol(address);
+		const Symbol::pointer s = yad64::v1::symbol_manager().find_near_symbol(address);
 		if(s) {
 			value = s->name;
 			offset = address - s->address;
@@ -90,7 +90,7 @@ namespace {
 	}
 }
 
-namespace edb {
+namespace yad64 {
 namespace internal {
 
 //------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ void load_function_db() {
 // Name: cpu_selected_address()
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::cpu_selected_address() {
+yad64::address_t yad64::v1::cpu_selected_address() {
 	return ui()->ui->cpuView->selectedAddress();
 }
 
@@ -153,7 +153,7 @@ edb::address_t edb::v1::cpu_selected_address() {
 // Name: current_cpu_view_region()
 // Desc:
 //------------------------------------------------------------------------------
-MemoryRegion edb::v1::current_cpu_view_region() {
+MemoryRegion yad64::v1::current_cpu_view_region() {
 	return ui()->ui->cpuView->region();
 }
 
@@ -161,7 +161,7 @@ MemoryRegion edb::v1::current_cpu_view_region() {
 // Name: repaint_cpu_view()
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::repaint_cpu_view() {
+void yad64::v1::repaint_cpu_view() {
 	DebuggerMain *const gui = ui();
 	Q_CHECK_PTR(gui);
 	gui->ui->cpuView->viewport()->repaint();
@@ -171,7 +171,7 @@ void edb::v1::repaint_cpu_view() {
 // Name: symbol_manager()
 // Desc:
 //------------------------------------------------------------------------------
-ISymbolManager &edb::v1::symbol_manager() {
+ISymbolManager &yad64::v1::symbol_manager() {
 	static SymbolManager g_SymbolManager;
 	return g_SymbolManager;
 }
@@ -180,7 +180,7 @@ ISymbolManager &edb::v1::symbol_manager() {
 // Name: memory_regions()
 // Desc:
 //------------------------------------------------------------------------------
-MemoryRegions &edb::v1::memory_regions() {
+MemoryRegions &yad64::v1::memory_regions() {
 	static MemoryRegions g_MemoryRegions;
 	return g_MemoryRegions;
 }
@@ -189,7 +189,7 @@ MemoryRegions &edb::v1::memory_regions() {
 // Name: arch_processor()
 // Desc:
 //------------------------------------------------------------------------------
-IArchProcessor &edb::v1::arch_processor() {
+IArchProcessor &yad64::v1::arch_processor() {
 	static ArchProcessor g_ArchProcessor;
 	return g_ArchProcessor;
 }
@@ -198,7 +198,7 @@ IArchProcessor &edb::v1::arch_processor() {
 // Name: set_analyzer(IAnalyzer *p)
 // Desc:
 //------------------------------------------------------------------------------
-IAnalyzer *edb::v1::set_analyzer(IAnalyzer *p) {
+IAnalyzer *yad64::v1::set_analyzer(IAnalyzer *p) {
 	Q_CHECK_PTR(p);
 	return g_Analyzer.fetchAndStoreAcquire(p);
 }
@@ -207,7 +207,7 @@ IAnalyzer *edb::v1::set_analyzer(IAnalyzer *p) {
 // Name: analyzer()
 // Desc:
 //------------------------------------------------------------------------------
-IAnalyzer *edb::v1::analyzer() {
+IAnalyzer *yad64::v1::analyzer() {
 	return g_Analyzer;
 }
 
@@ -215,7 +215,7 @@ IAnalyzer *edb::v1::analyzer() {
 // Name: set_session_file_handler(ISessionFile *p)
 // Desc:
 //------------------------------------------------------------------------------
-ISessionFile *edb::v1::set_session_file_handler(ISessionFile *p) {
+ISessionFile *yad64::v1::set_session_file_handler(ISessionFile *p) {
 	Q_CHECK_PTR(p);
 	return g_SessionHandler.fetchAndStoreAcquire(p);
 }
@@ -224,7 +224,7 @@ ISessionFile *edb::v1::set_session_file_handler(ISessionFile *p) {
 // Name: session_file_handler()
 // Desc:
 //------------------------------------------------------------------------------
-ISessionFile *edb::v1::session_file_handler() {
+ISessionFile *yad64::v1::session_file_handler() {
 	return g_SessionHandler;;
 }
 
@@ -232,7 +232,7 @@ ISessionFile *edb::v1::session_file_handler() {
 // Name: set_debug_event_handler(IDebugEventHandler *p)
 // Desc:
 //------------------------------------------------------------------------------
-IDebugEventHandler *edb::v1::set_debug_event_handler(IDebugEventHandler *p) {
+IDebugEventHandler *yad64::v1::set_debug_event_handler(IDebugEventHandler *p) {
 	Q_CHECK_PTR(p);
 	return g_DebugEventHandler.fetchAndStoreAcquire(p);
 }
@@ -241,81 +241,81 @@ IDebugEventHandler *edb::v1::set_debug_event_handler(IDebugEventHandler *p) {
 // Name: debug_event_handler();
 // Desc:
 //------------------------------------------------------------------------------
-IDebugEventHandler *edb::v1::debug_event_handler() {
+IDebugEventHandler *yad64::v1::debug_event_handler() {
 	return g_DebugEventHandler;
 }
 
 //------------------------------------------------------------------------------
-// Name: jump_to_address(edb::address_t address)
+// Name: jump_to_address(yad64::address_t address)
 // Desc: sets the disassembly display to a given address, returning success
 //       status
 //------------------------------------------------------------------------------
-bool edb::v1::jump_to_address(edb::address_t address) {
+bool yad64::v1::jump_to_address(yad64::address_t address) {
 	DebuggerMain *const gui = ui();
 	Q_CHECK_PTR(gui);
 	return gui->jump_to_address(address);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_data_range(edb::address_t address, edb::address_t end_address, bool newTab)
+// Name: dump_data_range(yad64::address_t address, yad64::address_t end_address, bool newTab)
 // Desc: shows a given address through a given end address in the data view,
 //       optionally in a new tab
 //------------------------------------------------------------------------------
-bool edb::v1::dump_data_range(edb::address_t address, edb::address_t end_address, bool new_tab) {
+bool yad64::v1::dump_data_range(yad64::address_t address, yad64::address_t end_address, bool new_tab) {
 	DebuggerMain *const gui = ui();
 	Q_CHECK_PTR(gui);
 	return gui->dump_data_range(address, end_address, new_tab);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_data_range(edb::address_t address, edb::address_t end_address)
+// Name: dump_data_range(yad64::address_t address, yad64::address_t end_address)
 // Desc: shows a given address through a given end address in the data view
 //------------------------------------------------------------------------------
-bool edb::v1::dump_data_range(edb::address_t address, edb::address_t end_address) {
+bool yad64::v1::dump_data_range(yad64::address_t address, yad64::address_t end_address) {
 	return dump_data_range(address, end_address, false);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_stack(edb::address_t address)
+// Name: dump_stack(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::dump_stack(edb::address_t address) {
+bool yad64::v1::dump_stack(yad64::address_t address) {
 	return dump_stack(address, true);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_stack(edb::address_t address, bool scroll_to)
+// Name: dump_stack(yad64::address_t address, bool scroll_to)
 // Desc: shows a given address in the stack view
 //------------------------------------------------------------------------------
-bool edb::v1::dump_stack(edb::address_t address, bool scroll_to) {
+bool yad64::v1::dump_stack(yad64::address_t address, bool scroll_to) {
 	DebuggerMain *const gui = ui();
 	Q_CHECK_PTR(gui);
 	return gui->dump_stack(address, scroll_to);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_data(edb::address_t address, bool new_tab)
+// Name: dump_data(yad64::address_t address, bool new_tab)
 // Desc: shows a given address in the data view, optionally in a new tab
 //------------------------------------------------------------------------------
-bool edb::v1::dump_data(edb::address_t address, bool new_tab) {
+bool yad64::v1::dump_data(yad64::address_t address, bool new_tab) {
 	DebuggerMain *const gui = ui();
 	Q_CHECK_PTR(gui);
 	return gui->dump_data(address, new_tab);
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_data(edb::address_t address)
+// Name: dump_data(yad64::address_t address)
 // Desc: shows a given address in the data view
 //------------------------------------------------------------------------------
-bool edb::v1::dump_data(edb::address_t address) {
+bool yad64::v1::dump_data(yad64::address_t address) {
 	return dump_data(address, false);
 }
 
 //------------------------------------------------------------------------------
-// Name: set_breakpoint_condition(edb::address_t address, const QString &condition)
+// Name: set_breakpoint_condition(yad64::address_t address, const QString &condition)
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::set_breakpoint_condition(edb::address_t address, const QString &condition) {
+void yad64::v1::set_breakpoint_condition(yad64::address_t address, const QString &condition) {
 	IBreakpoint::pointer bp = find_breakpoint(address);
 	if(bp) {
 		bp->condition = condition;
@@ -323,10 +323,10 @@ void edb::v1::set_breakpoint_condition(edb::address_t address, const QString &co
 }
 
 //------------------------------------------------------------------------------
-// Name: get_breakpoint_condition(edb::address_t address)
+// Name: get_breakpoint_condition(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::get_breakpoint_condition(edb::address_t address) {
+QString yad64::v1::get_breakpoint_condition(yad64::address_t address) {
 	QString ret;
 	IBreakpoint::pointer bp = find_breakpoint(address);
 	if(bp) {
@@ -338,10 +338,10 @@ QString edb::v1::get_breakpoint_condition(edb::address_t address) {
 
 
 //------------------------------------------------------------------------------
-// Name: create_breakpoint(edb::address_t address)
+// Name: create_breakpoint(yad64::address_t address)
 // Desc: adds a breakpoint at a given address
 //------------------------------------------------------------------------------
-void edb::v1::create_breakpoint(edb::address_t address) {
+void yad64::v1::create_breakpoint(yad64::address_t address) {
 
 	MemoryRegion region;
 	memory_regions().sync();
@@ -351,23 +351,23 @@ void edb::v1::create_breakpoint(edb::address_t address) {
 		if(!region.executable() && config().warn_on_no_exec_bp) {
 			ret = QMessageBox::question(
 				0,
-				QT_TRANSLATE_NOOP("edb", "Suspicious breakpoint"),
-				QT_TRANSLATE_NOOP("edb",
+				QT_TRANSLATE_NOOP("yad64", "Suspicious breakpoint"),
+				QT_TRANSLATE_NOOP("yad64",
 					"You want to place a breakpoint in a non-executable region.\n"
 					"An INT3 breakpoint set on data will not execute and may cause incorrect results or crashes.\n"
 					"Do you really want to set a breakpoint here?"),
 				QMessageBox::Yes, QMessageBox::No);
 		} else {
-			quint8 buffer[edb::Instruction::MAX_SIZE + 1];
+			quint8 buffer[yad64::Instruction::MAX_SIZE + 1];
 			int size = sizeof(buffer);
 
-			if(edb::v1::get_instruction_bytes(address, buffer, size)) {
-				edb::Instruction insn(buffer, buffer + size, address, std::nothrow);
+			if(yad64::v1::get_instruction_bytes(address, buffer, size)) {
+				yad64::Instruction insn(buffer, buffer + size, address, std::nothrow);
 				if(!insn.valid()) {
 					ret = QMessageBox::question(
 						0,
-						QT_TRANSLATE_NOOP("edb", "Suspicious breakpoint"),
-						QT_TRANSLATE_NOOP("edb",
+						QT_TRANSLATE_NOOP("yad64", "Suspicious breakpoint"),
+						QT_TRANSLATE_NOOP("yad64",
 							"It looks like you may be setting an INT3 breakpoint on data.\n"
 							"An INT3 breakpoint set on data will not execute and may cause incorrect results or crashes.\n"
 							"Do you really want to set a breakpoint here?"),
@@ -385,16 +385,16 @@ void edb::v1::create_breakpoint(edb::address_t address) {
 	} else {
 		QMessageBox::information(
 			0,
-			QT_TRANSLATE_NOOP("edb", "Error Setting Breakpoint"),
-			QT_TRANSLATE_NOOP("edb", "Sorry, but setting a breakpoint which is not in a valid region is not allowed."));
+			QT_TRANSLATE_NOOP("yad64", "Error Setting Breakpoint"),
+			QT_TRANSLATE_NOOP("yad64", "Sorry, but setting a breakpoint which is not in a valid region is not allowed."));
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: enable_breakpoint(edb::address_t address)
+// Name: enable_breakpoint(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::enable_breakpoint(edb::address_t address) {
+yad64::address_t yad64::v1::enable_breakpoint(yad64::address_t address) {
 	if(address != 0) {
 		IBreakpoint::pointer bp = find_breakpoint(address);
 		if(bp && bp->enable()) {
@@ -405,10 +405,10 @@ edb::address_t edb::v1::enable_breakpoint(edb::address_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: disable_breakpoint(edb::address_t address)
+// Name: disable_breakpoint(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::disable_breakpoint(edb::address_t address) {
+yad64::address_t yad64::v1::disable_breakpoint(yad64::address_t address) {
 	if(address != 0) {
 		IBreakpoint::pointer bp = find_breakpoint(address);
 		if(bp && bp->disable()) {
@@ -419,10 +419,10 @@ edb::address_t edb::v1::disable_breakpoint(edb::address_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: toggle_breakpoint(edb::address_t address)
+// Name: toggle_breakpoint(yad64::address_t address)
 // Desc: toggles the existence of a breakpoint at a given address
 //------------------------------------------------------------------------------
-void edb::v1::toggle_breakpoint(edb::address_t address) {
+void yad64::v1::toggle_breakpoint(yad64::address_t address) {
 	if(find_breakpoint(address)) {
 		remove_breakpoint(address);
 	} else {
@@ -431,38 +431,38 @@ void edb::v1::toggle_breakpoint(edb::address_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: remove_breakpoint(edb::address_t address)
+// Name: remove_breakpoint(yad64::address_t address)
 // Desc: removes a breakpoint
 //------------------------------------------------------------------------------
-void edb::v1::remove_breakpoint(edb::address_t address) {
+void yad64::v1::remove_breakpoint(yad64::address_t address) {
 	debugger_core->remove_breakpoint(address);
 	repaint_cpu_view();
 }
 
 //------------------------------------------------------------------------------
-// Name: eval_expression(const QString &expression, edb::address_t &value
+// Name: eval_expression(const QString &expression, yad64::address_t &value
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::eval_expression(const QString &expression, edb::address_t &value) {
-	Expression<edb::address_t> expr(expression, get_variable, get_value);
+bool yad64::v1::eval_expression(const QString &expression, yad64::address_t &value) {
+	Expression<yad64::address_t> expr(expression, get_variable, get_value);
 	ExpressionError err;
 
 	bool ok;
-	const edb::address_t address = expr.evaluate_expression(ok, err);
+	const yad64::address_t address = expr.evaluate_expression(ok, err);
 	if(ok) {
 		value = address;
 		return true;
 	} else {
-		QMessageBox::information(debugger_ui, QT_TRANSLATE_NOOP("edb", "Error In Expression!"), err.what());
+		QMessageBox::information(debugger_ui, QT_TRANSLATE_NOOP("yad64", "Error In Expression!"), err.what());
 		return false;
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: get_expression_from_user(const QString &title, const QString prompt, edb::address_t &value)
+// Name: get_expression_from_user(const QString &title, const QString prompt, yad64::address_t &value)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::get_expression_from_user(const QString &title, const QString prompt, edb::address_t &value) {
+bool yad64::v1::get_expression_from_user(const QString &title, const QString prompt, yad64::address_t &value) {
 	bool ok;
     const QString text = QInputDialog::getText(debugger_ui, title, prompt, QLineEdit::Normal, QString(), &ok);
 
@@ -473,18 +473,18 @@ bool edb::v1::get_expression_from_user(const QString &title, const QString promp
 }
 
 //------------------------------------------------------------------------------
-// Name: get_value_from_user(edb::reg_t &value)
+// Name: get_value_from_user(yad64::reg_t &value)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::get_value_from_user(edb::reg_t &value) {
-	return get_value_from_user(value, QT_TRANSLATE_NOOP("edb", "Input Value"));
+bool yad64::v1::get_value_from_user(yad64::reg_t &value) {
+	return get_value_from_user(value, QT_TRANSLATE_NOOP("yad64", "Input Value"));
 }
 
 //------------------------------------------------------------------------------
-// Name: get_value_from_user(edb::reg_t &value, const QString &title)
+// Name: get_value_from_user(yad64::reg_t &value, const QString &title)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::get_value_from_user(edb::reg_t &value, const QString &title) {
+bool yad64::v1::get_value_from_user(yad64::reg_t &value, const QString &title) {
 	static DialogInputValue *const dlg = new DialogInputValue(debugger_ui);
 	bool ret = false;
 
@@ -502,7 +502,7 @@ bool edb::v1::get_value_from_user(edb::reg_t &value, const QString &title) {
 // Name: get_binary_string_from_user(QByteArray &value, const QString &title)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::get_binary_string_from_user(QByteArray &value, const QString &title) {
+bool yad64::v1::get_binary_string_from_user(QByteArray &value, const QString &title) {
 	return get_binary_string_from_user(value, title, 10);
 }
 
@@ -510,7 +510,7 @@ bool edb::v1::get_binary_string_from_user(QByteArray &value, const QString &titl
 // Name: get_binary_string_from_user(QByteArray &value, const QString &title, int max_length)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::get_binary_string_from_user(QByteArray &value, const QString &title, int max_length) {
+bool yad64::v1::get_binary_string_from_user(QByteArray &value, const QString &title, int max_length) {
 	static DialogInputBinaryString *const dlg = new DialogInputBinaryString(debugger_ui);
 
 	bool ret = false;
@@ -538,7 +538,7 @@ bool edb::v1::get_binary_string_from_user(QByteArray &value, const QString &titl
 // Name: dialog_options()
 // Desc: returns a pointer to the options dialog
 //------------------------------------------------------------------------------
-QPointer<QDialog> edb::v1::dialog_options() {
+QPointer<QDialog> yad64::v1::dialog_options() {
 	static QPointer<QDialog> dialog = new DialogOptions(debugger_ui);
 	return dialog;
 }
@@ -547,13 +547,13 @@ QPointer<QDialog> edb::v1::dialog_options() {
 // Name: config()
 // Desc:
 //------------------------------------------------------------------------------
-Configuration &edb::v1::config() {
+Configuration &yad64::v1::config() {
 	static Configuration g_Configuration;
 	return g_Configuration;
 }
 
 //------------------------------------------------------------------------------
-// Name: get_ascii_string_at_address(edb::address_t address, QString &s, int min_length, int max_length, int &found_length)
+// Name: get_ascii_string_at_address(yad64::address_t address, QString &s, int min_length, int max_length, int &found_length)
 // Desc: attempts to get a string at a given address whose length is >= min_length
 //       and < max_length
 // Note: strings are comprised of printable characters and whitespace.
@@ -561,7 +561,7 @@ Configuration &edb::v1::config() {
 //       escape char with the escape sequence (thus the resultant string may be
 //       longer than the original). found_length is the original length.
 //------------------------------------------------------------------------------
-bool edb::v1::get_ascii_string_at_address(edb::address_t address, QString &s, int min_length, int max_length, int &found_length) {
+bool yad64::v1::get_ascii_string_at_address(yad64::address_t address, QString &s, int min_length, int max_length, int &found_length) {
 
 	bool is_string = false;
 
@@ -600,7 +600,7 @@ bool edb::v1::get_ascii_string_at_address(edb::address_t address, QString &s, in
 }
 
 //------------------------------------------------------------------------------
-// Name: get_utf16_string_at_address(edb::address_t address, QString &s, int min_length, int max_length, int &found_length)
+// Name: get_utf16_string_at_address(yad64::address_t address, QString &s, int min_length, int max_length, int &found_length)
 // Desc: attempts to get a string at a given address whose length os >= min_length
 //       and < max_length
 // Note: strings are comprised of printable characters and whitespace.
@@ -608,7 +608,7 @@ bool edb::v1::get_ascii_string_at_address(edb::address_t address, QString &s, in
 //       escape char with the escape sequence (thus the resultant string may be
 //       longer than the original). found_length is the original length.
 //------------------------------------------------------------------------------
-bool edb::v1::get_utf16_string_at_address(edb::address_t address, QString &s, int min_length, int max_length, int &found_length) {
+bool yad64::v1::get_utf16_string_at_address(yad64::address_t address, QString &s, int min_length, int max_length, int &found_length) {
 	bool is_string = false;
 	if(debugger_core) {
 		s.clear();
@@ -650,10 +650,10 @@ bool edb::v1::get_utf16_string_at_address(edb::address_t address, QString &s, in
 }
 
 //------------------------------------------------------------------------------
-// Name: find_function_symbol(edb::address_t address, const QString &default_value, int *offset)
+// Name: find_function_symbol(yad64::address_t address, const QString &default_value, int *offset)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::find_function_symbol(edb::address_t address, const QString &default_value, int *offset) {
+QString yad64::v1::find_function_symbol(yad64::address_t address, const QString &default_value, int *offset) {
 	QString symname(default_value);
 	int off;
 
@@ -668,18 +668,18 @@ QString edb::v1::find_function_symbol(edb::address_t address, const QString &def
 }
 
 //------------------------------------------------------------------------------
-// Name: find_function_symbol(edb::address_t address, const QString &default_value)
+// Name: find_function_symbol(yad64::address_t address, const QString &default_value)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::find_function_symbol(edb::address_t address, const QString &default_value) {
+QString yad64::v1::find_function_symbol(yad64::address_t address, const QString &default_value) {
 	return find_function_symbol(address, default_value, 0);
 }
 
 //------------------------------------------------------------------------------
-// Name: find_function_symbol(edb::address_t address)
+// Name: find_function_symbol(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::find_function_symbol(edb::address_t address) {
+QString yad64::v1::find_function_symbol(yad64::address_t address) {
 	return find_function_symbol(address, QString(), 0);
 }
 
@@ -687,13 +687,13 @@ QString edb::v1::find_function_symbol(edb::address_t address) {
 // Name: get_variable(QString &s, bool &ok, ExpressionError &err)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::get_variable(const QString &s, bool &ok, ExpressionError &err) {
+yad64::address_t yad64::v1::get_variable(const QString &s, bool &ok, ExpressionError &err) {
 
 	Q_CHECK_PTR(debugger_core);
 
 
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 	const Register reg = state.value(s);
 	ok = reg;
 	if(!ok) {
@@ -710,14 +710,14 @@ edb::address_t edb::v1::get_variable(const QString &s, bool &ok, ExpressionError
 }
 
 //------------------------------------------------------------------------------
-// Name: get_value(edb::address_t address, bool &ok, ExpressionError &err)
+// Name: get_value(yad64::address_t address, bool &ok, ExpressionError &err)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::get_value(edb::address_t address, bool &ok, ExpressionError &err) {
+yad64::address_t yad64::v1::get_value(yad64::address_t address, bool &ok, ExpressionError &err) {
 
 	Q_CHECK_PTR(debugger_core);
 
-	edb::address_t ret = 0;
+	yad64::address_t ret = 0;
 
 	ok = debugger_core->read_bytes(address, &ret, sizeof(ret));
 
@@ -729,10 +729,10 @@ edb::address_t edb::v1::get_value(edb::address_t address, bool &ok, ExpressionEr
 }
 
 //------------------------------------------------------------------------------
-// Name: get_instruction_bytes(edb::address_t address, quint8 *buf, int &size)
+// Name: get_instruction_bytes(yad64::address_t address, quint8 *buf, int &size)
 // Desc: attempts to read at most size bytes, but will retry using smaller sizes as needed
 //------------------------------------------------------------------------------
-bool edb::v1::get_instruction_bytes(edb::address_t address, quint8 *buf, int &size) {
+bool yad64::v1::get_instruction_bytes(yad64::address_t address, quint8 *buf, int &size) {
 
 	Q_CHECK_PTR(debugger_core);
 	Q_ASSERT(size >= 0);
@@ -751,7 +751,7 @@ bool edb::v1::get_instruction_bytes(edb::address_t address, quint8 *buf, int &si
 // Desc: gets an object which knows how to analyze the binary file provided
 //       or NULL if none-found
 //------------------------------------------------------------------------------
-IBinary *edb::v1::get_binary_info(const MemoryRegion &region) {
+IBinary *yad64::v1::get_binary_info(const MemoryRegion &region) {
 	Q_FOREACH(IBinary::create_func_ptr_t f, g_BinaryInfoList) {
 		IBinary *const p = (*f)(region);
 
@@ -770,14 +770,14 @@ IBinary *edb::v1::get_binary_info(const MemoryRegion &region) {
 // Desc:
 // Note: this currently only works for glibc linked elf files
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::locate_main_function() {
+yad64::address_t yad64::v1::locate_main_function() {
 
 	const MemoryRegion region = primary_code_region();
 
 	SCOPED_POINTER<IBinary> binfo(get_binary_info(region));
 	
 	if(binfo) {
-		const edb::address_t main_func = binfo->calculate_main();
+		const yad64::address_t main_func = binfo->calculate_main();
 		if(main_func != 0) {
 			return main_func;
 		} else {
@@ -792,7 +792,7 @@ edb::address_t edb::v1::locate_main_function() {
 // Name: plugin_list()
 // Desc:
 //------------------------------------------------------------------------------
-const QHash<QString, QObject *> &edb::v1::plugin_list() {
+const QHash<QString, QObject *> &yad64::v1::plugin_list() {
 	return g_GeneralPlugins;
 }
 
@@ -800,7 +800,7 @@ const QHash<QString, QObject *> &edb::v1::plugin_list() {
 // Name: find_plugin_by_name(const QString &name)
 // Desc: gets a pointer to a plugin based on it's classname
 //------------------------------------------------------------------------------
-IPlugin *edb::v1::find_plugin_by_name(const QString &name) {
+IPlugin *yad64::v1::find_plugin_by_name(const QString &name) {
 	Q_FOREACH(QObject *p, g_GeneralPlugins) {
 		if(name == p->metaObject()->className()) {
 			return qobject_cast<IPlugin *>(p);
@@ -813,15 +813,15 @@ IPlugin *edb::v1::find_plugin_by_name(const QString &name) {
 // Name: reload_symbols()
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::reload_symbols() {
-	symbol_manager().load_symbols(edb::v1::config().symbol_path);
+void yad64::v1::reload_symbols() {
+	symbol_manager().load_symbols(yad64::v1::config().symbol_path);
 }
 
 //------------------------------------------------------------------------------
 // Name: get_function_info(const QString &function)
 // Desc:
 //------------------------------------------------------------------------------
-const FunctionInfo *edb::v1::get_function_info(const QString &function) {
+const FunctionInfo *yad64::v1::get_function_info(const QString &function) {
 
 	QHash<QString, FunctionInfo>::const_iterator it = g_FunctionDB.find(function);
 	if(it != g_FunctionDB.end()) {
@@ -837,8 +837,8 @@ const FunctionInfo *edb::v1::get_function_info(const QString &function) {
 // Note: make sure that memory regions has been sync'd first or you will like
 //       get a null-region result
 //------------------------------------------------------------------------------
-MemoryRegion edb::v1::primary_data_region() {
-	const QList<MemoryRegion> &l = edb::v1::memory_regions().regions();
+MemoryRegion yad64::v1::primary_data_region() {
+	const QList<MemoryRegion> &l = yad64::v1::memory_regions().regions();
 
 	if(l.size() >= 2) {
 		return l[1];
@@ -851,52 +851,52 @@ MemoryRegion edb::v1::primary_data_region() {
 // Name: pop_value(State &state)
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::pop_value(State &state) {
-	state.adjust_stack(sizeof(edb::reg_t));
+void yad64::v1::pop_value(State &state) {
+	state.adjust_stack(sizeof(yad64::reg_t));
 }
 
 //------------------------------------------------------------------------------
-// Name: push_value(State &state, edb::reg_t value)
+// Name: push_value(State &state, yad64::reg_t value)
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::push_value(State &state, edb::reg_t value) {
-	state.adjust_stack(- static_cast<int>(sizeof(edb::reg_t)));
-	edb::v1::debugger_core->write_bytes(state.stack_pointer(), &value, sizeof(edb::reg_t));
+void yad64::v1::push_value(State &state, yad64::reg_t value) {
+	state.adjust_stack(- static_cast<int>(sizeof(yad64::reg_t)));
+	yad64::v1::debugger_core->write_bytes(state.stack_pointer(), &value, sizeof(yad64::reg_t));
 }
 
 //------------------------------------------------------------------------------
 // Name: register_binary_info(createFuncPtr fptr)
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::register_binary_info(IBinary::create_func_ptr_t fptr) {
+void yad64::v1::register_binary_info(IBinary::create_func_ptr_t fptr) {
     if(!g_BinaryInfoList.contains(fptr)) {
 		g_BinaryInfoList.push_back(fptr);
     }
 }
 
 //------------------------------------------------------------------------------
-// Name: edb_version()
+// Name: yad64_version()
 // Desc: returns an integer comparable version of our current version string
 //------------------------------------------------------------------------------
-quint32 edb::v1::edb_version() {
+quint32 yad64::v1::yad64_version() {
 	return int_version(version);
 }
 
 //------------------------------------------------------------------------------
-// Name: overwrite_check(edb::address_t address, unsigned int size)
+// Name: overwrite_check(yad64::address_t address, unsigned int size)
 // Desc:
 //------------------------------------------------------------------------------
-bool edb::v1::overwrite_check(edb::address_t address, unsigned int size) {
+bool yad64::v1::overwrite_check(yad64::address_t address, unsigned int size) {
 	bool firstConflict = true;
-	for(edb::address_t addr = address; addr != (address + size); ++addr) {
+	for(yad64::address_t addr = address; addr != (address + size); ++addr) {
 		IBreakpoint::pointer bp = find_breakpoint(addr);
 
 		if(bp && bp->enabled()) {
 			if(firstConflict) {
 				const int ret = QMessageBox::question(
 						0,
-						QT_TRANSLATE_NOOP("edb", "Overwritting breakpoint"),
-						QT_TRANSLATE_NOOP("edb", "You are attempting to modify bytes which overlap with a software breakpoint. Doing this will implicitly remove any breakpoints which are a conflict. Are you sure you want to do this?"),
+						QT_TRANSLATE_NOOP("yad64", "Overwritting breakpoint"),
+						QT_TRANSLATE_NOOP("yad64", "You are attempting to modify bytes which overlap with a software breakpoint. Doing this will implicitly remove any breakpoints which are a conflict. Are you sure you want to do this?"),
 						QMessageBox::Yes,
 						QMessageBox::No);
 
@@ -913,13 +913,13 @@ bool edb::v1::overwrite_check(edb::address_t address, unsigned int size) {
 }
 
 //------------------------------------------------------------------------------
-// Name: modify_bytes(edb::address_t address, unsigned int size, QByteArray &bytes, quint8 fill
+// Name: modify_bytes(yad64::address_t address, unsigned int size, QByteArray &bytes, quint8 fill
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::modify_bytes(edb::address_t address, unsigned int size, QByteArray &bytes, quint8 fill) {
+void yad64::v1::modify_bytes(yad64::address_t address, unsigned int size, QByteArray &bytes, quint8 fill) {
 
 	if(size != 0) {
-		if(get_binary_string_from_user(bytes, QT_TRANSLATE_NOOP("edb", "Edit Binary String"), size)) {
+		if(get_binary_string_from_user(bytes, QT_TRANSLATE_NOOP("yad64", "Edit Binary String"), size)) {
 			if(overwrite_check(address, size)) {
 
 				// fill bytes
@@ -942,7 +942,7 @@ void edb::v1::modify_bytes(edb::address_t address, unsigned int size, QByteArray
 // Name: get_md5(const void *p, size_t n)
 // Desc:
 //------------------------------------------------------------------------------
-QByteArray edb::v1::get_md5(const void *p, size_t n) {
+QByteArray yad64::v1::get_md5(const void *p, size_t n) {
 	MD5 md5(p, n);
 
 	// make a deep copy because MD5 is about to go out of scope
@@ -953,7 +953,7 @@ QByteArray edb::v1::get_md5(const void *p, size_t n) {
 // Name: get_file_md5(const QString &s)
 // Desc: returns a byte array representing the MD5 of a file
 //------------------------------------------------------------------------------
-QByteArray edb::v1::get_file_md5(const QString &s) {
+QByteArray yad64::v1::get_file_md5(const QString &s) {
 
 	QFile file(s);
 	file.open(QIODevice::ReadOnly);
@@ -970,7 +970,7 @@ QByteArray edb::v1::get_file_md5(const QString &s) {
 // Name: basename(const QString &s)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::basename(const QString &s) {
+QString yad64::v1::basename(const QString &s) {
 
 	const QFileInfo fileInfo(s);
 	QString ret = fileInfo.baseName();
@@ -987,7 +987,7 @@ QString edb::v1::basename(const QString &s) {
 // Name: symlink_target(const QString &s)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::symlink_target(const QString &s) {
+QString yad64::v1::symlink_target(const QString &s) {
 	return QFileInfo(s).symLinkTarget();
 }
 
@@ -996,7 +996,7 @@ QString edb::v1::symlink_target(const QString &s) {
 // Desc: returns an integer comparable version of a version string in x.y.z
 //       format, or 0 if error
 //------------------------------------------------------------------------------
-quint32 edb::v1::int_version(const QString &s) {
+quint32 yad64::v1::int_version(const QString &s) {
 
 	ulong ret = 0;
 	const QStringList list = s.split(".");
@@ -1016,7 +1016,7 @@ quint32 edb::v1::int_version(const QString &s) {
 // Name: parse_command_line(const QString &cmdline)
 // Desc:
 //------------------------------------------------------------------------------
-QStringList edb::v1::parse_command_line(const QString &cmdline) {
+QStringList yad64::v1::parse_command_line(const QString &cmdline) {
 
 	QStringList args;
 	QString arg;
@@ -1084,10 +1084,10 @@ QStringList edb::v1::parse_command_line(const QString &cmdline) {
 // Name: string_to_address(const QString &s, bool &ok)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::string_to_address(const QString &s, bool &ok) {
-#if defined(EDB_X86)
+yad64::address_t yad64::v1::string_to_address(const QString &s, bool &ok) {
+#if defined(YAD64_X86)
 	return s.left(8).toULongLong(&ok, 16);
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	return s.left(16).toULongLong(&ok, 16);
 #endif
 }
@@ -1096,7 +1096,7 @@ edb::address_t edb::v1::string_to_address(const QString &s, bool &ok) {
 // Name: format_bytes(const QByteArray &x)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::format_bytes(const QByteArray &x) {
+QString yad64::v1::format_bytes(const QByteArray &x) {
 	QString bytes;
 
 	if(x.size() != 0) {
@@ -1116,18 +1116,18 @@ QString edb::v1::format_bytes(const QByteArray &x) {
 }
 
 //------------------------------------------------------------------------------
-// Name: format_pointer(edb::address_t p)
+// Name: format_pointer(yad64::address_t p)
 // Desc:
 //------------------------------------------------------------------------------
-QString edb::v1::format_pointer(edb::address_t p) {
-	return QString("%1").arg(p, EDB_MAX_HEX, 16, QChar('0'));
+QString yad64::v1::format_pointer(yad64::address_t p) {
+	return QString("%1").arg(p, YAD64_MAX_HEX, 16, QChar('0'));
 }
 
 //------------------------------------------------------------------------------
 // Name: current_data_view_address()
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t edb::v1::current_data_view_address() {
+yad64::address_t yad64::v1::current_data_view_address() {
 	return qobject_cast<QHexView *>(ui()->ui->tabWidget->currentWidget())->firstVisibleAddress();
 }
 
@@ -1135,16 +1135,16 @@ edb::address_t edb::v1::current_data_view_address() {
 // Name: set_status(const QString &message
 // Desc:
 //------------------------------------------------------------------------------
-void edb::v1::set_status(const QString &message) {
+void yad64::v1::set_status(const QString &message) {
 	ui()->ui->statusbar->showMessage(message, 0);
 }
 
 //------------------------------------------------------------------------------
-// Name: find_breakpoint(edb::address_t address)
+// Name: find_breakpoint(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-IBreakpoint::pointer edb::v1::find_breakpoint(edb::address_t address) {
-	if(edb::v1::debugger_core) {
+IBreakpoint::pointer yad64::v1::find_breakpoint(yad64::address_t address) {
+	if(yad64::v1::debugger_core) {
 		return debugger_core->find_breakpoint(address);
 	}
 	return IBreakpoint::pointer();
@@ -1154,10 +1154,10 @@ IBreakpoint::pointer edb::v1::find_breakpoint(edb::address_t address) {
 // Name: pointer_size()
 // Desc:
 //------------------------------------------------------------------------------
-int edb::v1::pointer_size() {
+int yad64::v1::pointer_size() {
 	
-	if(edb::v1::debugger_core) {
-		return edb::v1::debugger_core->pointer_size();
+	if(yad64::v1::debugger_core) {
+		return yad64::v1::debugger_core->pointer_size();
 	}
 	
 	// default to sizeof the native pointer for sanity!
@@ -1168,7 +1168,7 @@ int edb::v1::pointer_size() {
 // Name: pointer_size()
 // Desc:
 //------------------------------------------------------------------------------
-QWidget *edb::v1::disassembly_widget() {
+QWidget *yad64::v1::disassembly_widget() {
 	return ui()->ui->cpuView;
 }
 
@@ -1176,7 +1176,7 @@ QWidget *edb::v1::disassembly_widget() {
 // Name: serialize_object(const QObject *object)
 // Desc:
 //------------------------------------------------------------------------------
-QByteArray edb::v1::serialize_object(const QObject *object) {
+QByteArray yad64::v1::serialize_object(const QObject *object) {
 	QVariantMap variant = QJson::QObjectHelper::qobject2qvariant(object);
 	QJson::Serializer serializer;
 	return serializer.serialize(variant);

@@ -51,8 +51,8 @@ void RegionBuffer::set_region(const MemoryRegion &region) {
 //------------------------------------------------------------------------------
 qint64 RegionBuffer::readData(char *data, qint64 maxSize) {
 
-	const edb::address_t start = region_.start() + pos();
-	const edb::address_t end   = region_.start() + region_.size();
+	const yad64::address_t start = region_.start() + pos();
+	const yad64::address_t end   = region_.start() + region_.size();
 
 	if(start + maxSize > end) {
 		maxSize = end - start;
@@ -62,7 +62,7 @@ qint64 RegionBuffer::readData(char *data, qint64 maxSize) {
         return 0;
     }
 
-	if(edb::v1::debugger_core->read_bytes(start, data, maxSize)) {
+	if(yad64::v1::debugger_core->read_bytes(start, data, maxSize)) {
 		return maxSize;
 	} else {
 		return -1;

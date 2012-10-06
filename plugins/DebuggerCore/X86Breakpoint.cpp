@@ -24,10 +24,10 @@ const quint8 BreakpointInstruction[X86Breakpoint::size] = {0xcc};
 }
 
 //------------------------------------------------------------------------------
-// Name: X86Breakpoint(edb::address_t address, bool onetime)
+// Name: X86Breakpoint(yad64::address_t address, bool onetime)
 // Desc: constructor
 //------------------------------------------------------------------------------
-X86Breakpoint::X86Breakpoint(edb::address_t address) : address_(address), hit_count_(0), enabled_(false), one_time_(false), internal_(false) {
+X86Breakpoint::X86Breakpoint(yad64::address_t address) : address_(address), hit_count_(0), enabled_(false), one_time_(false), internal_(false) {
 	enable();
 }
 
@@ -46,8 +46,8 @@ X86Breakpoint::~X86Breakpoint() {
 bool X86Breakpoint::enable() {
 	if(!enabled()) {
 		char prev[size];
-		if(edb::v1::debugger_core->read_bytes(address(), prev, size)) {
-			if(edb::v1::debugger_core->write_bytes(address(), BreakpointInstruction, size)) {
+		if(yad64::v1::debugger_core->read_bytes(address(), prev, size)) {
+			if(yad64::v1::debugger_core->write_bytes(address(), BreakpointInstruction, size)) {
 				original_bytes_ = QByteArray(prev, size);
 				enabled_ = true;
 				return true;
@@ -63,7 +63,7 @@ bool X86Breakpoint::enable() {
 //------------------------------------------------------------------------------
 bool X86Breakpoint::disable() {
 	if(enabled()) {
-		if(edb::v1::debugger_core->write_bytes(address(), original_bytes_, size)) {
+		if(yad64::v1::debugger_core->write_bytes(address(), original_bytes_, size)) {
 			enabled_ = false;
 			return true;
 		}

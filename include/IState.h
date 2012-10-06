@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "API.h"
 #include "Register.h"
 
-class EDB_EXPORT IState {
+class YAD64_EXPORT IState {
 public:
 	virtual ~IState() {}
 
@@ -32,20 +32,20 @@ public:
 
 public:
 	virtual QString flags_to_string() const = 0;
-	virtual QString flags_to_string(edb::reg_t flags) const = 0;
+	virtual QString flags_to_string(yad64::reg_t flags) const = 0;
 	virtual Register value(const QString &reg) const = 0;
-	virtual edb::address_t frame_pointer() const = 0;
-	virtual edb::address_t instruction_pointer() const = 0;
-	virtual edb::address_t stack_pointer() const = 0;
-	virtual edb::reg_t debug_register(int n) const = 0;
-	virtual edb::reg_t flags() const = 0;
+	virtual yad64::address_t frame_pointer() const = 0;
+	virtual yad64::address_t instruction_pointer() const = 0;
+	virtual yad64::address_t stack_pointer() const = 0;
+	virtual yad64::reg_t debug_register(int n) const = 0;
+	virtual yad64::reg_t flags() const = 0;
 	virtual long double fpu_register(int n) const = 0;
 	virtual void adjust_stack(int bytes) = 0;
 	virtual void clear() = 0;
-	virtual void set_debug_register(int n, edb::reg_t value) = 0;
-	virtual void set_flags(edb::reg_t flags) = 0;
-	virtual void set_instruction_pointer(edb::address_t value) = 0;
-	virtual void set_register(const QString &name, edb::reg_t value) = 0;
+	virtual void set_debug_register(int n, yad64::reg_t value) = 0;
+	virtual void set_flags(yad64::reg_t flags) = 0;
+	virtual void set_instruction_pointer(yad64::address_t value) = 0;
+	virtual void set_register(const QString &name, yad64::reg_t value) = 0;
 	virtual quint64 mmx_register(int n) const = 0;
 	virtual QByteArray xmm_register(int n) const = 0;
 };

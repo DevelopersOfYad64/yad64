@@ -104,7 +104,7 @@ namespace {
 	}
 	
 	int instruction_size(quint8 *buffer, std::size_t size) {
-		edb::Instruction insn(buffer, buffer + size, 0, std::nothrow);
+		yad64::Instruction insn(buffer, buffer + size, 0, std::nothrow);
 		return insn.size();
 	}
 }
@@ -114,8 +114,8 @@ namespace {
 // Desc: constructor
 //------------------------------------------------------------------------------
 QDisassemblyView::QDisassemblyView(QWidget * parent) : QAbstractScrollArea(parent),
-		breakpoint_icon_(":/debugger/images/edb14-breakpoint.png"),
-		current_address_icon_(":/debugger/images/edb14-arrow.png"),
+        breakpoint_icon_(":/debugger/images/yad6414-breakpoint.png"),
+        current_address_icon_(":/debugger/images/yad6414-arrow.png"),
 		highlighter_(new SyntaxHighlighter(this)),
 		address_offset_(0),
 		selected_instruction_address_(0),
@@ -151,23 +151,23 @@ QDisassemblyView::~QDisassemblyView() {
 //------------------------------------------------------------------------------
 size_t QDisassemblyView::length_disasm_back(const quint8 *buf, size_t size) const {
 
-	quint8 tmp[edb::Instruction::MAX_SIZE * 2];
+	quint8 tmp[yad64::Instruction::MAX_SIZE * 2];
 	Q_ASSERT(size <= sizeof(tmp));
 
 	int offs = 0;
 
 	memcpy(tmp, buf, size);
 
-	while(offs < edb::Instruction::MAX_SIZE) {
+	while(offs < yad64::Instruction::MAX_SIZE) {
 	
-		const edb::Instruction insn(tmp + offs, tmp + sizeof(tmp), 0, std::nothrow);
+		const yad64::Instruction insn(tmp + offs, tmp + sizeof(tmp), 0, std::nothrow);
 		if(!insn.valid()) {
 			return 0;
 		}
 		const size_t cmdsize = insn.size();
 		offs += cmdsize;
 
-		if(offs == edb::Instruction::MAX_SIZE) {
+		if(offs == yad64::Instruction::MAX_SIZE) {
 			return cmdsize;
 		}
 	}
@@ -175,19 +175,19 @@ size_t QDisassemblyView::length_disasm_back(const quint8 *buf, size_t size) cons
 }
 
 //------------------------------------------------------------------------------
-// Name: previous_instructions(edb::address_t current_address, int count)
+// Name: previous_instructions(yad64::address_t current_address, int count)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t QDisassemblyView::previous_instructions(edb::address_t current_address, int count) {
+yad64::address_t QDisassemblyView::previous_instructions(yad64::address_t current_address, int count) {
 
 	for(int i = 0; i < count; ++i) {
 		
 
-		quint8 buf[edb::Instruction::MAX_SIZE];
+		quint8 buf[yad64::Instruction::MAX_SIZE];
 
-		int buf_size = qMin<edb::address_t>((current_address - region_.base()), sizeof(buf));
+		int buf_size = qMin<yad64::address_t>((current_address - region_.base()), sizeof(buf));
 
-		if(!edb::v1::get_instruction_bytes(address_offset_ + current_address - buf_size, buf, buf_size)) {
+		if(!yad64::v1::get_instruction_bytes(address_offset_ + current_address - buf_size, buf, buf_size)) {
 			current_address -= 1;
 			break;
 		}
@@ -204,24 +204,24 @@ edb::address_t QDisassemblyView::previous_instructions(edb::address_t current_ad
 }
 
 //------------------------------------------------------------------------------
-// Name: following_instructions(edb::address_t current_address, int count)
+// Name: following_instructions(yad64::address_t current_address, int count)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t QDisassemblyView::following_instructions(edb::address_t current_address, int count) {
+yad64::address_t QDisassemblyView::following_instructions(yad64::address_t current_address, int count) {
 
 	for(int i = 0; i < count; ++i) {
 		
-		quint8 buf[edb::Instruction::MAX_SIZE + 1];
+		quint8 buf[yad64::Instruction::MAX_SIZE + 1];
 
 		// do the longest read we can while still not passing the region end
-		int buf_size = qMin<edb::address_t>((region_.end() - current_address), sizeof(buf));
+		int buf_size = qMin<yad64::address_t>((region_.end() - current_address), sizeof(buf));
 
 		// read in the bytes...
-		if(!edb::v1::get_instruction_bytes(address_offset_ + current_address, buf, buf_size)) {
+		if(!yad64::v1::get_instruction_bytes(address_offset_ + current_address, buf, buf_size)) {
 			current_address += 1;
 			break;
 		} else {
-			const edb::Instruction insn(buf, buf + buf_size, current_address, std::nothrow);
+			const yad64::Instruction insn(buf, buf + buf_size, current_address, std::nothrow);
 			if(insn) {
 				current_address += insn.size();
 			} else {
@@ -250,12 +250,12 @@ void QDisassemblyView::wheelEvent(QWheelEvent *e) {
 
 	if(e->delta() > 0) {
 		// scroll up
-		edb::address_t address = verticalScrollBar()->value();
+		yad64::address_t address = verticalScrollBar()->value();
 		address = previous_instructions(address, scroll_count);
 		verticalScrollBar()->setValue(address);
 	} else {
 		// scroll down
-		edb::address_t address = verticalScrollBar()->value();
+		yad64::address_t address = verticalScrollBar()->value();
 		address = following_instructions(address, scroll_count);
 		verticalScrollBar()->setValue(address);
 	}
@@ -274,28 +274,28 @@ void QDisassemblyView::scrollbar_action_triggered(int action) {
 	switch(action) {
 	case QAbstractSlider::SliderSingleStepSub:
 		{
-			edb::address_t address = verticalScrollBar()->value();
+			yad64::address_t address = verticalScrollBar()->value();
 			address = previous_instructions(address, 1);
 			verticalScrollBar()->setSliderPosition(address);
 		}
 		break;
 	case QAbstractSlider::SliderPageStepSub:
 		{
-			edb::address_t address = verticalScrollBar()->value();
+			yad64::address_t address = verticalScrollBar()->value();
 			address = previous_instructions(address, verticalScrollBar()->pageStep());
 			verticalScrollBar()->setSliderPosition(address);
 		}
 		break;
 	case QAbstractSlider::SliderSingleStepAdd:
 		{
-			edb::address_t address = verticalScrollBar()->value();
+			yad64::address_t address = verticalScrollBar()->value();
 			address = following_instructions(address, 1);
 			verticalScrollBar()->setSliderPosition(address);
 		}
 		break;
 	case QAbstractSlider::SliderPageStepAdd:
 		{
-			edb::address_t address = verticalScrollBar()->value();
+			yad64::address_t address = verticalScrollBar()->value();
 			address = following_instructions(address, verticalScrollBar()->pageStep());
 			verticalScrollBar()->setSliderPosition(address);
 		}
@@ -319,10 +319,10 @@ void QDisassemblyView::setShowAddressSeparator(bool value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: formatAddress(edb::address_t address)
+// Name: formatAddress(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-QString QDisassemblyView::formatAddress(edb::address_t address) const {
+QString QDisassemblyView::formatAddress(yad64::address_t address) const {
 	return format_address(address, show_address_separator_);
 }
 
@@ -335,18 +335,18 @@ void QDisassemblyView::repaint() {
 }
 
 //------------------------------------------------------------------------------
-// Name: addressShown(edb::address_t address) const
+// Name: addressShown(yad64::address_t address) const
 // Desc: returns true if a given address is in the visible range
 //------------------------------------------------------------------------------
-bool QDisassemblyView::addressShown(edb::address_t address) const {
+bool QDisassemblyView::addressShown(yad64::address_t address) const {
 	return show_addresses_.contains(address);
 }
 
 //------------------------------------------------------------------------------
-// Name: setCurrentAddress(edb::address_t address)
+// Name: setCurrentAddress(yad64::address_t address)
 // Desc: sets the 'current address' (where EIP is usually)
 //------------------------------------------------------------------------------
-void QDisassemblyView::setCurrentAddress(edb::address_t address) {
+void QDisassemblyView::setCurrentAddress(yad64::address_t address) {
 	current_address_ = address;
 }
 
@@ -372,46 +372,46 @@ void QDisassemblyView::clear() {
 }
 
 //------------------------------------------------------------------------------
-// Name: setAddressOffset(edb::address_t address)
+// Name: setAddressOffset(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-void QDisassemblyView::setAddressOffset(edb::address_t address) {
+void QDisassemblyView::setAddressOffset(yad64::address_t address) {
 	address_offset_ = address;
 }
 
 //------------------------------------------------------------------------------
-// Name: scrollTo(edb::address_t address)
+// Name: scrollTo(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-void QDisassemblyView::scrollTo(edb::address_t address) {
+void QDisassemblyView::scrollTo(yad64::address_t address) {
 	verticalScrollBar()->setValue(address - address_offset_);
 }
 
 //------------------------------------------------------------------------------
-// Name: format_instruction_bytes(const edb::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const
+// Name: format_instruction_bytes(const yad64::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const
 // Desc:
 //------------------------------------------------------------------------------
-QString QDisassemblyView::format_instruction_bytes(const edb::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const {
+QString QDisassemblyView::format_instruction_bytes(const yad64::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const {
 	const QString byte_buffer =
-	edb::v1::format_bytes(QByteArray::fromRawData(reinterpret_cast<const char *>(insn.bytes()), insn.size()));
+	yad64::v1::format_bytes(QByteArray::fromRawData(reinterpret_cast<const char *>(insn.bytes()), insn.size()));
 	return metrics.elidedText(byte_buffer, Qt::ElideRight, maxStringPx);
 }
 
 //------------------------------------------------------------------------------
-// Name: format_instruction_bytes(const edb::Instruction &insn) const
+// Name: format_instruction_bytes(const yad64::Instruction &insn) const
 // Desc:
 //------------------------------------------------------------------------------
-QString QDisassemblyView::format_instruction_bytes(const edb::Instruction &insn) const {
-	return edb::v1::format_bytes(QByteArray::fromRawData(reinterpret_cast<const char *>(insn.bytes()), insn.size()));
+QString QDisassemblyView::format_instruction_bytes(const yad64::Instruction &insn) const {
+	return yad64::v1::format_bytes(QByteArray::fromRawData(reinterpret_cast<const char *>(insn.bytes()), insn.size()));
 }
 
 //------------------------------------------------------------------------------
-// Name: draw_instruction(QPainter &painter, const edb::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const
+// Name: draw_instruction(QPainter &painter, const yad64::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const
 // Desc:
 //------------------------------------------------------------------------------
-int QDisassemblyView::draw_instruction(QPainter &painter, const edb::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const {
+int QDisassemblyView::draw_instruction(QPainter &painter, const yad64::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const {
 
-	const bool is_filling = edb::v1::arch_processor().is_filling(insn);
+	const bool is_filling = yad64::v1::arch_processor().is_filling(insn);
 	int x                 = font_width_ + font_width_ + l2 + (font_width_ / 2);
 	const int ret         = insn.size();
 
@@ -436,17 +436,17 @@ int QDisassemblyView::draw_instruction(QPainter &painter, const edb::Instruction
 		} else {
 
 			switch(insn.type()) {
-			case edb::Instruction::OP_JCC:
-			case edb::Instruction::OP_JMP:
-			case edb::Instruction::OP_LOOP:
-			case edb::Instruction::OP_LOOPE:
-			case edb::Instruction::OP_LOOPNE:
-			case edb::Instruction::OP_CALL:
+			case yad64::Instruction::OP_JCC:
+			case yad64::Instruction::OP_JMP:
+			case yad64::Instruction::OP_LOOP:
+			case yad64::Instruction::OP_LOOPE:
+			case yad64::Instruction::OP_LOOPNE:
+			case yad64::Instruction::OP_CALL:
 				if(insn.operand_count() != 0) {
-					const edb::Operand &oper = insn.operand(0);
-					if(oper.general_type() == edb::Operand::TYPE_REL) {
-						const edb::Instruction::address_t target = oper.relative_target();
-						if(const Symbol::pointer sym = edb::v1::symbol_manager().find(target)) {
+					const yad64::Operand &oper = insn.operand(0);
+					if(oper.general_type() == yad64::Operand::TYPE_REL) {
+						const yad64::Instruction::address_t target = oper.relative_target();
+						if(const Symbol::pointer sym = yad64::v1::symbol_manager().find(target)) {
 							opcode.append(QString(" <%2>").arg(sym->name));
 						}
 					}
@@ -482,10 +482,10 @@ int QDisassemblyView::draw_instruction(QPainter &painter, const edb::Instruction
 }
 
 //------------------------------------------------------------------------------
-// Name: format_invalid_instruction_bytes(const edb::Instruction &insn, QPainter &painter) const
+// Name: format_invalid_instruction_bytes(const yad64::Instruction &insn, QPainter &painter) const
 // Desc:
 //------------------------------------------------------------------------------
-QString QDisassemblyView::format_invalid_instruction_bytes(const edb::Instruction &insn, QPainter &painter) const {
+QString QDisassemblyView::format_invalid_instruction_bytes(const yad64::Instruction &insn, QPainter &painter) const {
 	char byte_buffer[32];
 	const quint8 *const buf = insn.bytes();
 
@@ -515,10 +515,10 @@ QString QDisassemblyView::format_invalid_instruction_bytes(const edb::Instructio
 }
 
 //------------------------------------------------------------------------------
-// Name: draw_function_markers(QPainter &painter, edb::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer)
+// Name: draw_function_markers(QPainter &painter, yad64::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer)
 // Desc:
 //------------------------------------------------------------------------------
-void QDisassemblyView::draw_function_markers(QPainter &painter, edb::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer) {
+void QDisassemblyView::draw_function_markers(QPainter &painter, yad64::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer) {
 	Q_CHECK_PTR(analyzer);
 	painter.setPen(QPen(palette().shadow().color(), 2));
 
@@ -591,7 +591,7 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 
 	QPainter painter(viewport());
 
-	const bool uppercase  = edb::v1::config().uppercase_disassembly;
+	const bool uppercase  = yad64::v1::config().uppercase_disassembly;
 	int viewable_lines    = viewport()->height() / line_height();
 	int current_line      = verticalScrollBar()->value();
 	int row_index         = 0;
@@ -602,7 +602,7 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 	const int line_height = this->line_height();
 
 	// TODO: reimplement me
-	// const Configuration::Syntax syntax = edb::v1::config().syntax;
+	// const Configuration::Syntax syntax = yad64::v1::config().syntax;
 	const int region_size = region_.size();
 
 	if(region_size == 0) {
@@ -620,20 +620,20 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 	const QPen bytes_pen               = bytes_color.color();
 	const QPen divider_pen             = divider_color.color();
 
-	IAnalyzer *const analyzer = edb::v1::analyzer();
+	IAnalyzer *const analyzer = yad64::v1::analyzer();
 
-	edb::address_t last_address = 0;
+	yad64::address_t last_address = 0;
 
 	while(viewable_lines >= 0 && current_line < region_size) {
-		const edb::address_t address = address_offset_ + current_line;
+		const yad64::address_t address = address_offset_ + current_line;
 
-		quint8 buf[edb::Instruction::MAX_SIZE + 1];
+		quint8 buf[yad64::Instruction::MAX_SIZE + 1];
 
 		// do the longest read we can while still not passing the region end
-		int buf_size = qMin<edb::address_t>((region_.end() - address), sizeof(buf));
+		int buf_size = qMin<yad64::address_t>((region_.end() - address), sizeof(buf));
 
 		// read in the bytes...
-		if(!edb::v1::get_instruction_bytes(address, buf, buf_size)) {
+		if(!yad64::v1::get_instruction_bytes(address, buf, buf_size)) {
 			// if the read failed, let's pretend that we were able to read a
 			// single 0xff byte so that we have _something_ to display.
 			buf_size = 1;
@@ -642,9 +642,9 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 
 		// disassemble the instruction, if it happens that the next byte is the start of a known function
 		// then we should treat this like a one byte instruction
-		edb::Instruction insn(buf, buf + buf_size, address, std::nothrow);
+		yad64::Instruction insn(buf, buf + buf_size, address, std::nothrow);
 		if((analyzer) && (analyzer->category(address + 1) == IAnalyzer::ADDRESS_FUNC_START)) {
-			edb::Instruction(buf, buf + 1, address, std::nothrow).swap(insn);
+			yad64::Instruction(buf, buf + 1, address, std::nothrow).swap(insn);
 		}
 
 		const int insn_size = insn.size();
@@ -670,7 +670,7 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 		// draw breakpoint icon or eip indicator
 		if(address == current_address_) {
 			painter.drawPixmap(1, y + 1, current_address_icon_);
-		} else if(edb::v1::find_breakpoint(address) != 0) {
+		} else if(yad64::v1::find_breakpoint(address) != 0) {
 			painter.drawPixmap(1, y + 1, breakpoint_icon_);
 		}
 
@@ -700,7 +700,7 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 
 
 		//optionally draw the symbol name
-		const Symbol::pointer sym = edb::v1::symbol_manager().find(address);
+		const Symbol::pointer sym = yad64::v1::symbol_manager().find(address);
 		if(sym) {
 
 			const int maxStringPx = l1 - (breakpoint_icon_.width() + 1 + ((address_buffer.length() + 1) * font_width_));
@@ -720,13 +720,13 @@ void QDisassemblyView::paintEvent(QPaintEvent *) {
 
 		// for relative jumps draw the jump direction indicators
 		switch(insn.type()) {
-		case edb::Instruction::OP_JCC:
-		case edb::Instruction::OP_JMP:
-		case edb::Instruction::OP_LOOP:
-		case edb::Instruction::OP_LOOPE:
-		case edb::Instruction::OP_LOOPNE:
-			if(insn.operand(0).general_type() == edb::Operand::TYPE_REL) {
-				const edb::Instruction::address_t target = insn.operand(0).relative_target();
+		case yad64::Instruction::OP_JCC:
+		case yad64::Instruction::OP_JMP:
+		case yad64::Instruction::OP_LOOP:
+		case yad64::Instruction::OP_LOOPE:
+		case yad64::Instruction::OP_LOOPNE:
+			if(insn.operand(0).general_type() == yad64::Operand::TYPE_REL) {
+				const yad64::Instruction::address_t target = insn.operand(0).relative_target();
 
 				painter.drawText(
 					l2 + font_width_ + (font_width_ / 2),
@@ -855,7 +855,7 @@ int QDisassemblyView::line3() const {
 // Desc:
 //------------------------------------------------------------------------------
 int QDisassemblyView::address_length() const {
-	const unsigned int address_len = (sizeof(edb::address_t) * CHAR_BIT) / 4;
+	const unsigned int address_len = (sizeof(yad64::address_t) * CHAR_BIT) / 4;
 	return address_len + (show_address_separator_ ? 1 : 0);
 }
 
@@ -863,8 +863,8 @@ int QDisassemblyView::address_length() const {
 // Name: addressFromPoint(const QPoint &pos) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t QDisassemblyView::addressFromPoint(const QPoint &pos) const {
-	const edb::address_t address = address_from_coord(pos.x(), pos.y()) + address_offset_;
+yad64::address_t QDisassemblyView::addressFromPoint(const QPoint &pos) const {
+	const yad64::address_t address = address_from_coord(pos.x(), pos.y()) + address_offset_;
 	if(address >= region_.end()) {
 		return 0;
 	}
@@ -872,16 +872,16 @@ edb::address_t QDisassemblyView::addressFromPoint(const QPoint &pos) const {
 }
 
 //------------------------------------------------------------------------------
-// Name: get_instruction_size(edb::address_t address, bool &ok, quint8 *buf, int &size) const
+// Name: get_instruction_size(yad64::address_t address, bool &ok, quint8 *buf, int &size) const
 // Desc:
 //------------------------------------------------------------------------------
-int QDisassemblyView::get_instruction_size(edb::address_t address, bool &ok, quint8 *buf, int &size) const {
+int QDisassemblyView::get_instruction_size(yad64::address_t address, bool &ok, quint8 *buf, int &size) const {
 	int ret = 0;
 
 	if(size < 0) {
 		ok = false;
 	} else {
-		ok = edb::v1::get_instruction_bytes(address, buf, size);
+		ok = yad64::v1::get_instruction_bytes(address, buf, size);
 
 		if(ok) {
 			ret = instruction_size(buf, size);
@@ -891,11 +891,11 @@ int QDisassemblyView::get_instruction_size(edb::address_t address, bool &ok, qui
 }
 
 //------------------------------------------------------------------------------
-// Name: get_instruction_size(edb::address_t address, bool &ok) const
+// Name: get_instruction_size(yad64::address_t address, bool &ok) const
 // Desc:
 //------------------------------------------------------------------------------
-int QDisassemblyView::get_instruction_size(edb::address_t address, bool &ok) const {
-	quint8 buf[edb::Instruction::MAX_SIZE];
+int QDisassemblyView::get_instruction_size(yad64::address_t address, bool &ok) const {
+	quint8 buf[yad64::Instruction::MAX_SIZE];
 
 	// do the longest read we can while still not crossing region end
 	int buf_size = sizeof(buf);
@@ -915,11 +915,11 @@ int QDisassemblyView::get_instruction_size(edb::address_t address, bool &ok) con
 // Name: address_from_coord(int x, int y) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t QDisassemblyView::address_from_coord(int x, int y) const {
+yad64::address_t QDisassemblyView::address_from_coord(int x, int y) const {
 	Q_UNUSED(x);
 
 	const int line = y / line_height();
-	edb::address_t address = verticalScrollBar()->value();
+	yad64::address_t address = verticalScrollBar()->value();
 
 	// add up all the instructions sizes up to the line we want
 	for(int i = 0; i < line; ++i) {
@@ -943,15 +943,15 @@ edb::address_t QDisassemblyView::address_from_coord(int x, int y) const {
 void QDisassemblyView::mouseDoubleClickEvent(QMouseEvent *event) {
     if(region_ != MemoryRegion()) {
         if(event->button() == Qt::LeftButton) {
-            const edb::address_t address = addressFromPoint(event->pos());
+            const yad64::address_t address = addressFromPoint(event->pos());
             if(region_.contains(address)) {
-                quint8 buf[edb::Instruction::MAX_SIZE + 1];
-                int buf_size = edb::Instruction::MAX_SIZE;
-                IAnalyzer *const analyzer = edb::v1::analyzer();
-                edb::v1::get_instruction_bytes(address, buf, buf_size);
-                edb::Instruction insn(buf, buf + buf_size, address, std::nothrow);
+                quint8 buf[yad64::Instruction::MAX_SIZE + 1];
+                int buf_size = yad64::Instruction::MAX_SIZE;
+                IAnalyzer *const analyzer = yad64::v1::analyzer();
+                yad64::v1::get_instruction_bytes(address, buf, buf_size);
+                yad64::Instruction insn(buf, buf + buf_size, address, std::nothrow);
                 if((analyzer) && (analyzer->category(address + 1) == IAnalyzer::ADDRESS_FUNC_START)) {
-                    edb::Instruction(buf, buf + 1, address, std::nothrow).swap(insn);
+                    yad64::Instruction(buf, buf + 1, address, std::nothrow).swap(insn);
                 }
 
                 const int insn_size = insn.size();
@@ -960,16 +960,16 @@ void QDisassemblyView::mouseDoubleClickEvent(QMouseEvent *event) {
                 }
 
                 switch(insn.type()) {
-                case edb::Instruction::OP_JCC:
-                case edb::Instruction::OP_JMP:
-                case edb::Instruction::OP_LOOP:
-                case edb::Instruction::OP_LOOPE:
-                case edb::Instruction::OP_LOOPNE:
-                case edb::Instruction::OP_CALL:
-                    if(insn.operand(0).general_type() == edb::Operand::TYPE_REL) {
-                        const edb::Instruction::address_t target = insn.operand(0).relative_target();
-                        //edb::v1::jump_to_address(target);
-                        /*if(edb::v1::memory_regions().find_region(target, region)) {
+                case yad64::Instruction::OP_JCC:
+                case yad64::Instruction::OP_JMP:
+                case yad64::Instruction::OP_LOOP:
+                case yad64::Instruction::OP_LOOPE:
+                case yad64::Instruction::OP_LOOPNE:
+                case yad64::Instruction::OP_CALL:
+                    if(insn.operand(0).general_type() == yad64::Operand::TYPE_REL) {
+                        const yad64::Instruction::address_t target = insn.operand(0).relative_target();
+                        //yad64::v1::jump_to_address(target);
+                        /*if(yad64::v1::memory_regions().find_region(target, region)) {
                             do_jump_to_address(address, region, true);
                             return true;
                         }*/
@@ -998,14 +998,14 @@ bool QDisassemblyView::event(QEvent *event) {
 
 			if(helpEvent->x() >= line1() && helpEvent->x() < line2()) {
 
-				const edb::address_t address = addressFromPoint(helpEvent->pos());
+				const yad64::address_t address = addressFromPoint(helpEvent->pos());
 
-				quint8 buf[edb::Instruction::MAX_SIZE];
+				quint8 buf[yad64::Instruction::MAX_SIZE];
 
 				// do the longest read we can while still not passing the region end
-				int buf_size = qMin<edb::address_t>((region_.end() - address), sizeof(buf));
-				if(edb::v1::get_instruction_bytes(address, buf, buf_size)) {
-					const edb::Instruction insn(buf, buf + buf_size, address, std::nothrow);
+				int buf_size = qMin<yad64::address_t>((region_.end() - address), sizeof(buf));
+				if(yad64::v1::get_instruction_bytes(address, buf, buf_size)) {
+					const yad64::Instruction insn(buf, buf + buf_size, address, std::nothrow);
 
 					if((line1() + (static_cast<int>(insn.size()) * 3) * font_width_) > line2()) {
 						const QString byte_buffer = format_instruction_bytes(insn);
@@ -1048,7 +1048,7 @@ void QDisassemblyView::updateSelectedAddress(QMouseEvent *event) {
 	
 	if(region_ != MemoryRegion()) {
 		bool ok;
-		const edb::address_t address = addressFromPoint(event->pos());
+		const yad64::address_t address = addressFromPoint(event->pos());
 		const int size               = get_instruction_size(address, ok);
 	
 		if(ok) {
@@ -1140,7 +1140,7 @@ void QDisassemblyView::keyPressEvent( QKeyEvent * e ) {
 // Name: selectedAddress() const
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t QDisassemblyView::selectedAddress() const {
+yad64::address_t QDisassemblyView::selectedAddress() const {
 	return selected_instruction_address_;
 }
 

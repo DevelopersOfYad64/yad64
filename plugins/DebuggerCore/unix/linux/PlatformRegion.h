@@ -30,7 +30,7 @@ class PlatformRegion : public IRegion {
 	friend class BackupInfo;
 	
 public:
-	PlatformRegion(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, permissions_t permissions);
+	PlatformRegion(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, permissions_t permissions);
 	virtual ~PlatformRegion();
 
 public:
@@ -41,23 +41,23 @@ public:
 	virtual bool readable() const;
 	virtual bool writable() const;
 	virtual bool executable() const;
-	virtual edb::address_t size() const;
+	virtual yad64::address_t size() const;
 	virtual void set_permissions(bool read, bool write, bool execute);
 	
 public:
-	virtual edb::address_t start() const;
-	virtual edb::address_t end() const;
-	virtual edb::address_t base() const;
+	virtual yad64::address_t start() const;
+	virtual yad64::address_t end() const;
+	virtual yad64::address_t base() const;
 	virtual QString name() const;
 	virtual permissions_t permissions() const;
 	
 private:
-	void set_permissions(bool read, bool write, bool execute, edb::address_t temp_address);
+	void set_permissions(bool read, bool write, bool execute, yad64::address_t temp_address);
 	
 private:
-	edb::address_t start_;
-	edb::address_t end_;
-	edb::address_t base_;
+	yad64::address_t start_;
+	yad64::address_t end_;
+	yad64::address_t base_;
 	QString        name_;
 	permissions_t  permissions_;
 };

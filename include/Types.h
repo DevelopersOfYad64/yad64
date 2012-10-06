@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ArchTypes.h"
 #include "OSTypes.h"
 
-namespace edb {
+namespace yad64 {
 	enum EVENT_STATUS {
 		DEBUG_STOP,                 // do nothing, the UI will instigate the next event
 		DEBUG_CONTINUE,             // the event has been address, continue as normal

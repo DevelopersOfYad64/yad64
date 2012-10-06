@@ -67,10 +67,10 @@ void DialogAttach::on_filter_textChanged(const QString &text) {
 //------------------------------------------------------------------------------
 void DialogAttach::update_list(const QString &filter) {
 
-	if(edb::v1::debugger_core) {
-		QMap<edb::pid_t, Process> procs = edb::v1::debugger_core->enumerate_processes();
+	if(yad64::v1::debugger_core) {
+		QMap<yad64::pid_t, Process> procs = yad64::v1::debugger_core->enumerate_processes();
 
-		const edb::uid_t user_id = getuid();
+		const yad64::uid_t user_id = getuid();
 		const bool filterUID = ui->filter_uid->isChecked();
 		const QString lowerFilter = filter.toLower();
 		ui->processes_table->setSortingEnabled(false);
@@ -128,13 +128,13 @@ void DialogAttach::on_filter_uid_clicked(bool checked) {
 // Name: selected_pid(bool &ok) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::pid_t DialogAttach::selected_pid(bool &ok) const {
+yad64::pid_t DialogAttach::selected_pid(bool &ok) const {
 	const QList<QTableWidgetItem *> sel = ui->processes_table->selectedItems();
 	if(sel.size() != 0) {
 		ok = true;
 		return sel.first()->text().toUInt();
 	} else {
 		ok = false;
-		return edb::pid_t();
+		return yad64::pid_t();
 	}
 }

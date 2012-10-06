@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QList>
 
 #define SET_OK(ok, v) do { (ok) = ((v) != -1) || (errno == 0); } while(0)
-#define EDB_WORDSIZE  sizeof(long)
+#define YAD64_WORDSIZE  sizeof(long)
 
 namespace native {
 	int execvp(const char *file, char *const argv[]);
@@ -42,21 +42,21 @@ public:
 	virtual ~DebuggerCoreUNIX() {}
 
 protected:
-	quint8 read_byte(edb::address_t address, bool &ok);
-	quint8 read_byte_base(edb::address_t address, bool &ok);
+	quint8 read_byte(yad64::address_t address, bool &ok);
+	quint8 read_byte_base(yad64::address_t address, bool &ok);
 	void execute_process(const QString &path, const QString &cwd, const QList<QByteArray> &args);
-	void write_byte(edb::address_t address, quint8 value, bool &ok);
-	void write_byte_base(edb::address_t address, quint8 value, bool &ok);
+	void write_byte(yad64::address_t address, quint8 value, bool &ok);
+	void write_byte_base(yad64::address_t address, quint8 value, bool &ok);
 
 public:
-	virtual bool read_pages(edb::address_t address, void *buf, std::size_t count);
-	virtual bool read_bytes(edb::address_t address, void *buf, std::size_t len);
-	virtual bool write_bytes(edb::address_t address, const void *buf, std::size_t len);
+	virtual bool read_pages(yad64::address_t address, void *buf, std::size_t count);
+	virtual bool read_bytes(yad64::address_t address, void *buf, std::size_t len);
+	virtual bool write_bytes(yad64::address_t address, const void *buf, std::size_t len);
 	virtual int pointer_size() const;
 
 protected:
-	virtual long read_data(edb::address_t address, bool &ok) = 0;
-	virtual bool write_data(edb::address_t address, long value) = 0;
+	virtual long read_data(yad64::address_t address, bool &ok) = 0;
+	virtual bool write_data(yad64::address_t address, long value) = 0;
 };
 
 #endif

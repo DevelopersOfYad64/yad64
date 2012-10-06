@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <windows.h>
 
-namespace edb {
+namespace yad64 {
 	typedef DWORD pid_t;
 	typedef DWORD uid_t;
 	typedef DWORD tid_t;

@@ -63,9 +63,9 @@ void DialogEnvironment::on_listView_doubleClicked(const QModelIndex &index) {
 
 	bool ok;
 	const QString s = index.data().toString();
-	const edb::address_t addr = edb::v1::string_to_address(s, ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(s, ok);
 	if(ok) {
-		edb::v1::dump_data(addr, false);
+		yad64::v1::dump_data(addr, false);
 	}
 }
 
@@ -77,7 +77,7 @@ QString DialogEnvironment::libc_name() const {
 
 	QString libc;
 
-	const QList<Module> libs = edb::v1::loaded_libraries();
+	const QList<Module> libs = yad64::v1::loaded_libraries();
 
 	Q_FOREACH(const Module &module, libs) {
 		if(!libc.isEmpty()) {
@@ -112,39 +112,39 @@ QString DialogEnvironment::libc_name() const {
 void DialogEnvironment::do_find() {
 	QStringList results;
 
-	const int min_string_length = edb::v1::config().min_string_length;
+	const int min_string_length = yad64::v1::config().min_string_length;
 
 	const QString libc = libc_name();
-	if(const Symbol::pointer s = edb::v1::symbol_manager().find(libc + "::__environ")) {
-		edb::address_t evironment_address = s->address;
+	if(const Symbol::pointer s = yad64::v1::symbol_manager().find(libc + "::__environ")) {
+		yad64::address_t evironment_address = s->address;
 
-		qDebug() << "[Environment] pointer to environment array is at: " << edb::v1::format_pointer(evironment_address);
-		edb::v1::debugger_core->read_bytes(evironment_address, &evironment_address, sizeof(evironment_address));
-		qDebug() << "[Environment] environment array is at: " << edb::v1::format_pointer(evironment_address);
+		qDebug() << "[Environment] pointer to environment array is at: " << yad64::v1::format_pointer(evironment_address);
+		yad64::v1::debugger_core->read_bytes(evironment_address, &evironment_address, sizeof(evironment_address));
+		qDebug() << "[Environment] environment array is at: " << yad64::v1::format_pointer(evironment_address);
 
-		edb::address_t address;
-		edb::v1::debugger_core->read_bytes(evironment_address, &address, sizeof(address));
+		yad64::address_t address;
+		yad64::v1::debugger_core->read_bytes(evironment_address, &address, sizeof(address));
 		QString temp;
 		while(address != 0) {
 
 			QString str;
 			int stringLen;
-			if(edb::v1::get_ascii_string_at_address(address, str, min_string_length, 256, stringLen)) {
-				results << QString("%1:%2").arg(edb::v1::format_pointer(address)).arg(str);
+			if(yad64::v1::get_ascii_string_at_address(address, str, min_string_length, 256, stringLen)) {
+				results << QString("%1:%2").arg(yad64::v1::format_pointer(address)).arg(str);
 			}
 
-			evironment_address += sizeof(edb::address_t);
-			edb::v1::debugger_core->read_bytes(evironment_address, &address, sizeof(address));
+			evironment_address += sizeof(yad64::address_t);
+			yad64::v1::debugger_core->read_bytes(evironment_address, &address, sizeof(address));
 		}
 	} else {
 #ifdef Q_OS_LINUX
-		QFile proc_environ(QString("/proc/%1/environ").arg(edb::v1::debugger_core->pid()));
+		QFile proc_environ(QString("/proc/%1/environ").arg(yad64::v1::debugger_core->pid()));
 		if(proc_environ.open(QIODevice::ReadOnly)) {
 			QByteArray env = proc_environ.readAll();
 			char *p = env.data();
 			char *ptr = p;
 			while(ptr != p + env.size()) {
-				results << QString("%1:%2").arg(edb::v1::format_pointer(0)).arg(ptr);
+				results << QString("%1:%2").arg(yad64::v1::format_pointer(0)).arg(ptr);
 				ptr += qstrlen(ptr) + 1;
 			}
 

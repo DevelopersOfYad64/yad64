@@ -65,18 +65,18 @@ QString CommentServer::resolve_function_call(QHexView::address_t address, bool &
 
 	// ok, we now want to locate the instruction before this one
 	// so we need to look back a few bytes
-	quint8 buffer[edb::Instruction::MAX_SIZE];
+	quint8 buffer[yad64::Instruction::MAX_SIZE];
 
 	// TODO: portability warning, makes assumptions on the size of a call
-	if(edb::v1::debugger_core->read_bytes(address - CALL_MAX_SIZE, buffer, sizeof(buffer))) {
+	if(yad64::v1::debugger_core->read_bytes(address - CALL_MAX_SIZE, buffer, sizeof(buffer))) {
 		for(int i = (CALL_MAX_SIZE - CALL_MIN_SIZE); i >= 0; --i) {
-			edb::Instruction insn(buffer + i, buffer + sizeof(buffer), 0, std::nothrow);
-			if(insn.valid() && insn.type() == edb::Instruction::OP_CALL) {
-				const QString symname = edb::v1::find_function_symbol(address);
+			yad64::Instruction insn(buffer + i, buffer + sizeof(buffer), 0, std::nothrow);
+			if(insn.valid() && insn.type() == yad64::Instruction::OP_CALL) {
+				const QString symname = yad64::v1::find_function_symbol(address);
 				if(!symname.isEmpty()) {
-					ret = tr("return to %1 <%2>").arg(edb::v1::format_pointer(address)).arg(symname);
+					ret = tr("return to %1 <%2>").arg(yad64::v1::format_pointer(address)).arg(symname);
 				} else {
-					ret = tr("return to %1").arg(edb::v1::format_pointer(address));
+					ret = tr("return to %1").arg(yad64::v1::format_pointer(address));
 				}
 				ok = true;
 				break;
@@ -93,15 +93,15 @@ QString CommentServer::resolve_function_call(QHexView::address_t address, bool &
 //------------------------------------------------------------------------------
 QString CommentServer::resolve_string(QHexView::address_t address, bool &ok) const {
 
-	const int min_string_length = edb::v1::config().min_string_length;
+	const int min_string_length = yad64::v1::config().min_string_length;
 	QString ret;
 	ok = false;
 
 	int stringLen;
 	QString temp;
-	if((ok = edb::v1::get_ascii_string_at_address(address, temp, min_string_length, 256, stringLen))) {
+	if((ok = yad64::v1::get_ascii_string_at_address(address, temp, min_string_length, 256, stringLen))) {
 		ret = tr("ASCII \"%1\"").arg(temp);
-	} else if((ok = edb::v1::get_utf16_string_at_address(address, temp, min_string_length, 256, stringLen))) {
+	} else if((ok = yad64::v1::get_utf16_string_at_address(address, temp, min_string_length, 256, stringLen))) {
 		ret = tr("UTF16 \"%1\"").arg(temp);
 	}
 
@@ -119,9 +119,9 @@ QString CommentServer::comment(QHexView::address_t address, int size) const {
 
 	// if the view is currently looking at words which are a pointer in size
 	// then see if it points to anything...
-	if(size == edb::v1::pointer_size()) {
-		edb::address_t value;
-		if(edb::v1::debugger_core->read_bytes(address, &value, sizeof(value))) {
+	if(size == yad64::v1::pointer_size()) {
+		yad64::address_t value;
+		if(yad64::v1::debugger_core->read_bytes(address, &value, sizeof(value))) {
 
 			QHash<quint64, QString>::const_iterator it = custom_comments_.find(value);
 			if(it != custom_comments_.end()) {

@@ -35,7 +35,7 @@
        </property>
        <property name="icon">
         <iconset resource="debugger.qrc">
-         <normaloff>:/debugger/images/edb16-action-add.png</normaloff>:/debugger/images/edb16-action-add.png</iconset>
+         <normaloff>:/debugger/images/yad6416-action-add.png</normaloff>:/debugger/images/yad6416-action-add.png</iconset>
        </property>
       </widget>
      </item>
@@ -46,7 +46,7 @@
        </property>
        <property name="icon">
         <iconset resource="debugger.qrc">
-         <normaloff>:/debugger/images/edb16-action-remove.png</normaloff>:/debugger/images/edb16-action-remove.png</iconset>
+         <normaloff>:/debugger/images/yad6416-action-remove.png</normaloff>:/debugger/images/yad6416-action-remove.png</iconset>
        </property>
       </widget>
      </item>
@@ -70,7 +70,7 @@
        </property>
        <property name="icon">
         <iconset resource="debugger.qrc">
-         <normaloff>:/debugger/images/edb16-action-arrow-up.png</normaloff>:/debugger/images/edb16-action-arrow-up.png</iconset>
+         <normaloff>:/debugger/images/yad6416-action-arrow-up.png</normaloff>:/debugger/images/yad6416-action-arrow-up.png</iconset>
        </property>
       </widget>
      </item>
@@ -81,7 +81,7 @@
        </property>
        <property name="icon">
         <iconset resource="debugger.qrc">
-         <normaloff>:/debugger/images/edb16-action-arrow-down.png</normaloff>:/debugger/images/edb16-action-arrow-down.png</iconset>
+         <normaloff>:/debugger/images/yad6416-action-arrow-down.png</normaloff>:/debugger/images/yad6416-action-arrow-down.png</iconset>
        </property>
       </widget>
      </item>

@@ -56,11 +56,11 @@ protected:
 	void dropEvent(QDropEvent* event);
 
 public:
-	bool dump_data(edb::address_t address, bool new_tab);
-	bool dump_data_range(edb::address_t address, edb::address_t end_address, bool new_tab);
-	bool dump_stack(edb::address_t address, bool scroll_to);
-	bool jump_to_address(edb::address_t address);
-	void attach(edb::pid_t pid);
+	bool dump_data(yad64::address_t address, bool new_tab);
+	bool dump_data_range(yad64::address_t address, yad64::address_t end_address, bool new_tab);
+	bool dump_stack(yad64::address_t address, bool scroll_to);
+	bool jump_to_address(yad64::address_t address);
+	void attach(yad64::pid_t pid);
 	void execute(const QString &s, const QList<QByteArray> &args);
 	void refresh_gui();
 	void update_gui();
@@ -88,7 +88,7 @@ public Q_SLOTS:
 	void on_action_Step_Over_Pass_Signal_To_Application_triggered();
 	void on_action_Step_Over_triggered();
 	void on_action_Threads_triggered();
-	void on_cpuView_breakPointToggled(edb::address_t);
+	void on_cpuView_breakPointToggled(yad64::address_t);
 	void on_cpuView_customContextMenuRequested(const QPoint &);
 	void on_registerList_customContextMenuRequested(const QPoint &);
 	void on_registerList_itemDoubleClicked(QTreeWidgetItem *);
@@ -147,7 +147,7 @@ private Q_SLOTS:
 	void tab_context_menu(int index, const QPoint &pos);
 
 public:
-	virtual edb::EVENT_STATUS handle_event(const DebugEvent &event);
+	virtual yad64::EVENT_STATUS handle_event(const DebugEvent &event);
 
 private:
 	enum DEBUG_MODE {
@@ -175,18 +175,18 @@ private:
 	bool breakpoint_condition_true(const QString &condition);
 	bool common_open(const QString &s, const QList<QByteArray> &args);
 	bool current_instruction_is_return() const;
-	edb::EVENT_STATUS debug_event_handler(const DebugEvent &event);
-	edb::EVENT_STATUS handle_event_exited(const DebugEvent &event);
-	edb::EVENT_STATUS handle_event_signaled(const DebugEvent &event);
-	edb::EVENT_STATUS handle_event_stopped(const DebugEvent &event);
-	edb::EVENT_STATUS handle_trap();
-	edb::EVENT_STATUS resume_status(bool pass_exception);
+	yad64::EVENT_STATUS debug_event_handler(const DebugEvent &event);
+	yad64::EVENT_STATUS handle_event_exited(const DebugEvent &event);
+	yad64::EVENT_STATUS handle_event_signaled(const DebugEvent &event);
+	yad64::EVENT_STATUS handle_event_stopped(const DebugEvent &event);
+	yad64::EVENT_STATUS handle_trap();
+	yad64::EVENT_STATUS resume_status(bool pass_exception);
 	void apply_default_fonts();
 	void apply_default_show_separator();
 	void cleanup_debugger();
 	void cpu_fill(quint8 byte);
 	void detach_from_process(DETACH_ACTION kill);
-	void do_jump_to_address(edb::address_t address, const MemoryRegion &r, bool scroll_to);
+	void do_jump_to_address(yad64::address_t address, const MemoryRegion &r, bool scroll_to);
 	void follow_register_in_dump(bool tabbed);
 	void resume_execution(EXCEPTION_RESUME pass_exception, DEBUG_MODE mode);
 	void set_initial_breakpoint(const QString &s);
@@ -197,17 +197,17 @@ private:
 	void test_native_binary();
 	void update_cpu_view(const State &state, MemoryRegion &region);
 	void update_data_views();
-	void update_disassembly(edb::address_t address, const MemoryRegion &r);
+	void update_disassembly(yad64::address_t address, const MemoryRegion &r);
 	void update_stack_view(const State &state);
-	void update_tab_caption(const QSharedPointer<QHexView> &view, edb::address_t start, edb::address_t end);
+	void update_tab_caption(const QSharedPointer<QHexView> &view, yad64::address_t start, yad64::address_t end);
 
 private:
 
 	template <class F>
-	void follow_memory(edb::address_t address, F follow_func);
+	void follow_memory(yad64::address_t address, F follow_func);
 
 	template <class T>
-	edb::address_t get_follow_address(const T &hv, bool &ok);
+	yad64::address_t get_follow_address(const T &hv, bool &ok);
 	
 	template <class F, class T>
 	void add_plugin_context_menu(const T &menu, const F &f);
@@ -242,7 +242,7 @@ private:
 	bool                                             step_run_;
 	DebugEvent                                       last_event_;
 #ifdef Q_OS_UNIX
-	edb::address_t                                   debug_pointer_;
+	yad64::address_t                                   debug_pointer_;
 #endif
 };
 

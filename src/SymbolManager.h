@@ -32,21 +32,21 @@ public:
 public:
 	virtual const QList<Symbol::pointer> symbols() const;
 	virtual const Symbol::pointer find(const QString &name) const;
-	virtual const Symbol::pointer find(edb::address_t address) const;
-	virtual const Symbol::pointer find_near_symbol(edb::address_t address) const;
+	virtual const Symbol::pointer find(yad64::address_t address) const;
+	virtual const Symbol::pointer find_near_symbol(yad64::address_t address) const;
 	virtual void clear();
-	virtual void load_symbol_file(const QString &filename, edb::address_t base);
+	virtual void load_symbol_file(const QString &filename, yad64::address_t base);
 	virtual void load_symbols(const QString &symbol_directory);
 	virtual void add_symbol(const Symbol::pointer &symbol);
 	
 private:
-	bool process_symbol_file(const QString &f, edb::address_t base, const QString &library_filename);
+	bool process_symbol_file(const QString &f, yad64::address_t base, const QString &library_filename);
 
 private:
 	QString                               symbol_directory_;
 	QSet<QString>                         symbol_files_;
 	QList<Symbol::pointer>                symbols_;
-	QMap<edb::address_t, Symbol::pointer> symbols_by_address_;
+	QMap<yad64::address_t, Symbol::pointer> symbols_by_address_;
 	QHash<QString, Symbol::pointer>       symbols_by_name_;
 };
 

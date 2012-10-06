@@ -28,7 +28,7 @@ namespace Ui { class BinaryStringWidget; }
 
 class QString;
 
-class EDB_EXPORT BinaryString : public QWidget {
+class YAD64_EXPORT BinaryString : public QWidget {
 	Q_OBJECT
 
 public:

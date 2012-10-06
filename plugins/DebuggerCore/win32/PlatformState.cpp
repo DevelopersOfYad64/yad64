@@ -91,10 +91,10 @@ IState *PlatformState::clone() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: flags_to_string(edb::reg_t flags) const
+// Name: flags_to_string(yad64::reg_t flags) const
 // Desc: returns the flags in a string form appropriate for this platform
 //------------------------------------------------------------------------------
-QString PlatformState::flags_to_string(edb::reg_t flags) const {
+QString PlatformState::flags_to_string(yad64::reg_t flags) const {
 	char buf[14];
 	qsnprintf(
 		buf,
@@ -127,7 +127,7 @@ QString PlatformState::flags_to_string() const {
 Register PlatformState::value(const QString &reg) const {
 	const QString lreg = reg.toLower();
 
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	if(lreg == "eax")			return Register("eax", context_.Eax, Register::TYPE_GPR);
 	else if(lreg == "ebx")		return Register("ebx", context_.Ebx, Register::TYPE_GPR);
 	else if(lreg == "ecx")		return Register("ecx", context_.Ecx, Register::TYPE_GPR);
@@ -162,7 +162,7 @@ Register PlatformState::value(const QString &reg) const {
 	else if(lreg == "fs_base")  return Register("fs_base", fs_base_, Register::TYPE_SEG);
 	else if(lreg == "gs_base")  return Register("gs_base", gs_base_, Register::TYPE_SEG);
 	else if(lreg == "eflags") 	return Register("eflags", context_.EFlags, Register::TYPE_COND);
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	if(lreg == "rax")			return Register("rax", context_.Rax, Register::TYPE_GPR);
 	else if(lreg == "rbx")		return Register("rbx", context_.Rbx, Register::TYPE_GPR);
 	else if(lreg == "rcx")		return Register("rcx", context_.Rcx, Register::TYPE_GPR);
@@ -250,10 +250,10 @@ Register PlatformState::value(const QString &reg) const {
 // Name: frame_pointer() const
 // Desc: returns what is conceptually the frame pointer for this platform
 //------------------------------------------------------------------------------
-edb::address_t PlatformState::frame_pointer() const {
-#if defined(EDB_X86)
+yad64::address_t PlatformState::frame_pointer() const {
+#if defined(YAD64_X86)
 	return context_.Ebp;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	return context_.Rbp;
 #endif
 }
@@ -262,10 +262,10 @@ edb::address_t PlatformState::frame_pointer() const {
 // Name: instruction_pointer() const
 // Desc: returns the instruction pointer for this platform
 //------------------------------------------------------------------------------
-edb::address_t PlatformState::instruction_pointer() const {
-#if defined(EDB_X86)
+yad64::address_t PlatformState::instruction_pointer() const {
+#if defined(YAD64_X86)
 	return context_.Eip;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	return context_.Rip;
 #endif
 }
@@ -274,10 +274,10 @@ edb::address_t PlatformState::instruction_pointer() const {
 // Name: stack_pointer() const
 // Desc: returns the stack pointer for this platform
 //------------------------------------------------------------------------------
-edb::address_t PlatformState::stack_pointer() const {
-#if defined(EDB_X86)
+yad64::address_t PlatformState::stack_pointer() const {
+#if defined(YAD64_X86)
 	return context_.Esp;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	return context_.Rsp;
 #endif
 }
@@ -286,7 +286,7 @@ edb::address_t PlatformState::stack_pointer() const {
 // Name: debug_register(int n) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::reg_t PlatformState::debug_register(int n) const {
+yad64::reg_t PlatformState::debug_register(int n) const {
 
 	switch(n) {
 	case 0: return context_.Dr0;
@@ -303,10 +303,10 @@ edb::reg_t PlatformState::debug_register(int n) const {
 // Name: flags() const
 // Desc:
 //------------------------------------------------------------------------------
-edb::reg_t PlatformState::flags() const {
-#if defined(EDB_X86)
+yad64::reg_t PlatformState::flags() const {
+#if defined(YAD64_X86)
 	return context_.EFlags;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	return context_.EFlags;
 #endif
 }
@@ -319,14 +319,14 @@ long double PlatformState::fpu_register(int n) const {
 double ret = 0.0;
 
 	if(n >= 0 && n <= 7) {
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 		const uint8_t* p = reinterpret_cast<const uint8_t*>(&context_.FloatSave.RegisterArea[n*10]);
 		if(sizeof(long double) == 10) { // can we check this at compile time?
 			ret = *(reinterpret_cast<const long double*>(p));
 		} else {
 			ret = read_float80(p);
 		}
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 		const uint8_t* p = reinterpret_cast<const uint8_t*>(&context_.FltSave.FloatRegisters[n]);
 		if(sizeof(long double) == 10) {
 			ret = *(reinterpret_cast<const long double*>(p));
@@ -344,11 +344,11 @@ quint64 PlatformState::mmx_register(int n) const {
 	// TODO: actually check again for this again
 	if(true) {
 		if(n >= 0 && n <= 7) {
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 			// MMX registers are an alias to the lower 64-bits of the FPU regs
 			const quint64* p = reinterpret_cast<const quint64*>(&context_.FloatSave.RegisterArea[n*10]);
 			ret = *p; // little endian!
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 			const quint64* p = reinterpret_cast<const quint64*>(&context_.FltSave.FloatRegisters[n]);
 			ret = *p;
 #endif
@@ -362,13 +362,13 @@ QByteArray PlatformState::xmm_register(int n) const {
 
 	// TODO: actually check again for this again
 	if(true) {
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 		if(n >= 0 && n <= 7) {
 			const char* p = reinterpret_cast<const char*>(&context_.ExtendedRegisters[(10+n)*16]);
 			ret = QByteArray(p, 16);
 			std::reverse(ret.begin(), ret.end()); //little endian!
 		}
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 		if(n >= 0 && n <= 15) {
 			const char* p = reinterpret_cast<const char*>(&context_.FltSave.XmmRegisters[n]);
 			ret = QByteArray(p, sizeof(M128A));
@@ -384,9 +384,9 @@ QByteArray PlatformState::xmm_register(int n) const {
 // Desc:
 //------------------------------------------------------------------------------
 void PlatformState::adjust_stack(int bytes) {
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	context_.Esp += bytes;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	context_.Rsp += bytes;
 #endif
 }
@@ -402,10 +402,10 @@ void PlatformState::clear() {
 }
 
 //------------------------------------------------------------------------------
-// Name: set_debug_register(int n, edb::reg_t value)
+// Name: set_debug_register(int n, yad64::reg_t value)
 // Desc:
 //------------------------------------------------------------------------------
-void PlatformState::set_debug_register(int n, edb::reg_t value) {
+void PlatformState::set_debug_register(int n, yad64::reg_t value) {
 	switch(n) {
 	case 0: context_.Dr0 = value; break;
 	case 1: context_.Dr1 = value; break;
@@ -419,37 +419,37 @@ void PlatformState::set_debug_register(int n, edb::reg_t value) {
 }
 
 //------------------------------------------------------------------------------
-// Name: set_flags(edb::reg_t flags)
+// Name: set_flags(yad64::reg_t flags)
 // Desc:
 //------------------------------------------------------------------------------
-void PlatformState::set_flags(edb::reg_t flags) {
-#if defined(EDB_X86)
+void PlatformState::set_flags(yad64::reg_t flags) {
+#if defined(YAD64_X86)
 	context_.EFlags = flags;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	context_.EFlags = flags;
 #endif
 }
 
 //------------------------------------------------------------------------------
-// Name: set_instruction_pointer(edb::address_t value)
+// Name: set_instruction_pointer(yad64::address_t value)
 // Desc:
 //------------------------------------------------------------------------------
-void PlatformState::set_instruction_pointer(edb::address_t value) {
-#if defined(EDB_X86)
+void PlatformState::set_instruction_pointer(yad64::address_t value) {
+#if defined(YAD64_X86)
 	context_.Eip = value;
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	context_.Rip = value;
 #endif
 }
 
 //------------------------------------------------------------------------------
-// Name: set_register(const QString &name, edb::reg_t value)
+// Name: set_register(const QString &name, yad64::reg_t value)
 // Desc:
 //------------------------------------------------------------------------------
-void PlatformState::set_register(const QString &name, edb::reg_t value) {
+void PlatformState::set_register(const QString &name, yad64::reg_t value) {
 
 	const QString lreg = name.toLower();
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	if(lreg == "eax") { context_.Eax = value; }
 	else if(lreg == "ebx") { context_.Ebx = value; }
 	else if(lreg == "ecx") { context_.Ecx = value; }
@@ -466,7 +466,7 @@ void PlatformState::set_register(const QString &name, edb::reg_t value) {
 	else if(lreg == "gs") { context_.SegGs = value; }
 	else if(lreg == "ss") { context_.SegSs = value; }
 	else if(lreg == "eflags") { context_.EFlags = value; }
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	if(lreg == "rax") { context_.Rax = value; }
 	else if(lreg == "rbx") { context_.Rbx = value; }
 	else if(lreg == "rcx") { context_.Rcx = value; }

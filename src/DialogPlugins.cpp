@@ -47,7 +47,7 @@ DialogPlugins::~DialogPlugins() {
 //------------------------------------------------------------------------------
 void DialogPlugins::showEvent(QShowEvent *) {
 
-	QHash<QString, QObject *> plugins = edb::v1::plugin_list();
+	QHash<QString, QObject *> plugins = yad64::v1::plugin_list();
 
 	ui->plugins_table->setSortingEnabled(false);
 	ui->plugins_table->setRowCount(0);

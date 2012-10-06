@@ -44,11 +44,11 @@ void DebuggerCoreBase::clear_breakpoints() {
 }
 
 //------------------------------------------------------------------------------
-// Name: add_breakpoint(edb::address_t address)
+// Name: add_breakpoint(yad64::address_t address)
 // Desc: creates a new breakpoint
 //       (only if there isn't already one at the given address)
 //------------------------------------------------------------------------------
-IBreakpoint::pointer DebuggerCoreBase::add_breakpoint(edb::address_t address) {
+IBreakpoint::pointer DebuggerCoreBase::add_breakpoint(yad64::address_t address) {
 
 	if(attached()) {
 		if(!find_breakpoint(address)) {
@@ -62,10 +62,10 @@ IBreakpoint::pointer DebuggerCoreBase::add_breakpoint(edb::address_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: find_breakpoint(edb::address_t address) const
+// Name: find_breakpoint(yad64::address_t address) const
 // Desc: returns the breakpoint at the given address or IBreakpoint::pointer()
 //------------------------------------------------------------------------------
-IBreakpoint::pointer DebuggerCoreBase::find_breakpoint(edb::address_t address) {
+IBreakpoint::pointer DebuggerCoreBase::find_breakpoint(yad64::address_t address) {
 	if(attached()) {
 		const BreakpointState::const_iterator it = breakpoints_.find(address);
 		if(it != breakpoints_.end()) {
@@ -77,13 +77,13 @@ IBreakpoint::pointer DebuggerCoreBase::find_breakpoint(edb::address_t address) {
 
 
 //------------------------------------------------------------------------------
-// Name: remove_breakpoint(edb::address_t address)
+// Name: remove_breakpoint(yad64::address_t address)
 // Desc: removes the breakpoint at the given address, this is a no-op if there
 //       is no breakpoint present.
 // Note: if another part of the code has a reference to the BP, it will not
 //       actually be removed until it releases the reference.
 //------------------------------------------------------------------------------
-void DebuggerCoreBase::remove_breakpoint(edb::address_t address) {
+void DebuggerCoreBase::remove_breakpoint(yad64::address_t address) {
 
 	// TODO: assert paused
 	if(attached()) {
@@ -115,7 +115,7 @@ bool DebuggerCoreBase::open(const QString &path, const QString &cwd, const QList
 // Name: pid() const
 // Desc: returns the pid of the currently debugged process (0 if not attached)
 //------------------------------------------------------------------------------
-edb::pid_t DebuggerCoreBase::pid() const {
+yad64::pid_t DebuggerCoreBase::pid() const {
 	return pid_;
 }
 
@@ -131,23 +131,23 @@ bool DebuggerCoreBase::attached() const {
 // Name: thread_ids() const
 // Desc:
 //------------------------------------------------------------------------------
-QList<edb::tid_t> DebuggerCoreBase::thread_ids() const {
-	return QList<edb::tid_t>();
+QList<yad64::tid_t> DebuggerCoreBase::thread_ids() const {
+	return QList<yad64::tid_t>();
 }
 
 //------------------------------------------------------------------------------
 // Name: active_thread() const
 // Desc:
 //------------------------------------------------------------------------------
-edb::tid_t DebuggerCoreBase::active_thread() const {
+yad64::tid_t DebuggerCoreBase::active_thread() const {
 	return active_thread_;
 }
 
 //------------------------------------------------------------------------------
-// Name: set_active_thread(edb::tid_t)
+// Name: set_active_thread(yad64::tid_t)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCoreBase::set_active_thread(edb::tid_t) {
+void DebuggerCoreBase::set_active_thread(yad64::tid_t) {
 }
 
 //------------------------------------------------------------------------------

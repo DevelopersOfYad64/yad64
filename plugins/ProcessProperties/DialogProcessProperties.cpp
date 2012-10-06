@@ -73,13 +73,13 @@ DialogProcessProperties::~DialogProcessProperties() {
 // Desc:
 //------------------------------------------------------------------------------
 void DialogProcessProperties::updateGeneralPage() {
-	if(edb::v1::debugger_core) {
+	if(yad64::v1::debugger_core) {
 	
-		const edb::pid_t pid        = edb::v1::debugger_core->pid();
-		const QString exe           = edb::v1::debugger_core->process_exe(pid);
-		const QString cwd           = edb::v1::debugger_core->process_cwd(pid);
-		const edb::pid_t parent_pid = edb::v1::debugger_core->parent_pid(pid);
-		const QString parent_exe    = edb::v1::debugger_core->process_exe(parent_pid);
+		const yad64::pid_t pid        = yad64::v1::debugger_core->pid();
+		const QString exe           = yad64::v1::debugger_core->process_exe(pid);
+		const QString cwd           = yad64::v1::debugger_core->process_cwd(pid);
+		const yad64::pid_t parent_pid = yad64::v1::debugger_core->parent_pid(pid);
+		const QString parent_exe    = yad64::v1::debugger_core->process_exe(parent_pid);
 	
 		ui->editImage->setText(exe);
 		ui->editCommand->setText(QString());
@@ -101,13 +101,13 @@ void DialogProcessProperties::updateModulePage() {
 
 	ui->tableModules->clearContents();
 	ui->tableModules->setRowCount(0);
-	if(edb::v1::debugger_core) {
-		const QList<Module> modules = edb::v1::loaded_libraries();
+	if(yad64::v1::debugger_core) {
+		const QList<Module> modules = yad64::v1::loaded_libraries();
 		ui->tableModules->setSortingEnabled(false);
 		Q_FOREACH(const Module &m, modules) {
 			const int row = ui->tableModules->rowCount();
 			ui->tableModules->insertRow(row);
-			ui->tableModules->setItem(row, 0, new QTableWidgetItem(edb::v1::format_pointer(m.base_address)));
+			ui->tableModules->setItem(row, 0, new QTableWidgetItem(yad64::v1::format_pointer(m.base_address)));
 			ui->tableModules->setItem(row, 1, new QTableWidgetItem(m.name));
 		}
 		ui->tableModules->setSortingEnabled(true);
@@ -124,16 +124,16 @@ void DialogProcessProperties::updateMemoryPage() {
 		ui->tableMemory->clearContents();
 		ui->tableMemory->setRowCount(0);
 
-		if(edb::v1::debugger_core) {
-			edb::v1::memory_regions().sync();
-			const QList<MemoryRegion> regions = edb::v1::memory_regions().regions();
+		if(yad64::v1::debugger_core) {
+			yad64::v1::memory_regions().sync();
+			const QList<MemoryRegion> regions = yad64::v1::memory_regions().regions();
 			ui->tableMemory->setSortingEnabled(false);
 
 
 			Q_FOREACH(const MemoryRegion &r, regions) {
 				const int row = ui->tableMemory->rowCount();
 				ui->tableMemory->insertRow(row);
-				ui->tableMemory->setItem(row, 0, new QTableWidgetItem(edb::v1::format_pointer(r.start()))); // address
+				ui->tableMemory->setItem(row, 0, new QTableWidgetItem(yad64::v1::format_pointer(r.start()))); // address
 				ui->tableMemory->setItem(row, 1, new QTableWidgetItem(size_to_string(r.size())));           // size
 				ui->tableMemory->setItem(row, 2, new QTableWidgetItem(QString("%1%2%3")                     // protection
 					.arg(r.readable() ? 'r' : '-')
@@ -161,10 +161,10 @@ void DialogProcessProperties::showEvent(QShowEvent *) {
 //------------------------------------------------------------------------------
 void DialogProcessProperties::on_btnParent_clicked() {
 
-	if(edb::v1::debugger_core) {
-		const edb::pid_t pid        = edb::v1::debugger_core->pid();
-		const edb::pid_t parent_pid = edb::v1::debugger_core->parent_pid(pid);
-		const QString parent_exe    = edb::v1::debugger_core->process_exe(parent_pid);
+	if(yad64::v1::debugger_core) {
+		const yad64::pid_t pid        = yad64::v1::debugger_core->pid();
+		const yad64::pid_t parent_pid = yad64::v1::debugger_core->parent_pid(pid);
+		const QString parent_exe    = yad64::v1::debugger_core->process_exe(parent_pid);
 		QFileInfo info(parent_exe);
 		QDir dir = info.absoluteDir();
 		QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(dir.absolutePath()), QUrl::TolerantMode));
@@ -176,7 +176,7 @@ void DialogProcessProperties::on_btnParent_clicked() {
 // Desc:
 //------------------------------------------------------------------------------
 void DialogProcessProperties::on_btnImage_clicked() {
-	if(edb::v1::debugger_core) {
+	if(yad64::v1::debugger_core) {
 		QFileInfo info(ui->editImage->text());
 		QDir dir = info.absoluteDir();
 		QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(dir.absolutePath()), QUrl::TolerantMode));

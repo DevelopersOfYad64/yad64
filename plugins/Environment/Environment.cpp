@@ -57,7 +57,7 @@ QMenu *Environment::menu(QWidget *parent) {
 void Environment::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogEnvironment(edb::v1::debugger_ui);
+		dialog_ = new DialogEnvironment(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

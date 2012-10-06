@@ -54,12 +54,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MIN_REFCOUNT 2
 
 namespace {
-#if defined(EDB_X86)
-	const edb::Operand::Register STACK_REG = edb::Operand::REG_ESP;
-	const edb::Operand::Register FRAME_REG = edb::Operand::REG_EBP;
-#elif defined(EDB_X86_64)
-	const edb::Operand::Register STACK_REG = edb::Operand::REG_RSP;
-	const edb::Operand::Register FRAME_REG = edb::Operand::REG_RBP;
+#if defined(YAD64_X86)
+	const yad64::Operand::Register STACK_REG = yad64::Operand::REG_ESP;
+	const yad64::Operand::Register FRAME_REG = yad64::Operand::REG_EBP;
+#elif defined(YAD64_X86_64)
+	const yad64::Operand::Register STACK_REG = yad64::Operand::REG_RSP;
+	const yad64::Operand::Register FRAME_REG = yad64::Operand::REG_RBP;
 #endif
 }
 
@@ -86,9 +86,9 @@ QMenu *Analyzer::menu(QWidget *parent) {
 	if(menu_ == 0) {
 		menu_ = new QMenu(tr("Analyzer"), parent);
 		menu_->addAction(tr("Show &Specified Functions"), this, SLOT(show_specified()));
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 		menu_->addAction(tr("&Analyze EIP's Region"), this, SLOT(do_ip_analysis()), QKeySequence(tr("Ctrl+A")));
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 		menu_->addAction(tr("&Analyze RIP's Region"), this, SLOT(do_ip_analysis()), QKeySequence(tr("Ctrl+A")));
 #endif
 		menu_->addAction(tr("&Analyze Viewed Region"), this, SLOT(do_view_analysis()), QKeySequence(tr("Ctrl+Shift+A")));
@@ -121,7 +121,7 @@ QMenu *Analyzer::menu(QWidget *parent) {
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::private_init() {
-	edb::v1::set_analyzer(this);
+	yad64::v1::set_analyzer(this);
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ void Analyzer::private_init() {
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::show_specified() {
-	static QDialog *dialog = new DialogSpecifiedFunctions(edb::v1::debugger_ui);
+	static QDialog *dialog = new DialogSpecifiedFunctions(yad64::v1::debugger_ui);
 	dialog->show();
 }
 
@@ -141,10 +141,10 @@ void Analyzer::do_ip_analysis() {
 	MemoryRegion region;
 	
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 	
-	const edb::address_t eip = state.instruction_pointer();
-	if(edb::v1::memory_regions().find_region(eip, region)) {
+	const yad64::address_t eip = state.instruction_pointer();
+	if(yad64::v1::memory_regions().find_region(eip, region)) {
 		do_analysis(region);
 	}
 }
@@ -154,7 +154,7 @@ void Analyzer::do_ip_analysis() {
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::do_view_analysis() {
-	do_analysis(edb::v1::current_cpu_view_region());
+	do_analysis(yad64::v1::current_cpu_view_region());
 }
 
 //------------------------------------------------------------------------------
@@ -162,9 +162,9 @@ void Analyzer::do_view_analysis() {
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::mark_function_start() {
-	const edb::address_t address = edb::v1::cpu_selected_address();
+	const yad64::address_t address = yad64::v1::cpu_selected_address();
 	MemoryRegion region;
-	if(edb::v1::memory_regions().find_region(address, region)) {
+	if(yad64::v1::memory_regions().find_region(address, region)) {
 		qDebug("Added %p to the list of known functions", reinterpret_cast<void *>(address));
 		specified_functions_.insert(address);
 		invalidate_dynamic_analysis(region);
@@ -177,11 +177,11 @@ void Analyzer::mark_function_start() {
 //------------------------------------------------------------------------------
 void Analyzer::goto_function_start() {
 
-	const edb::address_t address = edb::v1::cpu_selected_address();
+	const yad64::address_t address = yad64::v1::cpu_selected_address();
 
 	Function function;
 	if(find_containing_function(address, function)) {
-		edb::v1::jump_to_address(function.entry_address);
+		yad64::v1::jump_to_address(function.entry_address);
 		return;
 	}
 
@@ -197,11 +197,11 @@ void Analyzer::goto_function_start() {
 //------------------------------------------------------------------------------
 void Analyzer::goto_function_end() {
 
-	const edb::address_t address = edb::v1::cpu_selected_address();
+	const yad64::address_t address = yad64::v1::cpu_selected_address();
 
 	Function function;
 	if(find_containing_function(address, function)) {
-		edb::v1::jump_to_address(function.last_instruction);
+		yad64::v1::jump_to_address(function.last_instruction);
 		return;
 	}
 
@@ -239,12 +239,12 @@ QList<QAction *> Analyzer::cpu_context_menu() {
 //------------------------------------------------------------------------------
 void Analyzer::do_analysis(const MemoryRegion &region) {
 	if(region.size() != 0) {
-		QProgressDialog progress(tr("Performing Analysis"), 0, 0, 100, edb::v1::debugger_ui);
+		QProgressDialog progress(tr("Performing Analysis"), 0, 0, 100, yad64::v1::debugger_ui);
 		connect(this, SIGNAL(update_progress(int)), &progress, SLOT(setValue(int)));
 		progress.show();
 		progress.setValue(0);
 		analyze(region);
-		edb::v1::repaint_cpu_view();
+		yad64::v1::repaint_cpu_view();
 	}
 }
 
@@ -253,25 +253,25 @@ void Analyzer::do_analysis(const MemoryRegion &region) {
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::find_function_calls(const MemoryRegion &region, FunctionMap &found_functions) {
-	static const edb::address_t page_size = edb::v1::debugger_core->page_size();
+	static const yad64::address_t page_size = yad64::v1::debugger_core->page_size();
 
-	const edb::address_t size_in_pages = region.size() / page_size;
+	const yad64::address_t size_in_pages = region.size() / page_size;
 
 	try {
 		QVector<quint8> pages(size_in_pages * page_size);
 
-		if(edb::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
-			for(edb::address_t i = 0; i < static_cast<edb::address_t>(region.size()); ++i) {
+		if(yad64::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
+			for(yad64::address_t i = 0; i < static_cast<yad64::address_t>(region.size()); ++i) {
 
-				const edb::Instruction insn(&pages[i], &pages[i] + region.size(), region.start() + i, std::nothrow);
+				const yad64::Instruction insn(&pages[i], &pages[i] + region.size(), region.start() + i, std::nothrow);
 
-				if(insn.valid() && insn.type() == edb::Instruction::OP_CALL) {
+				if(insn.valid() && insn.type() == yad64::Instruction::OP_CALL) {
 
-					const edb::address_t ip = region.start() + i;
-					const edb::Operand &op = insn.operand(0);
+					const yad64::address_t ip = region.start() + i;
+					const yad64::Operand &op = insn.operand(0);
 
-					if(op.general_type() == edb::Operand::TYPE_REL) {
-						const edb::address_t ea = op.relative_target();
+					if(op.general_type() == yad64::Operand::TYPE_REL) {
+						const yad64::address_t ea = op.relative_target();
 
 						// skip over ones which are : call <label>; label:
 						if(ea != ip + insn.size()) {
@@ -298,24 +298,24 @@ void Analyzer::find_function_calls(const MemoryRegion &region, FunctionMap &foun
 }
 
 //------------------------------------------------------------------------------
-// Name: is_stack_frame(edb::address_t addr)
+// Name: is_stack_frame(yad64::address_t addr)
 // Desc:
 //------------------------------------------------------------------------------
-bool Analyzer::is_stack_frame(edb::address_t addr) const {
+bool Analyzer::is_stack_frame(yad64::address_t addr) const {
 
-	quint8 buf[edb::Instruction::MAX_SIZE];
+	quint8 buf[yad64::Instruction::MAX_SIZE];
 
 	unsigned int i = 0;
 
 	while(i < 2) {
 		// gets the bytes for the instruction
 		int buf_size = sizeof(buf);
-		if(!edb::v1::get_instruction_bytes(addr, buf, buf_size)) {
+		if(!yad64::v1::get_instruction_bytes(addr, buf, buf_size)) {
 			break;
 		}
 
 		// decode it
-		const edb::Instruction insn(buf, buf + buf_size, addr, std::nothrow);
+		const yad64::Instruction insn(buf, buf + buf_size, addr, std::nothrow);
 		if(!insn.valid()) {
 			break;;
 		}
@@ -324,19 +324,19 @@ bool Analyzer::is_stack_frame(edb::address_t addr) const {
 		switch(i++) {
 		case 0:
 			// are we looking at a 'push rBP' ?
-			if(insn.type() == edb::Instruction::OP_PUSH) {
+			if(insn.type() == yad64::Instruction::OP_PUSH) {
 				Q_ASSERT(insn.operand_count() == 1);
-				const edb::Operand &op = insn.operand(0);
-				if(op.complete_type() == edb::Operand::TYPE_REGISTER) {
+				const yad64::Operand &op = insn.operand(0);
+				if(op.complete_type() == yad64::Operand::TYPE_REGISTER) {
 					if(op.reg() == FRAME_REG) {
 						break;
 					}
 				}
 			// if it is an 'enter 0,0' instruction, then it's a stack frame right away
-			} else if(insn.type() == edb::Instruction::OP_ENTER) {
+			} else if(insn.type() == yad64::Instruction::OP_ENTER) {
 				Q_ASSERT(insn.operand_count() == 2);
-				const edb::Operand &op0 = insn.operand(0);
-				const edb::Operand &op1 = insn.operand(1);
+				const yad64::Operand &op0 = insn.operand(0);
+				const yad64::Operand &op1 = insn.operand(1);
 				if(op0.immediate() == 0 && op1.immediate() == 0) {
 					return true;
 				}
@@ -345,11 +345,11 @@ bool Analyzer::is_stack_frame(edb::address_t addr) const {
 			break;
 		case 1:
 			// are we looking at a 'mov rBP, rSP' ?
-			if(insn.type() == edb::Instruction::OP_MOV) {
+			if(insn.type() == yad64::Instruction::OP_MOV) {
 				Q_ASSERT(insn.operand_count() == 2);
-				const edb::Operand &op0 = insn.operand(0);
-				const edb::Operand &op1 = insn.operand(1);
-				if(op0.complete_type() == edb::Operand::TYPE_REGISTER && op1.complete_type() == edb::Operand::TYPE_REGISTER) {
+				const yad64::Operand &op0 = insn.operand(0);
+				const yad64::Operand &op1 = insn.operand(1);
+				if(op0.complete_type() == yad64::Operand::TYPE_REGISTER && op1.complete_type() == yad64::Operand::TYPE_REGISTER) {
 					if(op0.reg() == FRAME_REG && op1.reg() == STACK_REG) {
 						return true;
 					}
@@ -394,10 +394,10 @@ void Analyzer::bonus_stack_frames(FunctionMap &results) {
 }
 
 //------------------------------------------------------------------------------
-// Name: update_results_entry(FunctionMap &results, edb::address_t address) const
+// Name: update_results_entry(FunctionMap &results, yad64::address_t address) const
 // Desc:
 //------------------------------------------------------------------------------
-void Analyzer::update_results_entry(FunctionMap &results, edb::address_t address) const {
+void Analyzer::update_results_entry(FunctionMap &results, yad64::address_t address) const {
 	results[address].entry_address = address;
 	results[address].end_address   = address;
 	
@@ -413,9 +413,9 @@ void Analyzer::update_results_entry(FunctionMap &results, edb::address_t address
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::bonus_main(const MemoryRegion &region, FunctionMap &results) const {
-	const QString s = edb::v1::debugger_core->process_exe(edb::v1::debugger_core->pid());
+	const QString s = yad64::v1::debugger_core->process_exe(yad64::v1::debugger_core->pid());
 	if(!s.isEmpty()) {
-		const edb::address_t main = edb::v1::locate_main_function();
+		const yad64::address_t main = yad64::v1::locate_main_function();
 
 		if(main && region.contains(main)) {
 			// make sure we have an entry for this function
@@ -429,7 +429,7 @@ void Analyzer::bonus_main(const MemoryRegion &region, FunctionMap &results) cons
 // Desc:
 //------------------------------------------------------------------------------
 void Analyzer::bonus_symbols_helper(const MemoryRegion &region, FunctionMap &results, const Symbol::pointer &sym) {
-	const edb::address_t addr = sym->address;
+	const yad64::address_t addr = sym->address;
 
 	if(region.contains(addr) && sym->is_code()) {
 		qDebug("[Analyzer] adding: %s <%p>", qPrintable(sym->name), reinterpret_cast<void *>(addr));
@@ -447,7 +447,7 @@ void Analyzer::bonus_symbols_helper(const MemoryRegion &region, FunctionMap &res
 void Analyzer::bonus_symbols(const MemoryRegion &region, FunctionMap &results) {
 
 	// give bonus if we have a symbol for the address
-	const QList<Symbol::pointer> symbols = edb::v1::symbol_manager().symbols();
+	const QList<Symbol::pointer> symbols = yad64::v1::symbol_manager().symbols();
 
 	std::for_each(
 		symbols.begin(),
@@ -461,7 +461,7 @@ void Analyzer::bonus_symbols(const MemoryRegion &region, FunctionMap &results) {
 //------------------------------------------------------------------------------
 void Analyzer::bonus_marked_functions(const MemoryRegion &region, FunctionMap &results) {
 
-	Q_FOREACH(edb::address_t addr, specified_functions_) {
+	Q_FOREACH(yad64::address_t addr, specified_functions_) {
 		if(region.contains(addr)) {
 
 			qDebug("[Analyzer] adding: <%p>", reinterpret_cast<void *>(addr));
@@ -473,13 +473,13 @@ void Analyzer::bonus_marked_functions(const MemoryRegion &region, FunctionMap &r
 }
 
 //------------------------------------------------------------------------------
-// Name: walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<edb::address_t> &walked_functions)
+// Name: walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<yad64::address_t> &walked_functions)
 // Desc:
 //------------------------------------------------------------------------------
-int Analyzer::walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<edb::address_t> &walked_functions) {
+int Analyzer::walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<yad64::address_t> &walked_functions) {
 	int updates = 0;
 
-	QSet<edb::address_t> found_functions;
+	QSet<yad64::address_t> found_functions;
 
 	FunctionMap::iterator it = results.begin();
 	while(it != results.end()) {
@@ -492,7 +492,7 @@ int Analyzer::walk_all_functions(FunctionMap &results, const MemoryRegion &regio
 
 				// the function's upper bound is either the entry point of the next function
 				// or the region's end which is the absolute max end this function can have
-				const edb::address_t next_entry = (next != results.end()) ? next.value().entry_address : region.end();
+				const yad64::address_t next_entry = (next != results.end()) ? next.value().entry_address : region.end();
 
 				// walk the function and collect some results
 
@@ -502,17 +502,17 @@ int Analyzer::walk_all_functions(FunctionMap &results, const MemoryRegion &regio
 				// if the very last instruction happens to be a jmp, then this may
 				// be a call/ret -> jmp optimization. This isn't always the case
 				// but often enough that it's probably right
-				quint8 buf[edb::Instruction::MAX_SIZE];
+				quint8 buf[yad64::Instruction::MAX_SIZE];
 				int buf_size = sizeof(buf);
-				if(edb::v1::get_instruction_bytes(function.last_instruction, buf, buf_size)) {
-					const edb::Instruction insn(buf, buf + buf_size, function.last_instruction, std::nothrow);
-					if(insn.valid() && insn.type() == edb::Instruction::OP_JMP) {
+				if(yad64::v1::get_instruction_bytes(function.last_instruction, buf, buf_size)) {
+					const yad64::Instruction insn(buf, buf + buf_size, function.last_instruction, std::nothrow);
+					if(insn.valid() && insn.type() == yad64::Instruction::OP_JMP) {
 
 						Q_ASSERT(insn.operand_count() == 1);
-						const edb::Operand &op = insn.operand(0);
+						const yad64::Operand &op = insn.operand(0);
 
-						if(op.general_type() == edb::Operand::TYPE_REL) {
-							const edb::address_t target = op.relative_target();
+						if(op.general_type() == yad64::Operand::TYPE_REL) {
+							const yad64::address_t target = op.relative_target();
 
 							Function func;
 							if(!find_containing_function(target, func)) {
@@ -528,7 +528,7 @@ int Analyzer::walk_all_functions(FunctionMap &results, const MemoryRegion &regio
 	}
 
 	// add the newly found functions to the list and report the number of "updates"
-	Q_FOREACH(edb::address_t func, found_functions) {
+	Q_FOREACH(yad64::address_t func, found_functions) {
 		if(!results.contains(func)) {
 			results[func].entry_address   = func;
 			results[func].end_address     = func;
@@ -557,13 +557,13 @@ void Analyzer::fix_overlaps(FunctionMap &function_map) {
 }
 
 //------------------------------------------------------------------------------
-// Name: find_function_end(Function &function, edb::address_t end_address, QSet<edb::address_t> &found_functions, const FunctionMap &results)
+// Name: find_function_end(Function &function, yad64::address_t end_address, QSet<yad64::address_t> &found_functions, const FunctionMap &results)
 // Desc:
 //------------------------------------------------------------------------------
-void Analyzer::find_function_end(Function &function, edb::address_t end_address, QSet<edb::address_t> &found_functions, const FunctionMap &results) {
+void Analyzer::find_function_end(Function &function, yad64::address_t end_address, QSet<yad64::address_t> &found_functions, const FunctionMap &results) {
 
-	QStack<edb::address_t>		jump_targets;
-	QHash<edb::address_t, int>	visited_addresses;
+	QStack<yad64::address_t>		jump_targets;
+	QHash<yad64::address_t, int>	visited_addresses;
 
 	// we start with the entry point of the function
 	jump_targets.push(function.entry_address);
@@ -571,7 +571,7 @@ void Analyzer::find_function_end(Function &function, edb::address_t end_address,
 	// while no more jump targets... (includes entry point)
 	while(!jump_targets.empty()) {
 	
-		edb::address_t addr = jump_targets.pop();
+		yad64::address_t addr = jump_targets.pop();
 
 		// for certain forward jump scenarioes this is possible.
 		if(visited_addresses.contains(addr)) {
@@ -581,14 +581,14 @@ void Analyzer::find_function_end(Function &function, edb::address_t end_address,
 		// keep going until we go out of bounds
 		while(addr >= function.entry_address && addr < end_address) {
 
-			quint8 buf[edb::Instruction::MAX_SIZE];
+			quint8 buf[yad64::Instruction::MAX_SIZE];
 			int buf_size = sizeof(buf);
-			if(!edb::v1::get_instruction_bytes(addr, buf, buf_size)) {
+			if(!yad64::v1::get_instruction_bytes(addr, buf, buf_size)) {
 				break;
 			}
 
 			// an invalid instruction ends this "block"
-			const edb::Instruction insn(buf, buf + buf_size, addr, std::nothrow);
+			const yad64::Instruction insn(buf, buf + buf_size, addr, std::nothrow);
 			if(!insn.valid()) {
 				break;
 			}
@@ -597,47 +597,47 @@ void Analyzer::find_function_end(Function &function, edb::address_t end_address,
 			// list of possible 'code addresses'
 			visited_addresses.insert(addr, insn.size());
 
-			const edb::Instruction::Type type = insn.type();
+			const yad64::Instruction::Type type = insn.type();
 
-			if(type == edb::Instruction::OP_RET || type == edb::Instruction::OP_HLT) {
+			if(type == yad64::Instruction::OP_RET || type == yad64::Instruction::OP_HLT) {
 				// instructions that clearly terminate the current block...
 				break;
 				
-			} else if(type == edb::Instruction::OP_JCC) {
+			} else if(type == yad64::Instruction::OP_JCC) {
 
 				// note if neccessary the Jcc target and move on, yes this can be fooled by "conditional"
 				// jumps which are always true or false, not much we can do about it at this level.
-				const edb::Operand &op = insn.operand(0);
-				if(op.general_type() == edb::Operand::TYPE_REL) {
-					const edb::address_t ea = op.relative_target();
+				const yad64::Operand &op = insn.operand(0);
+				if(op.general_type() == yad64::Operand::TYPE_REL) {
+					const yad64::address_t ea = op.relative_target();
 
 					if(!visited_addresses.contains(ea) && !jump_targets.contains(ea)) {
 						jump_targets.push(ea);
 					}
 				}
-			} else if(type == edb::Instruction::OP_CALL) {
+			} else if(type == yad64::Instruction::OP_CALL) {
 
 
 				// similar to above, note the destination and move on
 				// we special case simple things for speed.
 				// also this is an opportunity to find call tables.
-				const edb::Operand &op = insn.operand(0);
-				if(op.general_type() == edb::Operand::TYPE_REL) {
-					const edb::address_t ea = op.relative_target();
+				const yad64::Operand &op = insn.operand(0);
+				if(op.general_type() == yad64::Operand::TYPE_REL) {
+					const yad64::address_t ea = op.relative_target();
 
 					// skip over ones which are: "call <label>; label:"
 					if(ea != addr + insn.size()) {
 						found_functions.insert(ea);
 					}
-				} else if(op.general_type() == edb::Operand::TYPE_EXPRESSION) {
+				} else if(op.general_type() == yad64::Operand::TYPE_EXPRESSION) {
 					// looks like: "call [...]", if it is of the form, call [C + REG]
 					// then it may be a jump table using REG as an offset
 				}
-			} else if(type == edb::Instruction::OP_JMP) {
+			} else if(type == yad64::Instruction::OP_JMP) {
 
-				const edb::Operand &op = insn.operand(0);
-				if(op.general_type() == edb::Operand::TYPE_REL) {
-					const edb::address_t ea = op.relative_target();
+				const yad64::Operand &op = insn.operand(0);
+				if(op.general_type() == yad64::Operand::TYPE_REL) {
+					const yad64::address_t ea = op.relative_target();
 
 
 					// an absolute jump within this function
@@ -679,23 +679,23 @@ void Analyzer::find_function_end(Function &function, edb::address_t end_address,
 	function.end_address      = function.entry_address;
 
 	// get the last instruction and the last byte of the function
-	for(QHash<edb::address_t, int>::const_iterator it = visited_addresses.begin(); it != visited_addresses.end(); ++it) {
+	for(QHash<yad64::address_t, int>::const_iterator it = visited_addresses.begin(); it != visited_addresses.end(); ++it) {
 		function.end_address      = qMax(function.end_address,      it.key() + it.value() - 1);
 		function.last_instruction = qMax(function.last_instruction, it.key());
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: is_thunk(edb::address_t address)
+// Name: is_thunk(yad64::address_t address)
 // Desc: basically returns true if the first instruction of the function is a
 //       jmp
 //------------------------------------------------------------------------------
-bool Analyzer::is_thunk(edb::address_t address) const {
-	quint8 buf[edb::Instruction::MAX_SIZE];
+bool Analyzer::is_thunk(yad64::address_t address) const {
+	quint8 buf[yad64::Instruction::MAX_SIZE];
 	int buf_size = sizeof(buf);
-	if(edb::v1::get_instruction_bytes(address, buf, buf_size)) {
-		const edb::Instruction insn(buf, buf + buf_size, address, std::nothrow);
-		return insn.valid() && insn.type() == edb::Instruction::OP_JMP;
+	if(yad64::v1::get_instruction_bytes(address, buf, buf_size)) {
+		const yad64::Instruction insn(buf, buf + buf_size, address, std::nothrow);
+		return insn.valid() && insn.type() == yad64::Instruction::OP_JMP;
 	}
 
 	return false;
@@ -733,10 +733,10 @@ void Analyzer::set_function_types(FunctionMap &results) {
 }
 
 //------------------------------------------------------------------------------
-// Name: is_inside_known(const MemoryRegion &region, edb::address_t address)
+// Name: is_inside_known(const MemoryRegion &region, yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-bool Analyzer::is_inside_known(const MemoryRegion &region, edb::address_t address) {
+bool Analyzer::is_inside_known(const MemoryRegion &region, yad64::address_t address) {
 
 	const FunctionMap &funcs = functions(region);
 	Q_FOREACH(const Function &func, funcs) {
@@ -749,10 +749,10 @@ bool Analyzer::is_inside_known(const MemoryRegion &region, edb::address_t addres
 }
 
 //------------------------------------------------------------------------------
-// Name: find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<edb::address_t> &walked_functions)
+// Name: find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<yad64::address_t> &walked_functions)
 // Desc:
 //------------------------------------------------------------------------------
-void Analyzer::find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<edb::address_t> &walked_functions) {
+void Analyzer::find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<yad64::address_t> &walked_functions) {
 	int updates;
 	do {
 		updates = walk_all_functions(results, region, walked_functions);
@@ -781,7 +781,7 @@ void Analyzer::collect_high_ref_results(FunctionMap &function_map, FunctionMap &
 //------------------------------------------------------------------------------
 void Analyzer::collect_low_ref_results(const MemoryRegion &region, FunctionMap &function_map, FunctionMap &found_functions) {
 	// promote weak symbols...
-	ISymbolManager &syms = edb::v1::symbol_manager();
+	ISymbolManager &syms = yad64::v1::symbol_manager();
 	Q_FOREACH(const Function &func, found_functions) {
 		if(!is_inside_known(region, func.entry_address)) {
 			if(!function_map.contains(func.entry_address)) {
@@ -816,8 +816,8 @@ void Analyzer::analyze(const MemoryRegion &region_ref) {
 
 	// NOTE: through a series of craziness,
 	// bonus_main, calls
-	// edb::v1::locate_main_function, which calls
-	// edb::v1::primary_code_region, which calls
+	// yad64::v1::locate_main_function, which calls
+	// yad64::v1::primary_code_region, which calls
 	// MemoryRegions::sync()
 	// which happens to invalidate the references to regions we are potentially passed..
 	// so just to be sure, we make a copy! wow, that was an annoying bug!
@@ -834,7 +834,7 @@ void Analyzer::analyze(const MemoryRegion &region_ref) {
 		FunctionMap &function_map = region_info.analysis;
 		function_map.clear();
 		
-		QSet<edb::address_t> walked_functions;
+		QSet<yad64::address_t> walked_functions;
 		FunctionMap          found_functions;
 		
 		const struct {
@@ -906,10 +906,10 @@ void Analyzer::analyze(const MemoryRegion &region_ref) {
 }
 
 //------------------------------------------------------------------------------
-// Name: category(edb::address_t address) const
+// Name: category(yad64::address_t address) const
 // Desc:
 //------------------------------------------------------------------------------
-IAnalyzer::AddressCategory Analyzer::category(edb::address_t address) const {
+IAnalyzer::AddressCategory Analyzer::category(yad64::address_t address) const {
 
 	Function func;
 	if(find_containing_function(address, func)) {
@@ -933,13 +933,13 @@ IAnalyzer::FunctionMap Analyzer::functions(const MemoryRegion &region) const {
 }
 
 //------------------------------------------------------------------------------
-// Name: find_containing_function(edb::address_t address, IAnalyzer::Function &function) const
+// Name: find_containing_function(yad64::address_t address, IAnalyzer::Function &function) const
 // Desc:
 //------------------------------------------------------------------------------
-bool Analyzer::find_containing_function(edb::address_t address, IAnalyzer::Function &function) const {
+bool Analyzer::find_containing_function(yad64::address_t address, IAnalyzer::Function &function) const {
 
 	MemoryRegion region;
-	if(edb::v1::memory_regions().find_region(address, region)) {
+	if(yad64::v1::memory_regions().find_region(address, region)) {
 		const FunctionMap &funcs = functions(region);
 		Q_FOREACH(const Function &f, funcs) {
 			if(address >= f.entry_address && address <= f.end_address) {
@@ -957,14 +957,14 @@ bool Analyzer::find_containing_function(edb::address_t address, IAnalyzer::Funct
 //------------------------------------------------------------------------------
 QByteArray Analyzer::md5_region(const MemoryRegion &region) const{
 
-	static const edb::address_t page_size = edb::v1::debugger_core->page_size();
+	static const yad64::address_t page_size = yad64::v1::debugger_core->page_size();
 
-	const edb::address_t size_in_pages = region.size() / page_size;
+	const yad64::address_t size_in_pages = region.size() / page_size;
 	try {
 		QVector<quint8> pages(size_in_pages * page_size);
 
-		if(edb::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
-			return edb::v1::get_md5(&pages[0], size_in_pages * page_size);
+		if(yad64::v1::debugger_core->read_pages(region.start(), &pages[0], size_in_pages)) {
+			return yad64::v1::get_md5(&pages[0], size_in_pages * page_size);
 		}
 
 	} catch(const std::bad_alloc &) {
@@ -979,10 +979,10 @@ QByteArray Analyzer::md5_region(const MemoryRegion &region) const{
 // Name: module_entry_point(const MemoryRegion &region) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t Analyzer::module_entry_point(const MemoryRegion &region) const {
+yad64::address_t Analyzer::module_entry_point(const MemoryRegion &region) const {
 
-	edb::address_t entry = 0;
-	if(IBinary *const binary_info = edb::v1::get_binary_info(region)) {
+	yad64::address_t entry = 0;
+	if(IBinary *const binary_info = yad64::v1::get_binary_info(region)) {
 		entry = binary_info->entry_point();
 		delete binary_info;
 	}
@@ -997,7 +997,7 @@ edb::address_t Analyzer::module_entry_point(const MemoryRegion &region) const {
 //------------------------------------------------------------------------------
 void Analyzer::bonus_entry_point(const MemoryRegion &region, FunctionMap &results) const {
 
-	if(edb::address_t entry = module_entry_point(region)) {
+	if(yad64::address_t entry = module_entry_point(region)) {
 
 		// if the entry seems like a relative one (like for a library)
 		// then add the base of its image
@@ -1020,7 +1020,7 @@ void Analyzer::bonus_entry_point(const MemoryRegion &region, FunctionMap &result
 //------------------------------------------------------------------------------
 void Analyzer::invalidate_analysis(const MemoryRegion &region) {
 	invalidate_dynamic_analysis(region);
-	Q_FOREACH(edb::address_t addr, specified_functions_) {
+	Q_FOREACH(yad64::address_t addr, specified_functions_) {
 		if(addr >= region.start() && addr < region.end()) {
 			specified_functions_.remove(addr);
 		}

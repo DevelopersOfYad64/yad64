@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "API.h"
 #include <QString>
 
-class EDB_EXPORT Configuration {
+class YAD64_EXPORT Configuration {
 public:
 	Configuration();
 	~Configuration();

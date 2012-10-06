@@ -86,7 +86,7 @@ void DialogOptions::addOptionsPage(QWidget *page) {
 		layout->addWidget(toolbox_, 0, 0, 1, 1);
 	}
 
-	toolbox_->addItem(page, QIcon(":/debugger/images/edb32-preferences-plugin.png"), page->windowTitle());
+	toolbox_->addItem(page, QIcon(":/debugger/images/yad6432-preferences-plugin.png"), page->windowTitle());
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ void DialogOptions::showEvent(QShowEvent *event) {
 
 	QDialog::showEvent(event);
 	
-	const Configuration &config = edb::v1::config();
+	const Configuration &config = yad64::v1::config();
 
 	ui->rdoSytntaxATT->setChecked(config.syntax == Configuration::ATT);
 	ui->rdoSytntaxIntel->setChecked(config.syntax != Configuration::ATT);
@@ -236,7 +236,7 @@ void DialogOptions::showEvent(QShowEvent *event) {
 //------------------------------------------------------------------------------
 void DialogOptions::closeEvent(QCloseEvent *event) {
 
-	Configuration &config = edb::v1::config();
+	Configuration &config = yad64::v1::config();
 
 	if(ui->rdoSytntaxIntel->isChecked()) {
 		config.syntax = Configuration::Intel;

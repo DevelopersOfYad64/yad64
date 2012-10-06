@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QAbstractItemModel>
 #include <QList>
 
-class EDB_EXPORT MemoryRegions : public QAbstractItemModel {
+class YAD64_EXPORT MemoryRegions : public QAbstractItemModel {
 	Q_OBJECT
 
 public:
@@ -41,8 +41,8 @@ public:
 	virtual ~MemoryRegions();
 
 public:
-	bool find_region(edb::address_t address) const;
-	bool find_region(edb::address_t address, MemoryRegion &region) const;
+	bool find_region(yad64::address_t address) const;
+	bool find_region(yad64::address_t address, MemoryRegion &region) const;
 	const QList<MemoryRegion> &regions() const { return regions_; }
 	void clear();
 	void sync();

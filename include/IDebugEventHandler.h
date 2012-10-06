@@ -28,7 +28,7 @@ public:
 	virtual ~IDebugEventHandler() {}
 
 public:
-	virtual edb::EVENT_STATUS handle_event(const DebugEvent &event) = 0;
+	virtual yad64::EVENT_STATUS handle_event(const DebugEvent &event) = 0;
 };
 
 #endif

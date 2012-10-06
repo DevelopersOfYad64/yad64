@@ -65,15 +65,15 @@ void DialogSymbolViewer::on_listView_doubleClicked(const QModelIndex &index) {
 
 	bool ok;
 	const QString s = index.data().toString();
-	const edb::address_t addr = edb::v1::string_to_address(s, ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(s, ok);
 
 	if(ok) {
-		const Symbol::pointer sym = edb::v1::symbol_manager().find(addr);
+		const Symbol::pointer sym = yad64::v1::symbol_manager().find(addr);
 
 		if(sym && sym->is_code()) {
-			edb::v1::jump_to_address(addr);
+			yad64::v1::jump_to_address(addr);
 		} else {
-			edb::v1::dump_data(addr, false);
+			yad64::v1::dump_data(addr, false);
 		}
 	}
 }
@@ -89,7 +89,7 @@ void DialogSymbolViewer::on_listView_customContextMenuRequested(const QPoint &po
 
 		bool ok;
 		const QString s = index.data().toString();
-		const edb::address_t addr = edb::v1::string_to_address(s, ok);
+		const yad64::address_t addr = yad64::v1::string_to_address(s, ok);
 
 		QMenu menu;
 		QAction *const action1 = menu.addAction(tr("&Follow In Disassembly"), this, SLOT(mnuFollowInCPU()));
@@ -112,8 +112,8 @@ void DialogSymbolViewer::on_listView_customContextMenuRequested(const QPoint &po
 //------------------------------------------------------------------------------
 void DialogSymbolViewer::mnuFollowInDump() {
 	if(QAction *const action = qobject_cast<QAction *>(sender())) {
-		const edb::address_t address = action->data().toULongLong();
-		edb::v1::dump_data(address, false);
+		const yad64::address_t address = action->data().toULongLong();
+		yad64::v1::dump_data(address, false);
 	}
 }
 
@@ -123,8 +123,8 @@ void DialogSymbolViewer::mnuFollowInDump() {
 //------------------------------------------------------------------------------
 void DialogSymbolViewer::mnuFollowInDumpNewTab() {
 	if(QAction *const action = qobject_cast<QAction *>(sender())) {
-		const edb::address_t address = action->data().toULongLong();
-		edb::v1::dump_data(address, true);
+		const yad64::address_t address = action->data().toULongLong();
+		yad64::v1::dump_data(address, true);
 	}
 }
 
@@ -134,8 +134,8 @@ void DialogSymbolViewer::mnuFollowInDumpNewTab() {
 //------------------------------------------------------------------------------
 void DialogSymbolViewer::mnuFollowInStack() {
 	if(QAction *const action = qobject_cast<QAction *>(sender())) {
-		const edb::address_t address = action->data().toULongLong();
-		edb::v1::dump_stack(address, false);
+		const yad64::address_t address = action->data().toULongLong();
+		yad64::v1::dump_stack(address, false);
 	}
 }
 
@@ -145,8 +145,8 @@ void DialogSymbolViewer::mnuFollowInStack() {
 //------------------------------------------------------------------------------
 void DialogSymbolViewer::mnuFollowInCPU() {
 	if(QAction *const action = qobject_cast<QAction *>(sender())) {
-		const edb::address_t address = action->data().toULongLong();
-		edb::v1::jump_to_address(address);
+		const yad64::address_t address = action->data().toULongLong();
+		yad64::v1::jump_to_address(address);
 	}
 }
 
@@ -158,9 +158,9 @@ void DialogSymbolViewer::do_find() {
 	QStringList results;
 	QString temp;
 
-	const QList<Symbol::pointer> symbols = edb::v1::symbol_manager().symbols();
+	const QList<Symbol::pointer> symbols = yad64::v1::symbol_manager().symbols();
 	Q_FOREACH(const Symbol::pointer &sym, symbols) {
-		results << QString("%1: %2").arg(edb::v1::format_pointer(sym->address)).arg(sym->name);
+		results << QString("%1: %2").arg(yad64::v1::format_pointer(sym->address)).arg(sym->name);
 	}
 
 	model_->setStringList(results);

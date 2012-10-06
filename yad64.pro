@@ -6,5 +6,5 @@ plugins.depends = src
 
 # test for usable Qt version
 !equals(QT_MAJOR_VERSION, 4)|lessThan(QT_MINOR_VERSION, 5) {
-	error('edb requires Qt version 4.5 or greater')
+	error('yad64 requires Qt version 4.5 or greater')
 }

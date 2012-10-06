@@ -32,7 +32,7 @@ public:
 	QString        file;
 	QString        name;
 	QString        name_no_prefix;
-	edb::address_t address;
+	yad64::address_t address;
 	quint32        size;
 	char           type;
 

@@ -33,7 +33,7 @@ public:
 	virtual ~IBreakpoint() {}
 
 public:
-	virtual edb::address_t address() const = 0;
+	virtual yad64::address_t address() const = 0;
 	virtual unsigned int hit_count() const = 0;
 	virtual bool enabled() const = 0;
 	virtual bool one_time() const = 0;

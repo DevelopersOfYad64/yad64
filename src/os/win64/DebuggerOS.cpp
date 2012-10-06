@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Name: primary_code_region()
 // Desc:
 //------------------------------------------------------------------------------
-MemoryRegion edb::v1::primary_code_region() {
+MemoryRegion yad64::v1::primary_code_region() {
 	MemoryRegion region;
 	memory_regions().sync();
 	if(memory_regions().find_region(0, region)) {
@@ -46,10 +46,10 @@ MemoryRegion edb::v1::primary_code_region() {
 // Name: loaded_libraries()
 // Desc:
 //------------------------------------------------------------------------------
-QList<Module> edb::v1::loaded_libraries() {
+QList<Module> yad64::v1::loaded_libraries() {
 
 	QList<Module> ret;
-	edb::pid_t pid = edb::v1::debugger_core->pid();
+	yad64::pid_t pid = yad64::v1::debugger_core->pid();
 	HANDLE hModuleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
 	if(hModuleSnap != INVALID_HANDLE_VALUE) {
 		MODULEENTRY32 me32;
@@ -59,7 +59,7 @@ QList<Module> edb::v1::loaded_libraries() {
 		if(!Module32First(hModuleSnap, &me32)) {
 			do {
 				Module module;
-				module.base_address = reinterpret_cast<edb::address_t>(me32.modBaseAddr);
+				module.base_address = reinterpret_cast<yad64::address_t>(me32.modBaseAddr);
 				module.name         = QString::fromWCharArray(me32.szModule);
 				ret.push_back(module);
 			} while(Module32Next(hModuleSnap, &me32));

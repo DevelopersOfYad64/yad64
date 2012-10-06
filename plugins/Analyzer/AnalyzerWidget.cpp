@@ -23,9 +23,9 @@ AnalyzerWidget::AnalyzerWidget(QWidget *parent, Qt::WindowFlags f) : QWidget(par
 	policy.setHorizontalPolicy(QSizePolicy::Expanding);
 	setSizePolicy(policy);
 
-	connect(edb::v1::disassembly_widget(), SIGNAL(regionChanged()), this, SLOT(repaint()));
+	connect(yad64::v1::disassembly_widget(), SIGNAL(regionChanged()), this, SLOT(repaint()));
 
-	if(QAbstractScrollArea *scroll_area = qobject_cast<QAbstractScrollArea*>(edb::v1::disassembly_widget())) {
+	if(QAbstractScrollArea *scroll_area = qobject_cast<QAbstractScrollArea*>(yad64::v1::disassembly_widget())) {
 		if(QScrollBar *scrollbar = scroll_area->verticalScrollBar()) {
 			connect(scrollbar, SIGNAL(valueChanged(int)), this, SLOT(repaint()));
 		}
@@ -44,13 +44,13 @@ void AnalyzerWidget::paintEvent(QPaintEvent *event) {
 	painter.fillRect(0, 0, width(), height(), QBrush(Qt::black));
 	QFontMetrics fm(font());
 	
-	const MemoryRegion region = edb::v1::current_cpu_view_region();
+	const MemoryRegion region = yad64::v1::current_cpu_view_region();
 	if(region.size() != 0) {
 		const float byte_width = static_cast<float>(width()) / region.size();
 		
-		const QSet<edb::address_t> specified_functions = edb::v1::analyzer()->specified_functions();
+		const QSet<yad64::address_t> specified_functions = yad64::v1::analyzer()->specified_functions();
 		
-		const IAnalyzer::FunctionMap functions = edb::v1::analyzer()->functions(region);
+		const IAnalyzer::FunctionMap functions = yad64::v1::analyzer()->functions(region);
 		for(IAnalyzer::FunctionMap::const_iterator it = functions.begin(); it != functions.end(); ++it) {
 			const IAnalyzer::Function &f = it.value();
 			
@@ -65,7 +65,7 @@ void AnalyzerWidget::paintEvent(QPaintEvent *event) {
 		}
 		
 		// highlight header of binary (probably not going to be too noticeable but just in case)
-		if(IBinary *const binary_info = edb::v1::get_binary_info(region)) {
+		if(IBinary *const binary_info = yad64::v1::get_binary_info(region)) {
 			painter.fillRect(0, 0, binary_info->header_size() * byte_width, height(), QBrush(Qt::darkBlue));
 			delete binary_info;
 		}
@@ -75,7 +75,7 @@ void AnalyzerWidget::paintEvent(QPaintEvent *event) {
 			painter.setPen(QPen(Qt::white));
 			painter.drawText((width() - fm.width(s)) / 2, height() - 4, s);
 		} else {
-			if(QAbstractScrollArea *scroll_area = qobject_cast<QAbstractScrollArea*>(edb::v1::disassembly_widget())) {
+			if(QAbstractScrollArea *scroll_area = qobject_cast<QAbstractScrollArea*>(yad64::v1::disassembly_widget())) {
 				if(QScrollBar *scrollbar = scroll_area->verticalScrollBar()) {
 					const int offset = (scrollbar->value()) * byte_width;
 					
@@ -107,12 +107,12 @@ void AnalyzerWidget::mousePressEvent(QMouseEvent *event) {
 	
 	mouse_pressed_ = true;
 	
-	const MemoryRegion region = edb::v1::current_cpu_view_region();
-	const IAnalyzer::FunctionMap functions = edb::v1::analyzer()->functions(region);
+	const MemoryRegion region = yad64::v1::current_cpu_view_region();
+	const IAnalyzer::FunctionMap functions = yad64::v1::analyzer()->functions(region);
 	if(region.size() != 0 && !functions.empty()) {
 		const float byte_width = static_cast<float>(width()) / region.size();
-		const edb::address_t address = qBound(region.start(), region.start() + static_cast<edb::address_t>(event->x() / byte_width), region.end() - 1);
-		edb::v1::jump_to_address(address);
+		const yad64::address_t address = qBound(region.start(), region.start() + static_cast<yad64::address_t>(event->x() / byte_width), region.end() - 1);
+		yad64::v1::jump_to_address(address);
 	}
 }
 

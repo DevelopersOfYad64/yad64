@@ -69,7 +69,7 @@ QList<QAction *> BinarySearcher::stack_context_menu() {
 // Desc:
 //------------------------------------------------------------------------------
 void BinarySearcher::show_menu() {
-	static QDialog *const dialog = new DialogBinaryString(edb::v1::debugger_ui);
+	static QDialog *const dialog = new DialogBinaryString(yad64::v1::debugger_ui);
 	dialog->show();
 }
 
@@ -78,7 +78,7 @@ void BinarySearcher::show_menu() {
 // Desc:
 //------------------------------------------------------------------------------
 void BinarySearcher::mnuStackFindASCII() {
-	static QDialog *const dialog = new DialogASCIIString(edb::v1::debugger_ui);
+	static QDialog *const dialog = new DialogASCIIString(yad64::v1::debugger_ui);
 	dialog->show();
 }
 

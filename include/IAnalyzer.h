@@ -31,9 +31,9 @@ public:
 
 public:
 	struct Function {
-		edb::address_t entry_address;
-		edb::address_t end_address;
-		edb::address_t last_instruction;
+		yad64::address_t entry_address;
+		yad64::address_t end_address;
+		yad64::address_t last_instruction;
 		int            reference_count;
 
 		enum Type {
@@ -45,7 +45,7 @@ public:
 	};
 
 	// TODO: can this be a QHash?
-	typedef QMap<edb::address_t, Function> FunctionMap;
+	typedef QMap<yad64::address_t, Function> FunctionMap;
 
 public:
 	enum AddressCategory {
@@ -58,10 +58,10 @@ public:
 public:
 	virtual void analyze(const MemoryRegion &region) = 0;
 	virtual FunctionMap functions(const MemoryRegion &region) const = 0;
-	virtual AddressCategory category(edb::address_t address) const = 0;
+	virtual AddressCategory category(yad64::address_t address) const = 0;
 	virtual void invalidate_analysis(const MemoryRegion &region) = 0;
 	virtual void invalidate_analysis() = 0;
-	virtual QSet<edb::address_t> specified_functions() const { return QSet<edb::address_t>(); }
+	virtual QSet<yad64::address_t> specified_functions() const { return QSet<yad64::address_t>(); }
 };
 
 #endif

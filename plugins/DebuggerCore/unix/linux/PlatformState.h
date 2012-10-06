@@ -34,30 +34,30 @@ public:
 
 public:
 	virtual QString flags_to_string() const;
-	virtual QString flags_to_string(edb::reg_t flags) const;
+	virtual QString flags_to_string(yad64::reg_t flags) const;
 	virtual Register value(const QString &reg) const;
-	virtual edb::address_t frame_pointer() const;
-	virtual edb::address_t instruction_pointer() const;
-	virtual edb::address_t stack_pointer() const;
-	virtual edb::reg_t debug_register(int n) const;
-	virtual edb::reg_t flags() const;
+	virtual yad64::address_t frame_pointer() const;
+	virtual yad64::address_t instruction_pointer() const;
+	virtual yad64::address_t stack_pointer() const;
+	virtual yad64::reg_t debug_register(int n) const;
+	virtual yad64::reg_t flags() const;
 	virtual long double fpu_register(int n) const;
 	virtual void adjust_stack(int bytes);
 	virtual void clear();
-	virtual void set_debug_register(int n, edb::reg_t value);
-	virtual void set_flags(edb::reg_t flags);
-	virtual void set_instruction_pointer(edb::address_t value);
-	virtual void set_register(const QString &name, edb::reg_t value);
+	virtual void set_debug_register(int n, yad64::reg_t value);
+	virtual void set_flags(yad64::reg_t flags);
+	virtual void set_instruction_pointer(yad64::address_t value);
+	virtual void set_register(const QString &name, yad64::reg_t value);
 	virtual quint64 mmx_register(int n) const;
 	virtual QByteArray xmm_register(int n) const;
 
 private:
 	struct user_regs_struct   regs_;
 	struct user_fpregs_struct fpregs_;
-	edb::reg_t                dr_[8];
-#if defined(EDB_X86)
-	edb::address_t            fs_base;
-	edb::address_t            gs_base;
+	yad64::reg_t                dr_[8];
+#if defined(YAD64_X86)
+	yad64::address_t            fs_base;
+	yad64::address_t            gs_base;
 #endif
 };
 

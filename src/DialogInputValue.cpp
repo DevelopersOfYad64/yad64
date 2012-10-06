@@ -25,10 +25,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ui_dialog_inputvalue.h"
 
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	#define SNUM_FMT "%d"
 	#define UNUM_FMT "%u"
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	#define SNUM_FMT "%lld"
 	#define UNUM_FMT "%llu"
 #endif
@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 DialogInputValue::DialogInputValue(QWidget *parent) : QDialog(parent), ui(new Ui::DialogInputValue) {
 	ui->setupUi(this);
 
-	const QString regex = QString("[A-Fa-f0-9]{0,%1}").arg(edb::v1::pointer_size() * 2);
+	const QString regex = QString("[A-Fa-f0-9]{0,%1}").arg(yad64::v1::pointer_size() * 2);
 
 	ui->hexInput->setValidator(new QRegExpValidator(QRegExp(regex), this));
 	ui->signedInput->setValidator(new QLongValidator(LONG_MIN, LONG_MAX, this));
@@ -59,18 +59,18 @@ DialogInputValue::~DialogInputValue() {
 // Name: value() const
 // Desc:
 //------------------------------------------------------------------------------
-edb::reg_t DialogInputValue::value() const {
+yad64::reg_t DialogInputValue::value() const {
 	bool ok;
 	return ui->hexInput->text().toULongLong(&ok, 16);
 }
 
 //------------------------------------------------------------------------------
-// Name: set_value(edb::reg_t value)
+// Name: set_value(yad64::reg_t value)
 // Desc:
 //------------------------------------------------------------------------------
-void DialogInputValue::set_value(edb::reg_t value) {
+void DialogInputValue::set_value(yad64::reg_t value) {
 	QString temp;
-	ui->hexInput->setText(edb::v1::format_pointer(value));
+	ui->hexInput->setText(yad64::v1::format_pointer(value));
 	ui->signedInput->setText(temp.sprintf(SNUM_FMT, value));
 	ui->unsignedInput->setText(temp.sprintf(UNUM_FMT, value));
 }
@@ -81,7 +81,7 @@ void DialogInputValue::set_value(edb::reg_t value) {
 //------------------------------------------------------------------------------
 void DialogInputValue::on_hexInput_textEdited(const QString &s) {
 	bool ok;
-	edb::reg_t value = s.toULongLong(&ok, 16);
+	yad64::reg_t value = s.toULongLong(&ok, 16);
 
 	if(!ok) {
 		value = 0;
@@ -99,14 +99,14 @@ void DialogInputValue::on_hexInput_textEdited(const QString &s) {
 //------------------------------------------------------------------------------
 void DialogInputValue::on_signedInput_textEdited(const QString &s) {
 	bool ok;
-	edb::reg_t value = s.toLongLong(&ok, 10);
+	yad64::reg_t value = s.toLongLong(&ok, 10);
 
 	if(!ok) {
 		value = 0;
 	}
 
 	QString temp;
-	ui->hexInput->setText(edb::v1::format_pointer(value));
+	ui->hexInput->setText(yad64::v1::format_pointer(value));
 	ui->unsignedInput->setText(temp.sprintf(UNUM_FMT, value));
 }
 
@@ -116,12 +116,12 @@ void DialogInputValue::on_signedInput_textEdited(const QString &s) {
 //------------------------------------------------------------------------------
 void DialogInputValue::on_unsignedInput_textEdited(const QString &s) {
 	bool ok;
-	edb::reg_t value = s.toULongLong(&ok, 10);
+	yad64::reg_t value = s.toULongLong(&ok, 10);
 
 	if(!ok) {
 		value = 0;
 	}
 	QString temp;
-	ui->hexInput->setText(edb::v1::format_pointer(value));
+	ui->hexInput->setText(yad64::v1::format_pointer(value));
 	ui->signedInput->setText(temp.sprintf(SNUM_FMT, value));
 }

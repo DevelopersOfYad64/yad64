@@ -3,7 +3,7 @@
 #include "Debugger.h"
 #include "IDebuggerCore.h"
 
-MemoryRegion::MemoryRegion(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, IRegion::permissions_t permissions) : impl_(edb::v1::debugger_core ? edb::v1::debugger_core->create_region(start, end, base, name, permissions) : 0) {
+MemoryRegion::MemoryRegion(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, IRegion::permissions_t permissions) : impl_(yad64::v1::debugger_core ? yad64::v1::debugger_core->create_region(start, end, base, name, permissions) : 0) {
 }
 
 MemoryRegion::MemoryRegion() : impl_(0) {
@@ -55,28 +55,28 @@ bool MemoryRegion::executable() const {
 	return false;
 }
 
-edb::address_t MemoryRegion::size() const {
+yad64::address_t MemoryRegion::size() const {
 	if(impl_) {
 		return impl_->size();
 	}
 	return 0;
 }
 
-edb::address_t MemoryRegion::base() const {
+yad64::address_t MemoryRegion::base() const {
 	if(impl_) {
 		return impl_->base();
 	}
 	return 0;
 }
 
-edb::address_t MemoryRegion::start() const {
+yad64::address_t MemoryRegion::start() const {
 	if(impl_) {
 		return impl_->start();
 	}
 	return 0;
 }
 
-edb::address_t MemoryRegion::end() const {
+yad64::address_t MemoryRegion::end() const {
 	if(impl_) {
 		return impl_->end();
 	}
@@ -119,7 +119,7 @@ bool MemoryRegion::operator!=(const MemoryRegion &rhs) const {
 	return !operator==(rhs);
 }
 
-bool MemoryRegion::contains(edb::address_t address) const {
+bool MemoryRegion::contains(yad64::address_t address) const {
 	if(impl_) {
 		return address >= impl_->start() && address <= impl_->end();
 	}

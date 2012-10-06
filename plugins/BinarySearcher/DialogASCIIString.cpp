@@ -60,16 +60,16 @@ void DialogASCIIString::do_find() {
 	const int sz = b.size();
 	if(sz != 0) {
 
-		edb::v1::memory_regions().sync();
+		yad64::v1::memory_regions().sync();
 
 		MemoryRegion region;
 		
 		State state;
-		edb::v1::debugger_core->get_state(state);
-		edb::address_t stack_ptr = state.stack_pointer();
+		yad64::v1::debugger_core->get_state(state);
+		yad64::address_t stack_ptr = state.stack_pointer();
 
-		if(edb::v1::memory_regions().find_region(stack_ptr, region)) {
-			std::size_t count = (region.end() - stack_ptr) / sizeof(edb::address_t);
+		if(yad64::v1::memory_regions().find_region(stack_ptr, region)) {
+			std::size_t count = (region.end() - stack_ptr) / sizeof(yad64::address_t);
 
 			try {
 				QVector<quint8> chars(sz);
@@ -77,16 +77,16 @@ void DialogASCIIString::do_find() {
 				int i = 0;
 				while(stack_ptr < region.end()) {
 					// get the value from the stack
-					edb::address_t value;
-					if(edb::v1::debugger_core->read_bytes(stack_ptr, &value, sizeof(edb::address_t))) {
-						if(edb::v1::debugger_core->read_bytes(value, &chars[0], sz)) {
+					yad64::address_t value;
+					if(yad64::v1::debugger_core->read_bytes(stack_ptr, &value, sizeof(yad64::address_t))) {
+						if(yad64::v1::debugger_core->read_bytes(value, &chars[0], sz)) {
 							if(std::memcmp(&chars[0], b.constData(), sz) == 0) {
-								ui->listWidget->addItem(edb::v1::format_pointer(stack_ptr));
+								ui->listWidget->addItem(yad64::v1::format_pointer(stack_ptr));
 							}
 						}
 					}
 					ui->progressBar->setValue(util::percentage(i++, count));
-					stack_ptr += sizeof(edb::address_t);
+					stack_ptr += sizeof(yad64::address_t);
 				}
 			} catch(const std::bad_alloc &) {
 				QMessageBox::information(0, tr("Memroy Allocation Error"),
@@ -115,8 +115,8 @@ void DialogASCIIString::on_btnFind_clicked() {
 //------------------------------------------------------------------------------
 void DialogASCIIString::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 	bool ok;
-	const edb::address_t addr = edb::v1::string_to_address(item->text(), ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(item->text(), ok);
 	if(ok) {
-		edb::v1::dump_stack(addr, true);
+		yad64::v1::dump_stack(addr, true);
 	}
 }

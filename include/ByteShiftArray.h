@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstddef>
 #include <QVector>
 
-class EDB_EXPORT ByteShiftArray {
+class YAD64_EXPORT ByteShiftArray {
 public:
 	explicit ByteShiftArray(int size);
 	ByteShiftArray(const ByteShiftArray& other);

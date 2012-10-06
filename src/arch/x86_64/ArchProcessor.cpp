@@ -39,52 +39,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace {
 
 //------------------------------------------------------------------------------
-// Name: get_effective_address(const edb::Operand &op, const State &state)
+// Name: get_effective_address(const yad64::Operand &op, const State &state)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t get_effective_address(const edb::Operand &op, const State &state) {
-	edb::address_t ret = 0;
+yad64::address_t get_effective_address(const yad64::Operand &op, const State &state) {
+	yad64::address_t ret = 0;
 
 	// TODO: get registers by index, not string! too slow
 
 	if(op.valid()) {
 		switch(op.general_type()) {
-		case edb::Operand::TYPE_REGISTER:
+		case yad64::Operand::TYPE_REGISTER:
 			ret = *state[QString::fromStdString(edisassm::register_name<edisassm::x86_64>(op.reg()))];
 			break;
-		case edb::Operand::TYPE_EXPRESSION:
+		case yad64::Operand::TYPE_EXPRESSION:
 			do {
 
-				edb::reg_t base = *state[QString::fromStdString(edisassm::register_name<edisassm::x86_64>(op.expression().base))];
-				if(op.expression().base == edb::Operand::REG_RIP) {
+				yad64::reg_t base = *state[QString::fromStdString(edisassm::register_name<edisassm::x86_64>(op.expression().base))];
+				if(op.expression().base == yad64::Operand::REG_RIP) {
 					base += op.owner()->size();
 				}
 
-				const edb::reg_t index = *state[QString::fromStdString(edisassm::register_name<edisassm::x86_64>(op.expression().index))];
+				const yad64::reg_t index = *state[QString::fromStdString(edisassm::register_name<edisassm::x86_64>(op.expression().index))];
 				ret                    = base + index * op.expression().scale + op.displacement();
 
-				if(op.owner()->prefix() & edb::Instruction::PREFIX_GS) {
+				if(op.owner()->prefix() & yad64::Instruction::PREFIX_GS) {
 					ret += *state["gs_base"];
 				}
 
-				if(op.owner()->prefix() & edb::Instruction::PREFIX_FS) {
+				if(op.owner()->prefix() & yad64::Instruction::PREFIX_FS) {
 					ret += *state["fs_base"];
 				}
 			} while(0);
 			break;
-		case edb::Operand::TYPE_ABSOLUTE:
+		case yad64::Operand::TYPE_ABSOLUTE:
 			ret = op.absolute().offset;
-			if(op.owner()->prefix() & edb::Instruction::PREFIX_GS) {
+			if(op.owner()->prefix() & yad64::Instruction::PREFIX_GS) {
 				ret += *state["gs_base"];
 			}
 
-			if(op.owner()->prefix() & edb::Instruction::PREFIX_FS) {
+			if(op.owner()->prefix() & yad64::Instruction::PREFIX_FS) {
 				ret += *state["fs_base"];
 			}
 			break;
-		case edb::Operand::TYPE_IMMEDIATE:
+		case yad64::Operand::TYPE_IMMEDIATE:
 			break;
-		case edb::Operand::TYPE_REL:
+		case yad64::Operand::TYPE_REL:
 			ret = op.relative_target();
 			break;
 		default:
@@ -95,10 +95,10 @@ edb::address_t get_effective_address(const edb::Operand &op, const State &state)
 }
 
 //------------------------------------------------------------------------------
-// Name: format_argument(QChar ch, edb::reg_t arg) const
+// Name: format_argument(QChar ch, yad64::reg_t arg) const
 // Desc:
 //------------------------------------------------------------------------------
-QString format_argument(QChar ch, edb::reg_t arg) {
+QString format_argument(QChar ch, yad64::reg_t arg) {
 	QString param_text;
 
 	switch(ch.toAscii()) {
@@ -108,22 +108,22 @@ QString format_argument(QChar ch, edb::reg_t arg) {
 			QString string_param;
 			int string_length;
 
-			if(edb::v1::get_ascii_string_at_address(arg, string_param, edb::v1::config().min_string_length, 256, string_length)) {
-				param_text = QString("<0x%1> \"%2\"").arg(edb::v1::format_pointer(arg)).arg(string_param);
+			if(yad64::v1::get_ascii_string_at_address(arg, string_param, yad64::v1::config().min_string_length, 256, string_length)) {
+				param_text = QString("<0x%1> \"%2\"").arg(yad64::v1::format_pointer(arg)).arg(string_param);
 			} else {
 				char character;
-				edb::v1::debugger_core->read_bytes(arg, &character, sizeof(character));
+				yad64::v1::debugger_core->read_bytes(arg, &character, sizeof(character));
 				if(character == '\0') {
-					param_text = QString("<0x%1> \"\"").arg(edb::v1::format_pointer(arg));
+					param_text = QString("<0x%1> \"\"").arg(yad64::v1::format_pointer(arg));
 				} else {
-					param_text = QString("<0x%1>").arg(edb::v1::format_pointer(arg));
+					param_text = QString("<0x%1>").arg(yad64::v1::format_pointer(arg));
 				}
 			}
 		} while(0);
 		break;
 
 	case 'p':
-		param_text = QString("0x%1").arg(edb::v1::format_pointer(arg));
+		param_text = QString("0x%1").arg(yad64::v1::format_pointer(arg));
 		break;
 	case 'c':
 		if(arg < 0x80 && (std::isprint(arg) || std::isspace(arg))) {
@@ -182,7 +182,7 @@ void resolve_function_parameters(const State &state, const QString &symname, int
 	// safe not to check for -1, it means 'rest of string' for the mid function
 	func_name = func_name.mid(0, func_name.indexOf("@"));
 
-	if(const FunctionInfo *const info = edb::v1::get_function_info(func_name)) {
+	if(const FunctionInfo *const info = yad64::v1::get_function_info(func_name)) {
 
 		QString function_call = func_name + "(";
 
@@ -190,10 +190,10 @@ void resolve_function_parameters(const State &state, const QString &symname, int
 		int i = 0;
 		Q_FOREACH(QChar ch, params) {
 
-			edb::reg_t arg;
+			yad64::reg_t arg;
 
 			if(i > 5) {
-				edb::v1::debugger_core->read_bytes(state.stack_pointer() + (i - 5) * sizeof(edb::reg_t) + offset, &arg, sizeof(arg));
+				yad64::v1::debugger_core->read_bytes(state.stack_pointer() + (i - 5) * sizeof(yad64::reg_t) + offset, &arg, sizeof(arg));
 			} else {
 				arg = *state[paramter_registers[i]];
 			}
@@ -217,7 +217,7 @@ void resolve_function_parameters(const State &state, const QString &symname, int
 //------------------------------------------------------------------------------
 bool is_jcc_taken(const State &state, quint8 instruction_byte) {
 
-	const edb::reg_t efl = state.flags();
+	const yad64::reg_t efl = state.flags();
 	const bool cf = (efl & 0x0001) != 0;
 	const bool pf = (efl & 0x0004) != 0;
 	const bool zf = (efl & 0x0040) != 0;
@@ -261,10 +261,10 @@ bool is_jcc_taken(const State &state, quint8 instruction_byte) {
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_cmov(const State &state, const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_cmov(const State &state, const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_cmov(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_cmov(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 
 	const quint8 *const insn_buf = insn.bytes();
 
@@ -278,16 +278,16 @@ void analyze_cmov(const State &state, const edb::Instruction &insn, QStringList 
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_jump(const State &state, const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_jump(const State &state, const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_jump(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_jump(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 
 	bool taken = false;
 
 	const quint8 *const insn_buf = insn.bytes();
 
-	if(insn.type() == edb::Instruction::OP_JCC) {
+	if(insn.type() == yad64::Instruction::OP_JCC) {
 
 		if(insn.size() - insn.prefix_size() == 2) {
 			taken = is_jcc_taken(state, insn_buf[0 + insn.prefix_size()]);
@@ -296,7 +296,7 @@ void analyze_jump(const State &state, const edb::Instruction &insn, QStringList 
 		}
 
 	} else if(insn_buf[0] == 0xe3) {
-		if(insn.prefix() & edb::Instruction::PREFIX_ADDRESS) {
+		if(insn.prefix() & yad64::Instruction::PREFIX_ADDRESS) {
 			taken = (*state["rcx"] & 0xffff) == 0;
 		} else {
 			taken = *state["rcx"] == 0;
@@ -311,48 +311,48 @@ void analyze_jump(const State &state, const edb::Instruction &insn, QStringList 
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_return(const State &state, const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_return(const State &state, const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_return(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_return(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 	Q_UNUSED(insn);
 
-	edb::address_t return_address;
-	edb::v1::debugger_core->read_bytes(state.stack_pointer(), &return_address, sizeof(return_address));
+	yad64::address_t return_address;
+	yad64::v1::debugger_core->read_bytes(state.stack_pointer(), &return_address, sizeof(return_address));
 
-	const QString symname = edb::v1::find_function_symbol(return_address);
+	const QString symname = yad64::v1::find_function_symbol(return_address);
 	if(!symname.isEmpty()) {
-		ret << ArchProcessor::tr("return to %1 <%2>").arg(edb::v1::format_pointer(return_address)).arg(symname);
+		ret << ArchProcessor::tr("return to %1 <%2>").arg(yad64::v1::format_pointer(return_address)).arg(symname);
 	} else {
-		ret << ArchProcessor::tr("return to %1").arg(edb::v1::format_pointer(return_address));
+		ret << ArchProcessor::tr("return to %1").arg(yad64::v1::format_pointer(return_address));
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_call(const State &state, const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_call(const State &state, const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_call(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_call(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 
-	const edb::Operand &operand = insn.operand(0);
+	const yad64::Operand &operand = insn.operand(0);
 
 	if(operand.valid()) {
 
-		const edb::address_t effective_address = get_effective_address(operand, state);
+		const yad64::address_t effective_address = get_effective_address(operand, state);
 		const QString temp_operand             = QString::fromStdString(edisassm::to_string(operand));
 		QString temp;
 
 		switch(operand.general_type()) {
-		case edb::Operand::TYPE_REL:
-		case edb::Operand::TYPE_REGISTER:
+		case yad64::Operand::TYPE_REL:
+		case yad64::Operand::TYPE_REGISTER:
 			do {
 				int offset;
-				const QString symname = edb::v1::find_function_symbol(effective_address, QString(), &offset);
+				const QString symname = yad64::v1::find_function_symbol(effective_address, QString(), &offset);
 				if(!symname.isEmpty()) {
-					ret << temp.sprintf("%s = " EDB_FMT_PTR " <%s>", qPrintable(temp_operand), effective_address, qPrintable(symname));
+                    ret << temp.sprintf("%s = " YAD64_FMT_PTR " <%s>", qPrintable(temp_operand), effective_address, qPrintable(symname));
 
 					if(offset == 0) {
-						if(insn.type() == edb::Instruction::OP_CALL) {
+						if(insn.type() == yad64::Instruction::OP_CALL) {
 							resolve_function_parameters(state, symname, 0, ret);
 						} else {
 							resolve_function_parameters(state, symname, 4, ret);
@@ -360,25 +360,25 @@ void analyze_call(const State &state, const edb::Instruction &insn, QStringList 
 					}
 
 				} else {
-					ret << temp.sprintf("%s = " EDB_FMT_PTR, qPrintable(temp_operand), effective_address);
+                    ret << temp.sprintf("%s = " YAD64_FMT_PTR, qPrintable(temp_operand), effective_address);
 				}
 			} while(0);
 			break;
 
-		case edb::Operand::TYPE_EXPRESSION:
+		case yad64::Operand::TYPE_EXPRESSION:
 		default:
 			do {
-				edb::address_t target;
-				const bool ok = edb::v1::debugger_core->read_bytes(effective_address, &target, sizeof(target));
+				yad64::address_t target;
+				const bool ok = yad64::v1::debugger_core->read_bytes(effective_address, &target, sizeof(target));
 
 				if(ok) {
 					int offset;
-					const QString symname = edb::v1::find_function_symbol(target, QString(), &offset);
+					const QString symname = yad64::v1::find_function_symbol(target, QString(), &offset);
 					if(!symname.isEmpty()) {
-						ret << temp.sprintf("%s = [" EDB_FMT_PTR "] = " EDB_FMT_PTR " <%s>", qPrintable(temp_operand), effective_address, target, qPrintable(symname));
+                        ret << temp.sprintf("%s = [" YAD64_FMT_PTR "] = " YAD64_FMT_PTR " <%s>", qPrintable(temp_operand), effective_address, target, qPrintable(symname));
 
 						if(offset == 0) {
-							if(insn.type() == edb::Instruction::OP_CALL) {
+							if(insn.type() == yad64::Instruction::OP_CALL) {
 								resolve_function_parameters(state, symname, 0, ret);
 							} else {
 								resolve_function_parameters(state, symname, 4, ret);
@@ -386,11 +386,11 @@ void analyze_call(const State &state, const edb::Instruction &insn, QStringList 
 						}
 
 					} else {
-						ret << temp.sprintf("%s = [" EDB_FMT_PTR "] = " EDB_FMT_PTR, qPrintable(temp_operand), effective_address, target);
+                        ret << temp.sprintf("%s = [" YAD64_FMT_PTR "] = " YAD64_FMT_PTR, qPrintable(temp_operand), effective_address, target);
 					}
 				} else {
 					// could not read from the address
-					ret << temp.sprintf("%s = [" EDB_FMT_PTR "] = ?", qPrintable(temp_operand), effective_address);
+                    ret << temp.sprintf("%s = [" YAD64_FMT_PTR "] = ?", qPrintable(temp_operand), effective_address);
 				}
 			} while(0);
 			break;
@@ -399,54 +399,54 @@ void analyze_call(const State &state, const edb::Instruction &insn, QStringList 
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_operands(const State &state, const edb::Instruction &insn, QStringList &ret)
+// Name: analyze_operands(const State &state, const yad64::Instruction &insn, QStringList &ret)
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_operands(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_operands(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 
 	Q_UNUSED(insn);
 
-	for(int j = 0; j < edb::Instruction::MAX_OPERANDS; ++j) {
+	for(int j = 0; j < yad64::Instruction::MAX_OPERANDS; ++j) {
 
-		const edb::Operand &operand = insn.operand(j);
+		const yad64::Operand &operand = insn.operand(j);
 
 		if(operand.valid()) {
 
 			const QString temp_operand = QString::fromStdString(edisassm::to_string(operand));
 
 			switch(operand.general_type()) {
-			case edb::Operand::TYPE_REL:
-			case edb::Operand::TYPE_REGISTER:
+			case yad64::Operand::TYPE_REL:
+			case yad64::Operand::TYPE_REGISTER:
 				do {
-					const edb::address_t effective_address = get_effective_address(operand, state);
-					ret << QString("%1 = %2").arg(temp_operand).arg(edb::v1::format_pointer(effective_address));
+					const yad64::address_t effective_address = get_effective_address(operand, state);
+					ret << QString("%1 = %2").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address));
 				} while(0);
 				break;
-			case edb::Operand::TYPE_EXPRESSION:
+			case yad64::Operand::TYPE_EXPRESSION:
 				do {
-					const edb::address_t effective_address = get_effective_address(operand, state);
-					edb::address_t target;
+					const yad64::address_t effective_address = get_effective_address(operand, state);
+					yad64::address_t target;
 
-					const bool ok = edb::v1::debugger_core->read_bytes(effective_address, &target, sizeof(target));
+					const bool ok = yad64::v1::debugger_core->read_bytes(effective_address, &target, sizeof(target));
 
 					if(ok) {
 						switch(operand.complete_type()) {
-						case edb::Operand::TYPE_EXPRESSION8:
-							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(edb::v1::format_pointer(effective_address)).arg(target & 0xff, 2, 16, QChar('0'));
+						case yad64::Operand::TYPE_EXPRESSION8:
+							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address)).arg(target & 0xff, 2, 16, QChar('0'));
 							break;
-						case edb::Operand::TYPE_EXPRESSION16:
-							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(edb::v1::format_pointer(effective_address)).arg(target & 0xffff, 4, 16, QChar('0'));
+						case yad64::Operand::TYPE_EXPRESSION16:
+							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address)).arg(target & 0xffff, 4, 16, QChar('0'));
 							break;
-						case edb::Operand::TYPE_EXPRESSION32:
-							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(edb::v1::format_pointer(effective_address)).arg(target & 0xffffffff, 8, 16, QChar('0'));
+						case yad64::Operand::TYPE_EXPRESSION32:
+							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address)).arg(target & 0xffffffff, 8, 16, QChar('0'));
 							break;
-						case edb::Operand::TYPE_EXPRESSION64:
+						case yad64::Operand::TYPE_EXPRESSION64:
 						default:
-							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(edb::v1::format_pointer(effective_address)).arg(target, 16, 16, QChar('0'));
+							ret << QString("%1 = [%2] = 0x%3").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address)).arg(target, 16, 16, QChar('0'));
 							break;
 						}
 					} else {
-						ret << QString("%1 = [%2] = ?").arg(temp_operand).arg(edb::v1::format_pointer(effective_address));
+						ret << QString("%1 = [%2] = ?").arg(temp_operand).arg(yad64::v1::format_pointer(effective_address));
 					}
 				} while(0);
 				break;
@@ -458,28 +458,28 @@ void analyze_operands(const State &state, const edb::Instruction &insn, QStringL
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_jump_targets(const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_jump_targets(const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_jump_targets(const edb::Instruction &insn, QStringList &ret)  {
-	const edb::address_t address       = insn.rva();
-	const edb::address_t start_address = address - 128;
-	const edb::address_t end_address   = address + 127;
+void analyze_jump_targets(const yad64::Instruction &insn, QStringList &ret)  {
+	const yad64::address_t address       = insn.rva();
+	const yad64::address_t start_address = address - 128;
+	const yad64::address_t end_address   = address + 127;
 
-	quint8 buffer[edb::Instruction::MAX_SIZE];
+	quint8 buffer[yad64::Instruction::MAX_SIZE];
 
-	for(edb::address_t addr = start_address; addr < end_address; ++addr) {
+	for(yad64::address_t addr = start_address; addr < end_address; ++addr) {
 		int sz = sizeof(buffer);
-		if(edb::v1::get_instruction_bytes(addr, buffer, sz)) {
-			edb::Instruction insn(buffer, buffer + sz, addr, std::nothrow);
-			if(insn.valid() && (insn.type() == edb::Instruction::OP_JCC || insn.type() == edb::Instruction::OP_JMP)) {
-				const edb::Operand &operand = insn.operand(0);
+		if(yad64::v1::get_instruction_bytes(addr, buffer, sz)) {
+			yad64::Instruction insn(buffer, buffer + sz, addr, std::nothrow);
+			if(insn.valid() && (insn.type() == yad64::Instruction::OP_JCC || insn.type() == yad64::Instruction::OP_JMP)) {
+				const yad64::Operand &operand = insn.operand(0);
 
-				if(operand.general_type() == edb::Operand::TYPE_REL) {
-					const edb::address_t target = operand.relative_target();
+				if(operand.general_type() == yad64::Operand::TYPE_REL) {
+					const yad64::address_t target = operand.relative_target();
 
 					if(target == address) {
-						ret << ArchProcessor::tr("possible jump from 0x%1").arg(edb::v1::format_pointer(addr));
+						ret << ArchProcessor::tr("possible jump from 0x%1").arg(yad64::v1::format_pointer(addr));
 					}
 				}
 			}
@@ -488,22 +488,22 @@ void analyze_jump_targets(const edb::Instruction &insn, QStringList &ret)  {
 }
 
 //------------------------------------------------------------------------------
-// Name: analyze_syscall(const State &state, const edb::Instruction &insn, QStringList &ret) const
+// Name: analyze_syscall(const State &state, const yad64::Instruction &insn, QStringList &ret) const
 // Desc:
 //------------------------------------------------------------------------------
-void analyze_syscall(const State &state, const edb::Instruction &insn, QStringList &ret) {
+void analyze_syscall(const State &state, const yad64::Instruction &insn, QStringList &ret) {
 	Q_UNUSED(insn);
 	Q_UNUSED(ret);
 	Q_UNUSED(state);
 
 #ifdef Q_OS_LINUX
 
-	const edb::reg_t arg1 = *state["rdi"];
-	const edb::reg_t arg2 = *state["rsi"];
-	const edb::reg_t arg3 = *state["rdx"];
-	const edb::reg_t arg4 = *state["rcx"];
-	const edb::reg_t arg5 = *state["r8"];
-	const edb::reg_t arg6 = *state["r9"];
+	const yad64::reg_t arg1 = *state["rdi"];
+	const yad64::reg_t arg2 = *state["rsi"];
+	const yad64::reg_t arg3 = *state["rdx"];
+	const yad64::reg_t arg4 = *state["rcx"];
+	const yad64::reg_t arg5 = *state["r8"];
+	const yad64::reg_t arg6 = *state["r9"];
 
 	switch(*state["rax"]) {
 	#ifdef __NR_read
@@ -1410,9 +1410,9 @@ void analyze_syscall(const State &state, const edb::Instruction &insn, QStringLi
 // Desc:
 //------------------------------------------------------------------------------
 ArchProcessor::ArchProcessor() : split_flags_(0) {
-	if(edb::v1::debugger_core) {
-		has_mmx_ = edb::v1::debugger_core->has_extension(edb::string_hash<'M', 'M', 'X'>::value);
-		has_xmm_ = edb::v1::debugger_core->has_extension(edb::string_hash<'X', 'M', 'M'>::value);
+	if(yad64::v1::debugger_core) {
+		has_mmx_ = yad64::v1::debugger_core->has_extension(yad64::string_hash<'M', 'M', 'X'>::value);
+		has_xmm_ = yad64::v1::debugger_core->has_extension(yad64::string_hash<'X', 'M', 'M'>::value);
 	} else {
 		has_mmx_ = false;
 		has_xmm_ = false;
@@ -1441,9 +1441,9 @@ void ArchProcessor::setup_register_item(QCategoryList *category_list, QTreeWidge
 //------------------------------------------------------------------------------
 void ArchProcessor::setup_register_view(QCategoryList *category_list) {
 
-	if(edb::v1::debugger_core) {
+	if(yad64::v1::debugger_core) {
 		State state;
-		edb::v1::debugger_core->get_state(state);
+		yad64::v1::debugger_core->get_state(state);
 
 		Q_CHECK_PTR(category_list);
 
@@ -1561,7 +1561,7 @@ void ArchProcessor::setup_register_view(QCategoryList *category_list) {
 Register ArchProcessor::value_from_item(const QTreeWidgetItem &item) {
 	const QString &name = item.data(0, 1).toString();
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 	return state[name];
 }
 
@@ -1584,14 +1584,14 @@ void ArchProcessor::update_register(QTreeWidgetItem *item, const QString &name, 
 
 	QString reg_string;
 	int string_length;
-	const edb::reg_t value = *reg;
+	const yad64::reg_t value = *reg;
 
-	if(edb::v1::get_ascii_string_at_address(value, reg_string, edb::v1::config().min_string_length, 256, string_length)) {
-		item->setText(0, QString("%1: %2 ASCII \"%3\"").arg(name, edb::v1::format_pointer(value), reg_string));
-	} else if(edb::v1::get_utf16_string_at_address(value, reg_string, edb::v1::config().min_string_length, 256, string_length)) {
-		item->setText(0, QString("%1: %2 UTF16 \"%3\"").arg(name, edb::v1::format_pointer(value), reg_string));
+	if(yad64::v1::get_ascii_string_at_address(value, reg_string, yad64::v1::config().min_string_length, 256, string_length)) {
+		item->setText(0, QString("%1: %2 ASCII \"%3\"").arg(name, yad64::v1::format_pointer(value), reg_string));
+	} else if(yad64::v1::get_utf16_string_at_address(value, reg_string, yad64::v1::config().min_string_length, 256, string_length)) {
+		item->setText(0, QString("%1: %2 UTF16 \"%3\"").arg(name, yad64::v1::format_pointer(value), reg_string));
 	} else {
-		item->setText(0, QString("%1: %2").arg(name, edb::v1::format_pointer(value)));
+		item->setText(0, QString("%1: %2").arg(name, yad64::v1::format_pointer(value)));
 	}
 }
 
@@ -1601,11 +1601,11 @@ void ArchProcessor::update_register(QTreeWidgetItem *item, const QString &name, 
 //------------------------------------------------------------------------------
 void ArchProcessor::reset() {
 
-	if(edb::v1::debugger_core) {
+	if(yad64::v1::debugger_core) {
 		last_state_.clear();
 		
 		State state;
-		edb::v1::debugger_core->get_state(state);
+		yad64::v1::debugger_core->get_state(state);
 		
 		split_flags_->setText(0, state.flags_to_string(0));
 	}
@@ -1618,7 +1618,7 @@ void ArchProcessor::reset() {
 void ArchProcessor::update_register_view(const QString &default_region_name) {
 
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 	
 	const QPalette palette = QApplication::palette();
 
@@ -1639,20 +1639,20 @@ void ArchProcessor::update_register_view(const QString &default_region_name) {
 	update_register(get_register_item(14), "R14", state["r14"]);
 	update_register(get_register_item(15), "R15", state["r15"]);
 
-	const QString symname = edb::v1::find_function_symbol(state.instruction_pointer(), default_region_name);
+	const QString symname = yad64::v1::find_function_symbol(state.instruction_pointer(), default_region_name);
 
 	if(!symname.isEmpty()) {
-		get_register_item(16)->setText(0, QString("RIP: %1 <%2>").arg(edb::v1::format_pointer(state.instruction_pointer())).arg(symname));
+		get_register_item(16)->setText(0, QString("RIP: %1 <%2>").arg(yad64::v1::format_pointer(state.instruction_pointer())).arg(symname));
 	} else {
-		get_register_item(16)->setText(0, QString("RIP: %1").arg(edb::v1::format_pointer(state.instruction_pointer())));
+		get_register_item(16)->setText(0, QString("RIP: %1").arg(yad64::v1::format_pointer(state.instruction_pointer())));
 	}
-	get_register_item(17)->setText(0, QString("RFLAGS: %1").arg(edb::v1::format_pointer(state.flags())));
+	get_register_item(17)->setText(0, QString("RFLAGS: %1").arg(yad64::v1::format_pointer(state.flags())));
 
 	get_register_item(18)->setText(0, QString("CS: %1").arg(*state["cs"] & 0xffff, 4, 16, QChar('0')));
 	get_register_item(19)->setText(0, QString("DS: %1").arg(*state["ds"] & 0xffff, 4, 16, QChar('0')));
 	get_register_item(20)->setText(0, QString("ES: %1").arg(*state["es"] & 0xffff, 4, 16, QChar('0')));
-	get_register_item(21)->setText(0, QString("FS: %1 (%2)").arg(*state["fs"] & 0xffff, 4, 16, QChar('0')).arg(edb::v1::format_pointer(*state["fs_base"])));
-	get_register_item(22)->setText(0, QString("GS: %1 (%2)").arg(*state["gs"] & 0xffff, 4, 16, QChar('0')).arg(edb::v1::format_pointer(*state["gs_base"])));
+	get_register_item(21)->setText(0, QString("FS: %1 (%2)").arg(*state["fs"] & 0xffff, 4, 16, QChar('0')).arg(yad64::v1::format_pointer(*state["fs_base"])));
+	get_register_item(22)->setText(0, QString("GS: %1 (%2)").arg(*state["gs"] & 0xffff, 4, 16, QChar('0')).arg(yad64::v1::format_pointer(*state["gs_base"])));
 	get_register_item(23)->setText(0, QString("SS: %1").arg(*state["ss"] & 0xffff, 4, 16, QChar('0')));
 
 	for(int i = 0; i < 8; ++i) {
@@ -1715,50 +1715,50 @@ void ArchProcessor::update_register_view(const QString &default_region_name) {
 }
 
 //------------------------------------------------------------------------------
-// Name: update_instruction_info(edb::address_t address)
+// Name: update_instruction_info(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-QStringList ArchProcessor::update_instruction_info(edb::address_t address) {
+QStringList ArchProcessor::update_instruction_info(yad64::address_t address) {
 
 	QStringList ret;
 
-	Q_CHECK_PTR(edb::v1::debugger_core);
+	Q_CHECK_PTR(yad64::v1::debugger_core);
 
-	quint8 buffer[edb::Instruction::MAX_SIZE];
+	quint8 buffer[yad64::Instruction::MAX_SIZE];
 
-	const bool ok = edb::v1::debugger_core->read_bytes(address, buffer, sizeof(buffer));
+	const bool ok = yad64::v1::debugger_core->read_bytes(address, buffer, sizeof(buffer));
 	if(ok) {
-		edb::Instruction insn(buffer, buffer + sizeof(buffer), address, std::nothrow);
+		yad64::Instruction insn(buffer, buffer + sizeof(buffer), address, std::nothrow);
 		if(insn.valid()) {
 		
 			State state;
-			edb::v1::debugger_core->get_state(state);
+			yad64::v1::debugger_core->get_state(state);
 		
 			// figure out the instruction type and display some information about it
 			switch(insn.type()) {
-			case edb::Instruction::OP_CMOVCC:
+			case yad64::Instruction::OP_CMOVCC:
 				analyze_cmov(state, insn, ret);
 				break;
-			case edb::Instruction::OP_RET:
+			case yad64::Instruction::OP_RET:
 				analyze_return(state, insn, ret);
 				break;
-			case edb::Instruction::OP_JCC:
+			case yad64::Instruction::OP_JCC:
 				analyze_jump(state, insn, ret);
 				// FALL THROUGH!
-			case edb::Instruction::OP_JMP:
-			case edb::Instruction::OP_CALL:
+			case yad64::Instruction::OP_JMP:
+			case yad64::Instruction::OP_CALL:
 				analyze_call(state, insn, ret);
 				break;
 			#ifdef Q_OS_LINUX
-			case edb::Instruction::OP_INT:
-				if(insn.operand(0).complete_type() == edb::Operand::TYPE_IMMEDIATE8 && (insn.operand(0).immediate() & 0xff) == 0x80) {
+			case yad64::Instruction::OP_INT:
+				if(insn.operand(0).complete_type() == yad64::Operand::TYPE_IMMEDIATE8 && (insn.operand(0).immediate() & 0xff) == 0x80) {
 					analyze_syscall(state, insn, ret);
 				} else {
 					analyze_operands(state, insn, ret);
 				}
 				break;
 			#endif
-			case edb::Instruction::OP_SYSCALL:
+			case yad64::Instruction::OP_SYSCALL:
 				analyze_syscall(state, insn, ret);
 				break;
 			default:
@@ -1778,50 +1778,50 @@ QStringList ArchProcessor::update_instruction_info(edb::address_t address) {
 }
 
 //------------------------------------------------------------------------------
-// Name: can_step_over(const edb::Instruction &insn) const
+// Name: can_step_over(const yad64::Instruction &insn) const
 // Desc:
 //------------------------------------------------------------------------------
-bool ArchProcessor::can_step_over(const edb::Instruction &insn) const {
-	return insn.valid() && (insn.type() == edb::Instruction::OP_CALL || (insn.prefix() & (edb::Instruction::PREFIX_REPNE | edb::Instruction::PREFIX_REP)));
+bool ArchProcessor::can_step_over(const yad64::Instruction &insn) const {
+	return insn.valid() && (insn.type() == yad64::Instruction::OP_CALL || (insn.prefix() & (yad64::Instruction::PREFIX_REPNE | yad64::Instruction::PREFIX_REP)));
 }
 
 //------------------------------------------------------------------------------
-// Name: is_filling(const edb::Instruction &insn) const
+// Name: is_filling(const yad64::Instruction &insn) const
 // Desc:
 //------------------------------------------------------------------------------
-bool ArchProcessor::is_filling(const edb::Instruction &insn) const {
+bool ArchProcessor::is_filling(const yad64::Instruction &insn) const {
 	bool ret = false;
 
 	// fetch the operands
 	if(insn.valid()) {
-		const edb::Operand operands[edb::Instruction::MAX_OPERANDS] = {
+		const yad64::Operand operands[yad64::Instruction::MAX_OPERANDS] = {
 			insn.operand(0),
 			insn.operand(1),
 			insn.operand(2)
 		};
 
 		switch(insn.type()) {
-		case edb::Instruction::OP_NOP:
-		case edb::Instruction::OP_INT3:
+		case yad64::Instruction::OP_NOP:
+		case yad64::Instruction::OP_INT3:
 			ret = true;
 			break;
 
-		case edb::Instruction::OP_LEA:
+		case yad64::Instruction::OP_LEA:
 			if(operands[0].valid() && operands[1].valid()) {
-				if(operands[0].general_type() == edb::Operand::TYPE_REGISTER && operands[1].general_type() == edb::Operand::TYPE_EXPRESSION) {
+				if(operands[0].general_type() == yad64::Operand::TYPE_REGISTER && operands[1].general_type() == yad64::Operand::TYPE_EXPRESSION) {
 
-					edb::Operand::Register reg1;
-					edb::Operand::Register reg2;
+					yad64::Operand::Register reg1;
+					yad64::Operand::Register reg2;
 
 					reg1 = operands[0].reg();
 
 					if(operands[1].expression().scale == 1) {
 						if(operands[1].expression().u_disp32 == 0) {
 
-							if(operands[1].expression().base == edb::Operand::REG_NULL) {
+							if(operands[1].expression().base == yad64::Operand::REG_NULL) {
 								reg2 = operands[1].expression().index;
 								ret = reg1 == reg2;
-							} else if(operands[1].expression().index == edb::Operand::REG_NULL) {
+							} else if(operands[1].expression().index == yad64::Operand::REG_NULL) {
 								reg2 = operands[1].expression().base;
 								ret = reg1 == reg2;
 							}
@@ -1831,9 +1831,9 @@ bool ArchProcessor::is_filling(const edb::Instruction &insn) const {
 			}
 			break;
 
-		case edb::Instruction::OP_MOV:
+		case yad64::Instruction::OP_MOV:
 			if(operands[0].valid() && operands[1].valid()) {
-				if(operands[0].general_type() == edb::Operand::TYPE_REGISTER && operands[1].general_type() == edb::Operand::TYPE_REGISTER) {
+				if(operands[0].general_type() == yad64::Operand::TYPE_REGISTER && operands[1].general_type() == yad64::Operand::TYPE_REGISTER) {
 					ret = operands[0].reg() == operands[1].reg();
 				}
 			}
@@ -1844,7 +1844,7 @@ bool ArchProcessor::is_filling(const edb::Instruction &insn) const {
 		}
 
 		if(!ret) {
-			if(edb::v1::config().zeros_are_filling) {
+			if(yad64::v1::config().zeros_are_filling) {
 				ret = (QByteArray::fromRawData(reinterpret_cast<const char *>(insn.bytes()), insn.size()) == QByteArray::fromRawData("\x00\x00", 2));
 			}
 		}

@@ -63,8 +63,8 @@ public:
 	int signal_code() const;
 	int stop_code() const;
 	REASON reason() const;
-	edb::tid_t thread() const;
-	edb::pid_t process() const;
+	yad64::tid_t thread() const;
+	yad64::pid_t process() const;
 
 	bool exited() const;
 	bool signaled() const;

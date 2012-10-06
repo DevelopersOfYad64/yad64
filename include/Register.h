@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "API.h"
 #include <QString>
 
-class EDB_EXPORT Register {
+class YAD64_EXPORT Register {
 public:
 	enum Type{
 		// groups, these catagories should remain as portable as possible
@@ -38,7 +38,7 @@ public:
 
 public:
 	Register();
-	Register(const QString &name, edb::reg_t value, Type type);
+	Register(const QString &name, yad64::reg_t value, Type type);
 	Register(const Register &other);
 	Register &operator=(const Register &rhs);
 
@@ -48,7 +48,7 @@ public:
 
 public:
 	operator void*() const       { return reinterpret_cast<void*>(valid()); }
-	edb::reg_t operator*() const { return value_; }
+	yad64::reg_t operator*() const { return value_; }
 	Type type() const            { return type_; }
 	QString name() const         { return name_; }
 
@@ -57,7 +57,7 @@ private:
 
 private:
 	QString    name_;
-	edb::reg_t value_;
+	yad64::reg_t value_;
 	Type       type_;
 };
 

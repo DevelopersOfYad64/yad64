@@ -55,7 +55,7 @@
             </property>
             <property name="icon">
              <iconset resource="../../src/debugger.qrc">
-              <normaloff>:/debugger/images/edb22-action-open.png</normaloff>:/debugger/images/edb22-action-open.png</iconset>
+              <normaloff>:/debugger/images/yad6422-action-open.png</normaloff>:/debugger/images/yad6422-action-open.png</iconset>
             </property>
             <property name="arrowType">
              <enum>Qt::NoArrow</enum>
@@ -147,7 +147,7 @@
             </property>
             <property name="icon">
              <iconset resource="../../src/debugger.qrc">
-              <normaloff>:/debugger/images/edb22-action-open.png</normaloff>:/debugger/images/edb22-action-open.png</iconset>
+              <normaloff>:/debugger/images/yad6422-action-open.png</normaloff>:/debugger/images/yad6422-action-open.png</iconset>
             </property>
            </widget>
           </item>

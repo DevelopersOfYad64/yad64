@@ -48,8 +48,8 @@ private:
 	void dump_code(const State &state);
 	void dump_registers(const State &state);
 	void dump_stack(const State &state);
-	void dump_data(edb::address_t address);
-	void dump_lines(edb::address_t address, int lines);
+	void dump_data(yad64::address_t address);
+	void dump_lines(yad64::address_t address, int lines);
 
 private:
 	QMenu * menu_;

@@ -198,20 +198,20 @@ DebuggerCoreUNIX::DebuggerCoreUNIX() {
 
 
 //------------------------------------------------------------------------------
-// Name: write_byte(edb::address_t address, quint8 value, bool &ok)
+// Name: write_byte(yad64::address_t address, quint8 value, bool &ok)
 // Desc: writes a single byte at a given address
 // Note: assumes the this will not trample any breakpoints, must be handled
 //       in calling code!
 //------------------------------------------------------------------------------
-void DebuggerCoreUNIX::write_byte(edb::address_t address, quint8 value, bool &ok) {
+void DebuggerCoreUNIX::write_byte(yad64::address_t address, quint8 value, bool &ok) {
 	write_byte_base(address, value, ok);
 }
 
 //------------------------------------------------------------------------------
-// Name: read_byte(edb::address_t address, bool &ok)
+// Name: read_byte(yad64::address_t address, bool &ok)
 // Desc: reads a single bytes at a given address
 //------------------------------------------------------------------------------
-quint8 DebuggerCoreUNIX::read_byte(edb::address_t address, bool &ok) {
+quint8 DebuggerCoreUNIX::read_byte(yad64::address_t address, bool &ok) {
 
 	// TODO: handle if breakponts have a size more than 1!
 	const quint8 ret = read_byte_base(address, ok);
@@ -226,10 +226,10 @@ quint8 DebuggerCoreUNIX::read_byte(edb::address_t address, bool &ok) {
 }
 
 //------------------------------------------------------------------------------
-// Name: write_byte_base(edb::address_t address, quint8 value, bool &ok)
+// Name: write_byte_base(yad64::address_t address, quint8 value, bool &ok)
 // Desc: the base implementation of writing a byte
 //------------------------------------------------------------------------------
-void DebuggerCoreUNIX::write_byte_base(edb::address_t address, quint8 value, bool &ok) {
+void DebuggerCoreUNIX::write_byte_base(yad64::address_t address, quint8 value, bool &ok) {
 	// TODO: assert that we are paused
 
 	ok = false;
@@ -240,25 +240,25 @@ void DebuggerCoreUNIX::write_byte_base(edb::address_t address, quint8 value, boo
 		// are always 0x10*, so the masking works
 		// range of a is [1..n] where n=pagesize, and we have to adjust
 		// if a < wordsize
-		const edb::address_t a = page_size() - (address & (page_size() - 1));
+		const yad64::address_t a = page_size() - (address & (page_size() - 1));
 
 		v = value;
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-		if(a < EDB_WORDSIZE) {
-			address -= (EDB_WORDSIZE - a);                       // LE + BE
-			mask = ~(0xffUL << (CHAR_BIT * (EDB_WORDSIZE - a))); // LE
-			v <<= CHAR_BIT * (EDB_WORDSIZE - a);                 // LE
+		if(a < YAD64_WORDSIZE) {
+			address -= (YAD64_WORDSIZE - a);                       // LE + BE
+			mask = ~(0xffUL << (CHAR_BIT * (YAD64_WORDSIZE - a))); // LE
+			v <<= CHAR_BIT * (YAD64_WORDSIZE - a);                 // LE
 		} else {
 			mask = ~0xffUL; // LE
 		}
 #else /* BIG ENDIAN */
-		if(a < EDB_WORDSIZE) {
-			address -= (EDB_WORDSIZE - a);            // LE + BE
+		if(a < YAD64_WORDSIZE) {
+			address -= (YAD64_WORDSIZE - a);            // LE + BE
 			mask = ~(0xffUL << (CHAR_BIT * (a - 1))); // BE
 			v <<= CHAR_BIT * (a - 1);                 // BE
 		} else {
-			mask = ~(0xffUL << (CHAR_BIT * (EDB_WORDSIZE - 1))); // BE
-			v <<= CHAR_BIT * (EDB_WORDSIZE - 1);                 // BE
+			mask = ~(0xffUL << (CHAR_BIT * (YAD64_WORDSIZE - 1))); // BE
+			v <<= CHAR_BIT * (YAD64_WORDSIZE - 1);                 // BE
 		}
 #endif
 
@@ -270,10 +270,10 @@ void DebuggerCoreUNIX::write_byte_base(edb::address_t address, quint8 value, boo
 }
 
 //------------------------------------------------------------------------------
-// Name: read_byte_base(edb::address_t address, bool &ok)
+// Name: read_byte_base(yad64::address_t address, bool &ok)
 // Desc: the base implementation of reading a byte
 //------------------------------------------------------------------------------
-quint8 DebuggerCoreUNIX::read_byte_base(edb::address_t address, bool &ok) {
+quint8 DebuggerCoreUNIX::read_byte_base(yad64::address_t address, bool &ok) {
 	// TODO: assert that we are paused
 
 	ok = false;
@@ -286,24 +286,24 @@ quint8 DebuggerCoreUNIX::read_byte_base(edb::address_t address, bool &ok) {
 		// are always 0x10*, so the masking works
 		// range of a is [1..n] where n=pagesize, and we have to adjust
 		// if a < wordsize
-		const edb::address_t a = page_size() - (address & (page_size() - 1));
+		const yad64::address_t a = page_size() - (address & (page_size() - 1));
 
-		if(a < EDB_WORDSIZE) {
-			address -= (EDB_WORDSIZE - a); // LE + BE
+		if(a < YAD64_WORDSIZE) {
+			address -= (YAD64_WORDSIZE - a); // LE + BE
 		}
 
 		long value = read_data(address, ok);
 
 		if(ok) {
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-			if(a < EDB_WORDSIZE) {
-				value >>= CHAR_BIT * (EDB_WORDSIZE - a); // LE
+			if(a < YAD64_WORDSIZE) {
+				value >>= CHAR_BIT * (YAD64_WORDSIZE - a); // LE
 			}
 #else
-			if(a < EDB_WORDSIZE) {
+			if(a < YAD64_WORDSIZE) {
 				value >>= CHAR_BIT * (a - 1);            // BE
 			} else {
-				value >>= CHAR_BIT * (EDB_WORDSIZE - 1); // BE
+				value >>= CHAR_BIT * (YAD64_WORDSIZE - 1); // BE
 			}
 #endif
 			return value & 0xff;
@@ -314,12 +314,12 @@ quint8 DebuggerCoreUNIX::read_byte_base(edb::address_t address, bool &ok) {
 }
 
 //------------------------------------------------------------------------------
-// Name: read_pages(edb::address_t address, void *buf, std::size_t count)
+// Name: read_pages(yad64::address_t address, void *buf, std::size_t count)
 // Desc: reads <count> pages from the process starting at <address>
 // Note: buf's size must be >= count * page_size()
 // Note: address should be page aligned.
 //------------------------------------------------------------------------------
-bool DebuggerCoreUNIX::read_pages(edb::address_t address, void *buf, std::size_t count) {
+bool DebuggerCoreUNIX::read_pages(yad64::address_t address, void *buf, std::size_t count) {
 
 	Q_ASSERT(buf);
 
@@ -328,14 +328,14 @@ bool DebuggerCoreUNIX::read_pages(edb::address_t address, void *buf, std::size_t
 	}
 
 	if((address & (page_size() - 1)) == 0) {
-		const edb::address_t orig_address = address;
+		const yad64::address_t orig_address = address;
 		long *ptr                         = reinterpret_cast<long *>(buf);
 		quint8 *const orig_ptr            = reinterpret_cast<quint8 *>(buf);
 
-		const edb::address_t end_address  = orig_address + page_size() * count;
+		const yad64::address_t end_address  = orig_address + page_size() * count;
 
 		for(std::size_t c = 0; c < count; ++c) {
-			for(edb::address_t i = 0; i < page_size(); i += EDB_WORDSIZE) {
+			for(yad64::address_t i = 0; i < page_size(); i += YAD64_WORDSIZE) {
 				bool ok;
 				const long v = read_data(address, ok);
 				if(!ok) {
@@ -343,7 +343,7 @@ bool DebuggerCoreUNIX::read_pages(edb::address_t address, void *buf, std::size_t
 				}
 
 				*ptr++ = v;
-				address += EDB_WORDSIZE;
+				address += YAD64_WORDSIZE;
 			}
 		}
 
@@ -360,12 +360,12 @@ bool DebuggerCoreUNIX::read_pages(edb::address_t address, void *buf, std::size_t
 }
 
 //------------------------------------------------------------------------------
-// Name: read_bytes(edb::address_t address, void *buf, std::size_t len)
+// Name: read_bytes(yad64::address_t address, void *buf, std::size_t len)
 // Desc: reads <len> bytes into <buf> starting at <address>
 // Note: if the read failed, the part of the buffer that could not be read will
 //       be filled with 0xff bytes
 //------------------------------------------------------------------------------
-bool DebuggerCoreUNIX::read_bytes(edb::address_t address, void *buf, std::size_t len) {
+bool DebuggerCoreUNIX::read_bytes(yad64::address_t address, void *buf, std::size_t len) {
 
 	Q_ASSERT(buf);
 
@@ -397,10 +397,10 @@ bool DebuggerCoreUNIX::read_bytes(edb::address_t address, void *buf, std::size_t
 }
 
 //------------------------------------------------------------------------------
-// Name: write_bytes(edb::address_t address, const void *buf, std::size_t len)
+// Name: write_bytes(yad64::address_t address, const void *buf, std::size_t len)
 // Desc: writes <len> bytes from <buf> starting at <address>
 //------------------------------------------------------------------------------
-bool DebuggerCoreUNIX::write_bytes(edb::address_t address, const void *buf, std::size_t len) {
+bool DebuggerCoreUNIX::write_bytes(yad64::address_t address, const void *buf, std::size_t len) {
 
 	Q_ASSERT(buf);
 

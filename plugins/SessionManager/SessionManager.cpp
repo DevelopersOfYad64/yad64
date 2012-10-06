@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Desc:
 //------------------------------------------------------------------------------
 void SessionManager::private_init() {
-	edb::v1::set_session_file_handler(this);
+	yad64::v1::set_session_file_handler(this);
 }
 
 //------------------------------------------------------------------------------
@@ -36,11 +36,11 @@ void SessionManager::private_init() {
 void SessionManager::save_session(const QString &filename, const QString &executable) {
 	qDebug() << "[SessionManager] saving session file:" << filename <<  "for:" << executable;
 	
-	QHash<QString, QObject *> plugins = edb::v1::plugin_list();
+	QHash<QString, QObject *> plugins = yad64::v1::plugin_list();
 	for(QHash<QString, QObject *>::iterator it = plugins.begin(); it != plugins.end(); ++it) {
 		QObject *const o = it.value();
 		if(IPlugin *const p = qobject_cast<IPlugin *>(o)) {
-			//qDebug() << edb::v1::serialize_object(o);
+			//qDebug() << yad64::v1::serialize_object(o);
 		}
 	}
 }
@@ -52,7 +52,7 @@ void SessionManager::save_session(const QString &filename, const QString &execut
 void SessionManager::load_session(const QString &filename, const QString &executable) {
 	qDebug() << "[SessionManager] loading session file:" << filename <<  "for:" << executable;
 	
-	QHash<QString, QObject *> plugins = edb::v1::plugin_list();
+	QHash<QString, QObject *> plugins = yad64::v1::plugin_list();
 	for(QHash<QString, QObject *>::iterator it = plugins.begin(); it != plugins.end(); ++it) {
 		if(IPlugin *const p = qobject_cast<IPlugin *>(it.value())) {
 

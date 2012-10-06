@@ -37,8 +37,8 @@ public Q_SLOTS:
 	void on_unsignedInput_textEdited(const QString &);
 
 public:
-	edb::reg_t value() const;
-	void set_value(edb::reg_t value);
+	yad64::reg_t value() const;
+	void set_value(yad64::reg_t value);
 
 private:
 	Ui::DialogInputValue *const ui;

@@ -50,18 +50,18 @@ protected:
 
 public:
 	MemoryRegion region() const;
-	bool addressShown(edb::address_t address) const;
-	edb::address_t addressFromPoint(const QPoint &pos) const;
-	edb::address_t selectedAddress() const;
+	bool addressShown(yad64::address_t address) const;
+	yad64::address_t addressFromPoint(const QPoint &pos) const;
+	yad64::address_t selectedAddress() const;
 	int selectedSize() const;
 
 public Q_SLOTS:
 	void setFont(const QFont &f);
 	void resizeEvent(QResizeEvent *event);
-	void scrollTo(edb::address_t address);
-	void setAddressOffset(edb::address_t address);
+	void scrollTo(yad64::address_t address);
+	void setAddressOffset(yad64::address_t address);
 	void setRegion(const MemoryRegion &r);
-	void setCurrentAddress(edb::address_t address);
+	void setCurrentAddress(yad64::address_t address);
 	void clear();
 	void repaint();
 	void setShowAddressSeparator(bool value);
@@ -71,28 +71,28 @@ private Q_SLOTS:
 	void scrollbar_action_triggered(int action);
 
 signals:
-	void breakPointToggled(edb::address_t address);
+	void breakPointToggled(yad64::address_t address);
 	void regionChanged();
 
 private:
-	QString formatAddress(edb::address_t address) const;
-	QString format_instruction_bytes(const edb::Instruction &insn) const;
-	QString format_instruction_bytes(const edb::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const;
-	QString format_invalid_instruction_bytes(const edb::Instruction &insn, QPainter &painter) const;
-	edb::address_t address_from_coord(int x, int y) const;
+	QString formatAddress(yad64::address_t address) const;
+	QString format_instruction_bytes(const yad64::Instruction &insn) const;
+	QString format_instruction_bytes(const yad64::Instruction &insn, int maxStringPx, const QFontMetrics &metrics) const;
+	QString format_invalid_instruction_bytes(const yad64::Instruction &insn, QPainter &painter) const;
+	yad64::address_t address_from_coord(int x, int y) const;
 	size_t length_disasm_back(const quint8 *buf, size_t size) const;
-	edb::address_t previous_instructions(edb::address_t current_address, int count);
-	edb::address_t following_instructions(edb::address_t current_address, int count);
+	yad64::address_t previous_instructions(yad64::address_t current_address, int count);
+	yad64::address_t following_instructions(yad64::address_t current_address, int count);
 	int address_length() const;
 	int auto_line1() const;
-	int draw_instruction(QPainter &painter, const edb::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const;
-	int get_instruction_size(edb::address_t address, bool &ok) const;
-	int get_instruction_size(edb::address_t address, bool &ok, quint8 *buf, int &size) const;
+	int draw_instruction(QPainter &painter, const yad64::Instruction &insn, bool upper, int y, int line_height, int l2, int l3) const;
+	int get_instruction_size(yad64::address_t address, bool &ok) const;
+	int get_instruction_size(yad64::address_t address, bool &ok, quint8 *buf, int &size) const;
 	int line1() const;
 	int line2() const;
 	int line3() const;
 	int line_height() const;
-	void draw_function_markers(QPainter &painter, edb::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer);
+	void draw_function_markers(QPainter &painter, yad64::address_t address, int l2, int y, int insn_size, IAnalyzer *analyzer);
 	void updateScrollbars();
 	void updateSelectedAddress(QMouseEvent *event);
 
@@ -100,11 +100,11 @@ private:
 	MemoryRegion                region_;
 	QPixmap                  breakpoint_icon_;
 	QPixmap                  current_address_icon_;
-	QSet<edb::address_t>     show_addresses_;
+	QSet<yad64::address_t>     show_addresses_;
 	SyntaxHighlighter *const highlighter_;
-	edb::address_t           address_offset_;
-	edb::address_t           selected_instruction_address_;
-	edb::address_t           current_address_;
+	yad64::address_t           address_offset_;
+	yad64::address_t           selected_instruction_address_;
+	yad64::address_t           current_address_;
 	int                      font_height_; // height of a character in this font
 	int                      font_width_;  // width of a character in this font
 	int                      line1_;

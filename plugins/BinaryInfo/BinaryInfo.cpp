@@ -64,14 +64,14 @@ BinaryInfo::BinaryInfo() {
 //------------------------------------------------------------------------------
 void BinaryInfo::private_init() {
 #if defined(Q_OS_UNIX)
-	edb::v1::register_binary_info(create_binary_info_elf32);
-	edb::v1::register_binary_info(create_binary_info_elf64);
+	yad64::v1::register_binary_info(create_binary_info_elf32);
+	yad64::v1::register_binary_info(create_binary_info_elf64);
 #endif
 #if defined(Q_OS_WIN)
 #if defined(Q_OS_WIN64)
-    edb::v1::register_binary_info(create_binary_info_pe64);
+    yad64::v1::register_binary_info(create_binary_info_pe64);
 #else
-    edb::v1::register_binary_info(create_binary_info_pe32);
+    yad64::v1::register_binary_info(create_binary_info_pe32);
 #endif
 #endif
 }

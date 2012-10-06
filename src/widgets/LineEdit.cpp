@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //------------------------------------------------------------------------------
 LineEdit::LineEdit(QWidget *parent) : QLineEdit(parent), clear_button_(new QToolButton(this)) {
 
-	QPixmap pixmap(":/debugger/images/edb16-edit-clean.png");
+	QPixmap pixmap(":/debugger/images/yad6416-edit-clean.png");
 
 	clear_button_->setIcon(QIcon(pixmap));
 	clear_button_->setIconSize(pixmap.size());

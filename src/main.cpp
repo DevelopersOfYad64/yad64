@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "DebuggerMain.h"
 #include "Debugger.h"
 #include "DebuggerInternal.h"
-#include "symbols.h"
 #include "version.h"
 
 #include <QApplication>
@@ -60,14 +59,14 @@ namespace {
 
 					// TODO: handle the case where we find more than one core plugin...
 					if(IDebuggerCore *const core_plugin = qobject_cast<IDebuggerCore *>(plugin)) {
-						if(edb::v1::debugger_core == 0) {
+                        if(yad64::v1::debugger_core == 0) {
 							qDebug("[load_plugins] Loading Core Plugin: %-25s : %p", qPrintable(file_name), static_cast<void *>(plugin));
-							edb::v1::debugger_core = core_plugin;
+                            yad64::v1::debugger_core = core_plugin;
 						}
 					}
 
 					if(IPlugin *const generic_plugin = qobject_cast<IPlugin *>(plugin)) {
-						if(edb::internal::register_plugin(full_path, plugin)) {
+                        if(yad64::internal::register_plugin(full_path, plugin)) {
 							// we have a general purpose plugin
 							qDebug("[load_plugins] Loading Plugin: %-30s : %p", qPrintable(file_name), static_cast<void *>(plugin));
 						}
@@ -80,24 +79,24 @@ namespace {
 	}
 
 	//--------------------------------------------------------------------------
-	// Name: start_debugger(edb::pid_t attach_pid)
+    // Name: start_debugger(yad64::pid_t attach_pid)
 	// Desc: starts the main debugger code
 	//--------------------------------------------------------------------------
-	int start_debugger(edb::pid_t attach_pid, const QString &program, const QList<QByteArray> &programArgs) {
+    int start_debugger(yad64::pid_t attach_pid, const QString &program, const QList<QByteArray> &programArgs) {
 
-		qDebug() << "Starting edb version:" << edb::version;
+        qDebug() << "Starting yad64 version:" << yad64::version;
 		qDebug("Please Report Bugs & Requests At: http://bugs.codef00.com/");
 
 		// look for some plugins..
-		load_plugins(edb::v1::config().plugin_path);
+        load_plugins(yad64::v1::config().plugin_path);
 		
-		edb::internal::load_function_db();
+        yad64::internal::load_function_db();
 
 		// create the main window object
 		DebuggerMain debugger;
 
 		// let the plugins setup their menus
-		debugger.finish_plugin_setup(edb::v1::plugin_list());
+        debugger.finish_plugin_setup(yad64::v1::plugin_list());
 
 		// ok things are initialized to a reasonable degree, let's show the main window
 		debugger.show();
@@ -109,20 +108,20 @@ namespace {
 			debugger.execute(program, programArgs);
 		}
 
-		if(edb::v1::debugger_core == 0) {
+        if(yad64::v1::debugger_core == 0) {
 			QMessageBox::warning(
 				0,
-				QT_TRANSLATE_NOOP("edb", "edb Failed To Load A Necessary Plugin"),
-				QT_TRANSLATE_NOOP("edb",
+                QT_TRANSLATE_NOOP("yad64", "yad64 Failed To Load A Necessary Plugin"),
+                QT_TRANSLATE_NOOP("yad64",
 					"Failed to successfully load the debugger core plugin. Please make sure it exists and that the plugin path is correctly configured.\n"
-					"This is normal if edb has not been previously run or the configuration file has been removed."));
+                    "This is normal if yad64 has not been previously run or the configuration file has been removed."));
 
-			edb::v1::dialog_options()->exec();
+            yad64::v1::dialog_options()->exec();
 
 			QMessageBox::warning(
 				0,
-				QT_TRANSLATE_NOOP("edb", "edb"),
-				QT_TRANSLATE_NOOP("edb", "edb will now close. If you were successful in specifying the location of the debugger core plugin, please run edb again.")
+                QT_TRANSLATE_NOOP("yad64", "yad64"),
+                QT_TRANSLATE_NOOP("yad64", "yad64 will now close. If you were successful in specifying the location of the debugger core plugin, please run yad64 again.")
 				);
 
 			// TODO: detect if they corrected the issue and try again
@@ -139,7 +138,7 @@ namespace {
 		qApp->installTranslator(&qtTranslator);
 
 		QTranslator myappTranslator;
-		myappTranslator.load("edb_" + QLocale::system().name());
+        myappTranslator.load("yad64_" + QLocale::system().name());
 		qApp->installTranslator(&myappTranslator);
 	}
 }
@@ -154,19 +153,19 @@ int main(int argc, char *argv[]) {
 	QT_REQUIRE_VERSION(argc, argv, "4.5.0");
 
 	QApplication app(argc, argv);
-	QApplication::setWindowIcon(QIcon(":/debugger/images/edb48-logo.png"));
+    QApplication::setWindowIcon(QIcon(":/debugger/images/yad6448-logo.png"));
 
 	qsrand(std::time(0));
 
 	// setup organization info so settings go in right place
 	QApplication::setOrganizationName("codef00.com");
 	QApplication::setOrganizationDomain("codef00.com");
-	QApplication::setApplicationName("edb");
+    QApplication::setApplicationName("yad64");
 
 	load_translations();
 
 	const QStringList args = app.arguments();
-	edb::pid_t        attach_pid = 0;
+    yad64::pid_t        attach_pid = 0;
 	QList<QByteArray> run_args;
 	QString           run_app;
 
@@ -179,17 +178,14 @@ int main(int argc, char *argv[]) {
 			for(int i = 3; i < args.size(); ++i) {
 				run_args.push_back(argv[i]);
 			}
-		} else if(args.size() == 3 && args[1] == "--symbols") {
-			symbols::generate_symbols(args[2]);
-			return 0;
 		} else if(args.size() == 2 && args[1] == "--version") {
-			std::cout << "edb version: " << edb::version << std::endl;
+            std::cout << "yad64 version: " << yad64::version << std::endl;
 			return 0;
 		} else if(args.size() == 2 && args[1] == "--dump-version") {
-			std::cout << edb::version << std::endl;
+            std::cout << yad64::version << std::endl;
 			return 0;
 		} else {
-			std::cerr << "usage: " << qPrintable(args[0]) << " [--symbols <filename>] [ --attach <pid> ] [ --run <program> (args...) ] [ --version ] [ --dump-version ]" << std::endl;
+            std::cerr << "usage: " << qPrintable(args[0]) << " [ --attach <pid> ] [ --run <program> (args...) ] [ --version ] [ --dump-version ]" << std::endl;
 			return -1;
 		}
 	}

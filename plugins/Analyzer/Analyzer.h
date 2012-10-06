@@ -51,10 +51,10 @@ private:
 public:
 	virtual void analyze(const MemoryRegion &region);
 	virtual FunctionMap functions(const MemoryRegion &region) const;
-	virtual AddressCategory category(edb::address_t address) const;
+	virtual AddressCategory category(yad64::address_t address) const;
 	virtual void invalidate_analysis(const MemoryRegion &region);
 	virtual void invalidate_analysis();
-	virtual QSet<edb::address_t> specified_functions() const { return specified_functions_; }
+	virtual QSet<yad64::address_t> specified_functions() const { return specified_functions_; }
 
 private:
 	void indent_header();
@@ -68,20 +68,20 @@ private:
 
 private:
 	QByteArray md5_region(const MemoryRegion &region) const;
-	bool find_containing_function(edb::address_t address, Function &function) const;
-	bool is_inside_known(const MemoryRegion &region, edb::address_t address);
-	bool is_stack_frame(edb::address_t address) const;
-	bool is_thunk(edb::address_t address) const;
-	edb::address_t module_entry_point(const MemoryRegion &region) const;
-	int walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<edb::address_t> &walked_functions);
-	void find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<edb::address_t> &walked_functions);
+	bool find_containing_function(yad64::address_t address, Function &function) const;
+	bool is_inside_known(const MemoryRegion &region, yad64::address_t address);
+	bool is_stack_frame(yad64::address_t address) const;
+	bool is_thunk(yad64::address_t address) const;
+	yad64::address_t module_entry_point(const MemoryRegion &region) const;
+	int walk_all_functions(FunctionMap &results, const MemoryRegion &region, QSet<yad64::address_t> &walked_functions);
+	void find_calls_from_known(const MemoryRegion &region, FunctionMap &results, QSet<yad64::address_t> &walked_functions);
 	void find_function_calls(const MemoryRegion &region, FunctionMap &results);
-	void find_function_end(Function &function, edb::address_t end_address, QSet<edb::address_t> &found_functions, const FunctionMap &results);
+	void find_function_end(Function &function, yad64::address_t end_address, QSet<yad64::address_t> &found_functions, const FunctionMap &results);
 	void fix_overlaps(FunctionMap &function_map);
 	void invalidate_dynamic_analysis(const MemoryRegion &region);
 	void set_function_types(FunctionMap &results);
 	void set_function_types_helper(Function &info) const;
-	void update_results_entry(FunctionMap &results, edb::address_t address) const;
+	void update_results_entry(FunctionMap &results, yad64::address_t address) const;
 	void collect_high_ref_results(FunctionMap &function_map, FunctionMap &found_functions) const;
 	void collect_low_ref_results(const MemoryRegion &region, FunctionMap &function_map, FunctionMap &found_functions);
 
@@ -108,7 +108,7 @@ private:
 
 	QMenu *                      menu_;
 	QHash<MemoryRegion, RegionInfo> analysis_info_;
-	QSet<edb::address_t>         specified_functions_;
+	QSet<yad64::address_t>         specified_functions_;
 	AnalyzerWidget *             analyzer_widget_;
 };
 

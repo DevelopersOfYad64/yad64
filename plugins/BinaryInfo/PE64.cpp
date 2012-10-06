@@ -22,14 +22,14 @@ bool PE64::validate_header() {
 }
 
 bool PE64::native() const {
-#ifdef EDB_X86_64
+#ifdef YAD64_X86_64
     return true;
 #else
     return false;
 #endif
 }
 
-edb::address_t PE64::entry_point() {
+yad64::address_t PE64::entry_point() {
     read_header();
     if (lpNtHeaders == NULL) return 0;
     return region_.start()+lpNtHeaders->OptionalHeader.AddressOfEntryPoint;
@@ -39,11 +39,11 @@ size_t PE64::header_size() const {
     return sizeof(IMAGE_DOS_HEADER)+sizeof(IMAGE_NT_HEADERS64);
 }
 
-edb::address_t PE64::debug_pointer() {
+yad64::address_t PE64::debug_pointer() {
     return 0;
 }
 
-edb::address_t PE64::calculate_main() {
+yad64::address_t PE64::calculate_main() {
     return 0;
 }
 
@@ -51,14 +51,14 @@ void PE64::read_header() {
     if(lpDosHeader == NULL) {
         lpDosHeader = new IMAGE_DOS_HEADER;
 
-        if(!edb::v1::debugger_core->read_bytes(region_.base(), lpDosHeader, sizeof(IMAGE_DOS_HEADER))) {
+        if(!yad64::v1::debugger_core->read_bytes(region_.base(), lpDosHeader, sizeof(IMAGE_DOS_HEADER))) {
             std::memset(lpDosHeader, 0, sizeof(IMAGE_DOS_HEADER));
         }
 
         if(lpDosHeader->e_magic != IMAGE_DOS_SIGNATURE) return;
         lpNtHeaders = new IMAGE_NT_HEADERS64;
 
-        if(!edb::v1::debugger_core->read_bytes(region_.base()+lpDosHeader->e_lfanew, lpNtHeaders, sizeof(IMAGE_NT_HEADERS64))) {
+        if(!yad64::v1::debugger_core->read_bytes(region_.base()+lpDosHeader->e_lfanew, lpNtHeaders, sizeof(IMAGE_NT_HEADERS64))) {
             std::memset(lpNtHeaders, 0, sizeof(IMAGE_NT_HEADERS64));
         }
     }

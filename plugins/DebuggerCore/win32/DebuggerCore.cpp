@@ -125,7 +125,7 @@ DebuggerCore::~DebuggerCore() {
 // Name: page_size() const
 // Desc: returns the size of a page on this system
 //------------------------------------------------------------------------------
-edb::address_t DebuggerCore::page_size() const {
+yad64::address_t DebuggerCore::page_size() const {
 	return page_size_;
 }
 
@@ -134,19 +134,19 @@ edb::address_t DebuggerCore::page_size() const {
 // Desc:
 //------------------------------------------------------------------------------
 bool DebuggerCore::has_extension(quint64 ext) const {
-#if !defined(EDB_X86_64)
+#if !defined(YAD64_X86_64)
 	switch(ext) {
-	case edb::string_hash<'M', 'M', 'X'>::value:
+	case yad64::string_hash<'M', 'M', 'X'>::value:
 		return IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE);
-	case edb::string_hash<'X', 'M', 'M'>::value:
+	case yad64::string_hash<'X', 'M', 'M'>::value:
 		return IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE);
 	default:
 		return false;
 	}
 #else
 	switch(ext) {
-	case edb::string_hash<'M', 'M', 'X'>::value:
-	case edb::string_hash<'X', 'M', 'M'>::value:
+	case yad64::string_hash<'M', 'M', 'X'>::value:
+	case yad64::string_hash<'X', 'M', 'M'>::value:
 		return true;
 	default:
 		return false;
@@ -178,8 +178,8 @@ bool DebuggerCore::wait_debug_event(DebugEvent &event, int msecs) {
 				break;
 			case CREATE_PROCESS_DEBUG_EVENT:
 				CloseHandle(de.u.CreateProcessInfo.hFile);
-				start_address	= reinterpret_cast<edb::address_t>(de.u.CreateProcessInfo.lpStartAddress);
-				image_base		= reinterpret_cast<edb::address_t>(de.u.CreateProcessInfo.lpBaseOfImage);
+				start_address	= reinterpret_cast<yad64::address_t>(de.u.CreateProcessInfo.lpStartAddress);
+				image_base		= reinterpret_cast<yad64::address_t>(de.u.CreateProcessInfo.lpBaseOfImage);
 				break;
 			case LOAD_DLL_DEBUG_EVENT:
 				CloseHandle(de.u.LoadDll.hFile);
@@ -193,7 +193,7 @@ bool DebuggerCore::wait_debug_event(DebugEvent &event, int msecs) {
 				// handle_event_exited returns DEBUG_STOP, which in turn keeps the debugger from resuming the process
 				// However, this is needed to close all internal handles etc. and finish the debugging session
 				// So we do it manually here
-				resume(edb::DEBUG_CONTINUE);
+				resume(yad64::DEBUG_CONTINUE);
 				propagate = true;
 				break;
 			case EXCEPTION_DEBUG_EVENT:
@@ -206,19 +206,19 @@ bool DebuggerCore::wait_debug_event(DebugEvent &event, int msecs) {
 				event = DebugEvent(de);
 				return true;
 			}
-			resume(edb::DEBUG_EXCEPTION_NOT_HANDLED);
+			resume(yad64::DEBUG_EXCEPTION_NOT_HANDLED);
 		}
 	}
 	return false;
 }
 
 //------------------------------------------------------------------------------
-// Name: read_pages(edb::address_t address, void *buf, std::size_t count)
+// Name: read_pages(yad64::address_t address, void *buf, std::size_t count)
 // Desc: reads <count> pages from the process starting at <address>
 // Note: buf's size must be >= count * page_size()
 // Note: address should be page aligned.
 //------------------------------------------------------------------------------
-bool DebuggerCore::read_pages(edb::address_t address, void *buf, std::size_t count) {
+bool DebuggerCore::read_pages(yad64::address_t address, void *buf, std::size_t count) {
 
 	Q_ASSERT(address % page_size() == 0);
 
@@ -226,12 +226,12 @@ bool DebuggerCore::read_pages(edb::address_t address, void *buf, std::size_t cou
 }
 
 //------------------------------------------------------------------------------
-// Name: read_bytes(edb::address_t address, void *buf, std::size_t len)
+// Name: read_bytes(yad64::address_t address, void *buf, std::size_t len)
 // Desc: reads <len> bytes into <buf> starting at <address>
 // Note: if the read failed, the part of the buffer that could not be read will
 //       be filled with 0xff bytes
 //------------------------------------------------------------------------------
-bool DebuggerCore::read_bytes(edb::address_t address, void *buf, std::size_t len) {
+bool DebuggerCore::read_bytes(yad64::address_t address, void *buf, std::size_t len) {
 
 	Q_CHECK_PTR(buf);
 
@@ -261,10 +261,10 @@ bool DebuggerCore::read_bytes(edb::address_t address, void *buf, std::size_t len
 }
 
 //------------------------------------------------------------------------------
-// Name: write_bytes(edb::address_t address, const void *buf, std::size_t len)
+// Name: write_bytes(yad64::address_t address, const void *buf, std::size_t len)
 // Desc: writes <len> bytes from <buf> starting at <address>
 //------------------------------------------------------------------------------
-bool DebuggerCore::write_bytes(edb::address_t address, const void *buf, std::size_t len) {
+bool DebuggerCore::write_bytes(yad64::address_t address, const void *buf, std::size_t len) {
 
 	Q_CHECK_PTR(buf);
 
@@ -283,10 +283,10 @@ bool DebuggerCore::write_bytes(edb::address_t address, const void *buf, std::siz
 }
 
 //------------------------------------------------------------------------------
-// Name: attach(edb::pid_t pid)
+// Name: attach(yad64::pid_t pid)
 // Desc:
 //------------------------------------------------------------------------------
-bool DebuggerCore::attach(edb::pid_t pid) {
+bool DebuggerCore::attach(yad64::pid_t pid) {
 
 	detach();
 
@@ -349,33 +349,33 @@ void DebuggerCore::pause() {
 }
 
 //------------------------------------------------------------------------------
-// Name: resume(edb::EVENT_STATUS status)
+// Name: resume(yad64::EVENT_STATUS status)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCore::resume(edb::EVENT_STATUS status) {
+void DebuggerCore::resume(yad64::EVENT_STATUS status) {
 	// TODO: assert that we are paused
 
 	if(attached()) {
-		if(status != edb::DEBUG_STOP) {
+		if(status != yad64::DEBUG_STOP) {
 			// TODO: does this resume *all* threads?
 			// it does! (unless you manually paused one using SuspendThread)
 			ContinueDebugEvent(
 				pid(),
 				active_thread(),
-				(status == edb::DEBUG_CONTINUE) ? (DBG_CONTINUE) : (DBG_EXCEPTION_NOT_HANDLED));
+				(status == yad64::DEBUG_CONTINUE) ? (DBG_CONTINUE) : (DBG_EXCEPTION_NOT_HANDLED));
 		}
 	}
 }
 
 //------------------------------------------------------------------------------
-// Name: step(edb::EVENT_STATUS status)
+// Name: step(yad64::EVENT_STATUS status)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCore::step(edb::EVENT_STATUS status) {
+void DebuggerCore::step(yad64::EVENT_STATUS status) {
 	// TODO: assert that we are paused
 
 	if(attached()) {
-		if(status != edb::DEBUG_STOP) {
+		if(status != yad64::DEBUG_STOP) {
 			if(const Win32Handle th = OpenThread(THREAD_QUERY_INFORMATION | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, FALSE, active_thread())) {
 				CONTEXT	context;
 				context.ContextFlags = CONTEXT_CONTROL;
@@ -388,7 +388,7 @@ void DebuggerCore::step(edb::EVENT_STATUS status) {
 				/*ContinueDebugEvent(
 					pid(),
 					active_thread(),
-					(status == edb::DEBUG_CONTINUE) ? (DBG_CONTINUE) : (DBG_EXCEPTION_NOT_HANDLED));*/
+					(status == yad64::DEBUG_CONTINUE) ? (DBG_CONTINUE) : (DBG_EXCEPTION_NOT_HANDLED));*/
 			}
 		}
 	}
@@ -412,7 +412,7 @@ void DebuggerCore::get_state(State &state) {
 			state_impl->fs_base_ = 0;
 			// GetThreadSelectorEntry always returns false on x64
 			// on x64 gs_base == TEB, maybe we can use that somehow
-#if !defined(EDB_X86_64)
+#if !defined(YAD64_X86_64)
 			LDT_ENTRY ldt_entry;
 			if(GetThreadSelectorEntry(th.get(), state_impl->context_.SegGs, &ldt_entry)) {
 				state_impl->gs_base_ = ldt_entry.BaseLow | (ldt_entry.HighWord.Bits.BaseMid << 16) | (ldt_entry.HighWord.Bits.BaseHi << 24);
@@ -490,7 +490,7 @@ bool DebuggerCore::open(const QString &path, const QString &cwd, const QList<QBy
 
 	// CreateProcessW wants a writable copy of the command line :<
 	wchar_t* command_path = new wchar_t[command_str.length() + sizeof(wchar_t)];
-	wcscpy(command_path, command_str.utf16());
+    wcscpy_s(command_path, MAX_PATH, command_str.utf16());
 
 	if(CreateProcessW(
 			path.utf16(),	// exe
@@ -527,10 +527,10 @@ IState *DebuggerCore::create_state() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: create_region(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, IRegion::permissions_t permissions)
+// Name: create_region(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, IRegion::permissions_t permissions)
 // Desc:
 //------------------------------------------------------------------------------
-IRegion *DebuggerCore::create_region(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, IRegion::permissions_t permissions) const {
+IRegion *DebuggerCore::create_region(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, IRegion::permissions_t permissions) const {
 	return new PlatformRegion(start, end, base, name, permissions);
 }
 
@@ -581,8 +581,8 @@ bool DebuggerCore::set_debug_privilege(HANDLE process, bool set) {
 // Name: enumerate_processes() const
 // Desc:
 //------------------------------------------------------------------------------
-QMap<edb::pid_t, Process> DebuggerCore::enumerate_processes() const {
-	QMap<edb::pid_t, Process> ret;
+QMap<yad64::pid_t, Process> DebuggerCore::enumerate_processes() const {
+	QMap<yad64::pid_t, Process> ret;
 	
 	HANDLE handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if(handle != INVALID_HANDLE_VALUE) {
@@ -629,7 +629,7 @@ QMap<edb::pid_t, Process> DebuggerCore::enumerate_processes() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QString DebuggerCore::process_exe(edb::pid_t pid) const {
+QString DebuggerCore::process_exe(yad64::pid_t pid) const {
 	QString ret;
 
 	// These functions don't work immediately after CreateProcess but only
@@ -680,7 +680,7 @@ QString DebuggerCore::process_exe(edb::pid_t pid) const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QString DebuggerCore::process_cwd(edb::pid_t pid) const {
+QString DebuggerCore::process_cwd(yad64::pid_t pid) const {
 	// TODO: implement this
 	return QString();
 }
@@ -689,8 +689,8 @@ QString DebuggerCore::process_cwd(edb::pid_t pid) const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::pid_t DebuggerCore::parent_pid(edb::pid_t pid) const {
-	edb::pid_t parent = 1; // 1??
+yad64::pid_t DebuggerCore::parent_pid(yad64::pid_t pid) const {
+	yad64::pid_t parent = 1; // 1??
 	HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, pid);
 	if(hProcessSnap != INVALID_HANDLE_VALUE) {
 		PROCESSENTRY32W pe32;
@@ -718,7 +718,7 @@ QList<MemoryRegion> DebuggerCore::memory_regions() const {
 
 	if(pid_ != 0) {
 		if(HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid_)) {
-			edb::address_t addr = 0;
+			yad64::address_t addr = 0;
 			LPVOID last_base    = reinterpret_cast<LPVOID>(-1);
 
 			Q_FOREVER {
@@ -733,9 +733,9 @@ QList<MemoryRegion> DebuggerCore::memory_regions() const {
 
 				if(info.State == MEM_COMMIT) {
 
-					const edb::address_t start = reinterpret_cast<edb::address_t>(info.BaseAddress);
-					const edb::address_t end   = reinterpret_cast<edb::address_t>(info.BaseAddress) + info.RegionSize;
-					const edb::address_t base  = reinterpret_cast<edb::address_t>(info.AllocationBase);
+					const yad64::address_t start = reinterpret_cast<yad64::address_t>(info.BaseAddress);
+					const yad64::address_t end   = reinterpret_cast<yad64::address_t>(info.BaseAddress) + info.RegionSize;
+					const yad64::address_t base  = reinterpret_cast<yad64::address_t>(info.AllocationBase);
 					const QString name         = QString();
 					const IRegion::permissions_t permissions = info.Protect; // let MemoryRegion handle permissions and modifiers
 					
@@ -761,7 +761,7 @@ QList<MemoryRegion> DebuggerCore::memory_regions() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QList<QByteArray> DebuggerCore::process_args(edb::pid_t pid) const {
+QList<QByteArray> DebuggerCore::process_args(yad64::pid_t pid) const {
 	QList<QByteArray> ret;
 	if(pid != 0) {
 		// TODO: assert attached!

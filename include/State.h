@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class IState;
 
-class EDB_EXPORT State {
+class YAD64_EXPORT State {
 	friend class DebuggerCore;
 
 public:
@@ -43,23 +43,23 @@ public:
 public:
 	QByteArray xmm_register(int n) const;
 	QString flags_to_string() const;
-	QString flags_to_string(edb::reg_t flags) const;
+	QString flags_to_string(yad64::reg_t flags) const;
 	Register value(const QString &reg) const;
-	edb::address_t frame_pointer() const;
-	edb::address_t instruction_pointer() const;
-	edb::address_t stack_pointer() const;
-	edb::reg_t debug_register(int n) const;
-	edb::reg_t flags() const;
+	yad64::address_t frame_pointer() const;
+	yad64::address_t instruction_pointer() const;
+	yad64::address_t stack_pointer() const;
+	yad64::reg_t debug_register(int n) const;
+	yad64::reg_t flags() const;
 	long double fpu_register(int n) const;
 	quint64 mmx_register(int n) const;
 	void adjust_stack(int bytes);
 	void clear();
 
 public:
-	void set_debug_register(int n, edb::reg_t value);
-	void set_flags(edb::reg_t flags);
-	void set_instruction_pointer(edb::address_t value);
-	void set_register(const QString &name, edb::reg_t value);
+	void set_debug_register(int n, yad64::reg_t value);
+	void set_flags(yad64::reg_t flags);
+	void set_instruction_pointer(yad64::address_t value);
+	void set_register(const QString &name, yad64::reg_t value);
 
 public:
 	Register operator[](const QString &reg) const;

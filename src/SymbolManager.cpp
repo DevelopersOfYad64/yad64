@@ -49,12 +49,12 @@ void SymbolManager::clear() {
 }
 
 //------------------------------------------------------------------------------
-// Name: load_symbol_file(const QString &filename, edb::address_t base)
+// Name: load_symbol_file(const QString &filename, yad64::address_t base)
 // Desc:
 //------------------------------------------------------------------------------
-void SymbolManager::load_symbol_file(const QString &filename, edb::address_t base) {
+void SymbolManager::load_symbol_file(const QString &filename, yad64::address_t base) {
 
-	const QString name = edb::v1::basename(filename);
+	const QString name = yad64::v1::basename(filename);
 
 	if(!symbol_files_.contains(name)) {
 		const QString map_file = QString("%1/%2.map").arg(symbol_directory_, name);
@@ -78,21 +78,21 @@ const Symbol::pointer SymbolManager::find(const QString &name) const {
 }
 
 //------------------------------------------------------------------------------
-// Name: find(edb::address_t address) const
+// Name: find(yad64::address_t address) const
 // Desc:
 //------------------------------------------------------------------------------
-const Symbol::pointer SymbolManager::find(edb::address_t address) const {
-	QMap<edb::address_t, Symbol::pointer>::const_iterator it = symbols_by_address_.find(address);
+const Symbol::pointer SymbolManager::find(yad64::address_t address) const {
+	QMap<yad64::address_t, Symbol::pointer>::const_iterator it = symbols_by_address_.find(address);
 	return (it != symbols_by_address_.end()) ? it.value() : Symbol::pointer();
 }
 
 //------------------------------------------------------------------------------
-// Name: find_near_symbol(edb::address_t address) const
+// Name: find_near_symbol(yad64::address_t address) const
 // Desc:
 //------------------------------------------------------------------------------
-const Symbol::pointer SymbolManager::find_near_symbol(edb::address_t address) const {
+const Symbol::pointer SymbolManager::find_near_symbol(yad64::address_t address) const {
 
-	QMap<edb::address_t, Symbol::pointer>::const_iterator it = symbols_by_address_.lowerBound(address);
+	QMap<yad64::address_t, Symbol::pointer>::const_iterator it = symbols_by_address_.lowerBound(address);
 	if(it != symbols_by_address_.end()) {
 
 		// not an exact match, we should backup one
@@ -126,18 +126,18 @@ void SymbolManager::add_symbol(const Symbol::pointer &symbol) {
 }
 
 //------------------------------------------------------------------------------
-// Name: process_symbol_file(const QString &f, edb::address_t base, const QString &library_filename)
+// Name: process_symbol_file(const QString &f, yad64::address_t base, const QString &library_filename)
 // Desc:
 //------------------------------------------------------------------------------
-bool SymbolManager::process_symbol_file(const QString &f, edb::address_t base, const QString &library_filename) {
+bool SymbolManager::process_symbol_file(const QString &f, yad64::address_t base, const QString &library_filename) {
 
 	// TODO: support filename starting with "http://" being fetched from a web server
 
 	qDebug() << "loading symbols:" << f;
 	std::ifstream file(qPrintable(f));
 	if(file) {
-		edb::address_t sym_start;
-		edb::address_t sym_end;
+		yad64::address_t sym_start;
+		yad64::address_t sym_end;
 		std::string    sym_name;
 		std::string    date;
 		std::string    md5;
@@ -147,13 +147,13 @@ bool SymbolManager::process_symbol_file(const QString &f, edb::address_t base, c
 			if(file >> md5 >> filename) {
 
 				const QByteArray file_md5   = QByteArray::fromHex(md5.c_str());
-				const QByteArray actual_md5 = edb::v1::get_file_md5(library_filename);
+				const QByteArray actual_md5 = yad64::v1::get_file_md5(library_filename);
 
 				if(file_md5 != actual_md5) {
 					qDebug() << "Your symbol file for" << library_filename << "appears to not match the actual file, perhaps you should rebuild your symbols?";
 				}
 
-				const QString prefix = edb::v1::basename(QString::fromStdString(filename));
+				const QString prefix = yad64::v1::basename(QString::fromStdString(filename));
 				char sym_type;
 
 				while(file >> std::hex >> sym_start >> std::hex >> sym_end >> sym_type >> sym_name) {

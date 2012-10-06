@@ -60,9 +60,9 @@ void DialogSpecifiedFunctions::on_function_list_doubleClicked(const QModelIndex 
 
 	bool ok;
 	const QString s = index.data().toString();
-	const edb::address_t addr = edb::v1::string_to_address(s, ok);
+	const yad64::address_t addr = yad64::v1::string_to_address(s, ok);
 	if(ok) {
-		edb::v1::jump_to_address(addr);
+		yad64::v1::jump_to_address(addr);
 	}
 }
 
@@ -71,11 +71,11 @@ void DialogSpecifiedFunctions::on_function_list_doubleClicked(const QModelIndex 
 // Desc:
 //------------------------------------------------------------------------------
 void DialogSpecifiedFunctions::do_find() {
-	IAnalyzer *const analyzer = edb::v1::analyzer();
-	QSet<edb::address_t> functions = analyzer->specified_functions();
+	IAnalyzer *const analyzer = yad64::v1::analyzer();
+	QSet<yad64::address_t> functions = analyzer->specified_functions();
 	QStringList results;
-	Q_FOREACH(edb::address_t address, functions) {
-		results << QString("%1").arg(edb::v1::format_pointer(address));
+	Q_FOREACH(yad64::address_t address, functions) {
+		results << QString("%1").arg(yad64::v1::format_pointer(address));
 	}
 	model_->setStringList(results);
 }

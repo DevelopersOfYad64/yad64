@@ -57,7 +57,7 @@ QMenu *OpcodeSearcher::menu(QWidget *parent) {
 void OpcodeSearcher::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogOpcodes(edb::v1::debugger_ui);
+		dialog_ = new DialogOpcodes(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

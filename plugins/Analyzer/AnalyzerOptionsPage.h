@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace Ui { class AnalyzerOptionsPage; }
 
 class AnalyzerOptionsPage : public QWidget {
-	Q_OBJECT;
+    Q_OBJECT
 
 public:
 	AnalyzerOptionsPage(QWidget *parent = 0);

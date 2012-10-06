@@ -57,7 +57,7 @@ QMenu *SymbolViewer::menu(QWidget *parent) {
 void SymbolViewer::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogSymbolViewer(edb::v1::debugger_ui);
+		dialog_ = new DialogSymbolViewer(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

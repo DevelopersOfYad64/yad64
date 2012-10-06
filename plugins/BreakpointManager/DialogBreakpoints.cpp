@@ -63,7 +63,7 @@ void DialogBreakpoints::updateList() {
 	ui->tableWidget->setSortingEnabled(false);
 	ui->tableWidget->setRowCount(0);
 
-	const IDebuggerCore::BreakpointState breakpoint_state = edb::v1::debugger_core->backup_breakpoints();
+	const IDebuggerCore::BreakpointState breakpoint_state = yad64::v1::debugger_core->backup_breakpoints();
 
 	Q_FOREACH(const IBreakpoint::pointer &bp, breakpoint_state) {
 		const int row = ui->tableWidget->rowCount();
@@ -71,14 +71,14 @@ void DialogBreakpoints::updateList() {
 
 		if(!bp->internal()) {
 
-			const edb::address_t address = bp->address();
+			const yad64::address_t address = bp->address();
 			const QString condition      = bp->condition;
 			const QByteArray orig_bytes  = bp->original_bytes();
 			const bool onetime           = bp->one_time();
-			const QString symname        = edb::v1::find_function_symbol(address, QString(), 0);
-			const QString bytes          = edb::v1::format_bytes(orig_bytes);
+			const QString symname        = yad64::v1::find_function_symbol(address, QString(), 0);
+			const QString bytes          = yad64::v1::format_bytes(orig_bytes);
 
-			ui->tableWidget->setItem(row, 0, new QTableWidgetItem(edb::v1::format_pointer(address)));
+			ui->tableWidget->setItem(row, 0, new QTableWidgetItem(yad64::v1::format_pointer(address)));
 			ui->tableWidget->setItem(row, 1, new QTableWidgetItem(condition));
 			ui->tableWidget->setItem(row, 2, new QTableWidgetItem(bytes));
 			ui->tableWidget->setItem(row, 3, new QTableWidgetItem(onetime ? tr("One Time") : tr("Standard")));
@@ -99,11 +99,11 @@ void DialogBreakpoints::on_btnAdd_clicked() {
     QString text = QInputDialog::getText(this, tr("Add Breakpoint"), tr("Address:"), QLineEdit::Normal, QString(), &ok);
 
 	if(ok && !text.isEmpty()) {
-		Expression<edb::address_t> expr(text, edb::v1::get_variable, edb::v1::get_value);
+		Expression<yad64::address_t> expr(text, yad64::v1::get_variable, yad64::v1::get_value);
 		ExpressionError err;
-		const edb::address_t address = expr.evaluate_expression(ok, err);
+		const yad64::address_t address = expr.evaluate_expression(ok, err);
 		if(ok) {
-			edb::v1::create_breakpoint(address);
+			yad64::v1::create_breakpoint(address);
 			updateList();
 
 		} else {
@@ -120,12 +120,12 @@ void DialogBreakpoints::on_btnCondition_clicked() {
 	QList<QTableWidgetItem *> sel = ui->tableWidget->selectedItems();
 	if(sel.size() != 0) {
 		bool ok;
-		const edb::address_t address = edb::v1::string_to_address(sel.begin()[0]->text(), ok);
+		const yad64::address_t address = yad64::v1::string_to_address(sel.begin()[0]->text(), ok);
 		if(ok) {
-			const QString condition = edb::v1::get_breakpoint_condition(address);
+			const QString condition = yad64::v1::get_breakpoint_condition(address);
 			const QString text = QInputDialog::getText(this, tr("Set Breakpoint Condition"), tr("Expression:"), QLineEdit::Normal, condition, &ok);
 		    if(ok) {
-				edb::v1::set_breakpoint_condition(address, text);
+				yad64::v1::set_breakpoint_condition(address, text);
 				updateList();
 			}
 		}
@@ -141,10 +141,10 @@ void DialogBreakpoints::on_btnAddFunction_clicked() {
     bool ok;
     const QString text = QInputDialog::getText(this, tr("Add Breakpoint On Library Function"), tr("Function Name:"), QLineEdit::Normal, QString(), &ok);
 	if(ok && !text.isEmpty()) {
-		const QList<Symbol::pointer> syms = edb::v1::symbol_manager().symbols();
+		const QList<Symbol::pointer> syms = yad64::v1::symbol_manager().symbols();
 		Q_FOREACH(const Symbol::pointer &current, syms) {
 			if(current.name_no_prefix == text) {
-				edb::v1::create_breakpoint(current.address);
+				yad64::v1::create_breakpoint(current.address);
 			}
 		}
 		updateList();
@@ -161,9 +161,9 @@ void DialogBreakpoints::on_btnRemove_clicked() {
 	Q_FOREACH(QTableWidgetItem *it, sel) {
 		if(it->column() == 0) { // address column
 			bool ok;
-			const edb::address_t address = edb::v1::string_to_address(it->text(), ok);
+			const yad64::address_t address = yad64::v1::string_to_address(it->text(), ok);
 			if(ok) {
-				edb::v1::remove_breakpoint(address);
+				yad64::v1::remove_breakpoint(address);
 			}
 		}
 	}
@@ -180,9 +180,9 @@ void DialogBreakpoints::on_tableWidget_cellDoubleClicked(int row, int col) {
 		{
 			if(QTableWidgetItem *const address_item = ui->tableWidget->item(row, 0)) {
 				bool ok;
-				const edb::address_t address = edb::v1::string_to_address(address_item->text(), ok);
+				const yad64::address_t address = yad64::v1::string_to_address(address_item->text(), ok);
 				if(ok) {
-					edb::v1::jump_to_address(address);
+					yad64::v1::jump_to_address(address);
 				}
 			}
 			break;
@@ -191,12 +191,12 @@ void DialogBreakpoints::on_tableWidget_cellDoubleClicked(int row, int col) {
 		{
 			if(QTableWidgetItem *const address_item = ui->tableWidget->item(row, 0)) {
 				bool ok;
-				const edb::address_t address = edb::v1::string_to_address(address_item->text(), ok);
+				const yad64::address_t address = yad64::v1::string_to_address(address_item->text(), ok);
 				if(ok) {
-					const QString condition = edb::v1::get_breakpoint_condition(address);
+					const QString condition = yad64::v1::get_breakpoint_condition(address);
 					const QString text = QInputDialog::getText(this, tr("Set Breakpoint Condition"), tr("Expression:"), QLineEdit::Normal, condition, &ok);
 					if(ok) {
-						edb::v1::set_breakpoint_condition(address, text);
+						yad64::v1::set_breakpoint_condition(address, text);
 						updateList();
 					}
 				}

@@ -41,13 +41,13 @@ private:
 public:
 	virtual void setup_register_view(QCategoryList *category_list);
 	virtual void update_register_view(const QString &default_region_name);
-	virtual QStringList update_instruction_info(edb::address_t address);
+    virtual QStringList update_instruction_info(yad64::address_t address);
 	virtual Register value_from_item(const QTreeWidgetItem &item);
 	virtual void reset();
 
 public:
-	virtual bool is_filling(const edb::Instruction &insn) const;
-	virtual bool can_step_over(const edb::Instruction &insn) const;
+    virtual bool is_filling(const yad64::Instruction &insn) const;
+    virtual bool can_step_over(const yad64::Instruction &insn) const;
 
 private:
 	QTreeWidgetItem *get_register_item(unsigned int index);

@@ -112,9 +112,9 @@ bool process_map_line(const QString &line, MemoryRegion *region) {
 
 	Q_ASSERT(region);
 
-	edb::address_t start;
-	edb::address_t end;
-	edb::address_t base;
+	yad64::address_t start;
+	yad64::address_t end;
+	yad64::address_t base;
 	IRegion::permissions_t permissions;
 	QString name;
 
@@ -179,7 +179,7 @@ bool DebuggerCore::has_extension(quint64 ext) const {
 // Name: page_size() const
 // Desc: returns the size of a page on this system
 //------------------------------------------------------------------------------
-edb::address_t DebuggerCore::page_size() const {
+yad64::address_t DebuggerCore::page_size() const {
 	return page_size_;
 }
 
@@ -200,10 +200,10 @@ long DebuggerCore::ptrace_traceme() {
 }
 
 //------------------------------------------------------------------------------
-// Name: ptrace_continue(edb::tid_t tid, long status)
+// Name: ptrace_continue(yad64::tid_t tid, long status)
 // Desc:
 //------------------------------------------------------------------------------
-long DebuggerCore::ptrace_continue(edb::tid_t tid, long status) {
+long DebuggerCore::ptrace_continue(yad64::tid_t tid, long status) {
 	Q_ASSERT(waited_threads_.contains(tid));
 	Q_ASSERT(tid != 0);
 	waited_threads_.remove(tid);
@@ -211,10 +211,10 @@ long DebuggerCore::ptrace_continue(edb::tid_t tid, long status) {
 }
 
 //------------------------------------------------------------------------------
-// Name: ptrace_step(edb::tid_t tid, long status)
+// Name: ptrace_step(yad64::tid_t tid, long status)
 // Desc:
 //------------------------------------------------------------------------------
-long DebuggerCore::ptrace_step(edb::tid_t tid, long status) {
+long DebuggerCore::ptrace_step(yad64::tid_t tid, long status) {
 	Q_ASSERT(waited_threads_.contains(tid));
 	Q_ASSERT(tid != 0);
 	waited_threads_.remove(tid);
@@ -222,30 +222,30 @@ long DebuggerCore::ptrace_step(edb::tid_t tid, long status) {
 }
 
 //------------------------------------------------------------------------------
-// Name: ptrace_set_options(edb::tid_t tid, long options)
+// Name: ptrace_set_options(yad64::tid_t tid, long options)
 // Desc:
 //------------------------------------------------------------------------------
-long DebuggerCore::ptrace_set_options(edb::tid_t tid, long options) {
+long DebuggerCore::ptrace_set_options(yad64::tid_t tid, long options) {
 	Q_ASSERT(waited_threads_.contains(tid));
 	Q_ASSERT(tid != 0);
 	return ptrace(PTRACE_SETOPTIONS, tid, 0, options);
 }
 
 //------------------------------------------------------------------------------
-// Name: ptrace_get_event_message(edb::tid_t tid, unsigned long *message)
+// Name: ptrace_get_event_message(yad64::tid_t tid, unsigned long *message)
 // Desc:
 //------------------------------------------------------------------------------
-long DebuggerCore::ptrace_get_event_message(edb::tid_t tid, unsigned long *message) {
+long DebuggerCore::ptrace_get_event_message(yad64::tid_t tid, unsigned long *message) {
 	Q_ASSERT(waited_threads_.contains(tid));
 	Q_ASSERT(tid != 0);
 	return ptrace(PTRACE_GETEVENTMSG, tid, 0, message);
 }
 
 //------------------------------------------------------------------------------
-// Name: handle_event(DebugEvent &event, edb::tid_t tid, int status)
+// Name: handle_event(DebugEvent &event, yad64::tid_t tid, int status)
 // Desc:
 //------------------------------------------------------------------------------
-bool DebuggerCore::handle_event(DebugEvent &event, edb::tid_t tid, int status) {
+bool DebuggerCore::handle_event(DebugEvent &event, yad64::tid_t tid, int status) {
 
 	// note that we have waited on this thread
 	waited_threads_.insert(tid);
@@ -307,7 +307,7 @@ bool DebuggerCore::handle_event(DebugEvent &event, edb::tid_t tid, int status) {
 void DebuggerCore::stop_threads() {
 	for(threadmap_t::iterator it = threads_.begin(); it != threads_.end(); ++it) {
 		if(!waited_threads_.contains(it.key())) {
-			const edb::tid_t tid = it.key();
+			const yad64::tid_t tid = it.key();
 
 			tgkill(pid(), tid, SIGSTOP);
 
@@ -333,9 +333,9 @@ bool DebuggerCore::wait_debug_event(DebugEvent &event, int msecs) {
 
 	if(attached()) {
 		if(!native::wait_for_sigchld(msecs)) {
-			Q_FOREACH(edb::tid_t thread, thread_ids()) {
+			Q_FOREACH(yad64::tid_t thread, thread_ids()) {
 				int status;
-				const edb::tid_t tid = native::waitpid(thread, &status, __WALL | WNOHANG);
+				const yad64::tid_t tid = native::waitpid(thread, &status, __WALL | WNOHANG);
 				if(tid > 0 && handle_event(event, tid, status)) {
 					return true;
 				}
@@ -346,12 +346,12 @@ bool DebuggerCore::wait_debug_event(DebugEvent &event, int msecs) {
 }
 
 //------------------------------------------------------------------------------
-// Name: read_data(edb::address_t address, bool &ok)
+// Name: read_data(yad64::address_t address, bool &ok)
 // Desc:
 // Note: this will fail on newer versions of linux if called from a
 //       different thread than the one which attached to process
 //------------------------------------------------------------------------------
-long DebuggerCore::read_data(edb::address_t address, bool &ok) {
+long DebuggerCore::read_data(yad64::address_t address, bool &ok) {
 	errno = 0;
 	const long v = ptrace(PTRACE_PEEKTEXT, pid(), address, 0);
 	SET_OK(ok, v);
@@ -359,18 +359,18 @@ long DebuggerCore::read_data(edb::address_t address, bool &ok) {
 }
 
 //------------------------------------------------------------------------------
-// Name: write_data(edb::address_t address, long value)
+// Name: write_data(yad64::address_t address, long value)
 // Desc:
 //------------------------------------------------------------------------------
-bool DebuggerCore::write_data(edb::address_t address, long value) {
+bool DebuggerCore::write_data(yad64::address_t address, long value) {
 	return ptrace(PTRACE_POKETEXT, pid(), address, value) != -1;
 }
 
 //------------------------------------------------------------------------------
-// Name: attach_thread(edb::tid_t tid)
+// Name: attach_thread(yad64::tid_t tid)
 // Desc:
 //------------------------------------------------------------------------------
-bool DebuggerCore::attach_thread(edb::tid_t tid) {
+bool DebuggerCore::attach_thread(yad64::tid_t tid) {
 	if(ptrace(PTRACE_ATTACH, tid, 0, 0) == 0) {
 		// I *think* that the PTRACE_O_TRACECLONE is only valid on
 		// on stopped threads
@@ -388,10 +388,10 @@ bool DebuggerCore::attach_thread(edb::tid_t tid) {
 }
 
 //------------------------------------------------------------------------------
-// Name: attach(edb::pid_t pid)
+// Name: attach(yad64::pid_t pid)
 // Desc:
 //------------------------------------------------------------------------------
-bool DebuggerCore::attach(edb::pid_t pid) {
+bool DebuggerCore::attach(yad64::pid_t pid) {
 	detach();
 
 	bool attached;
@@ -402,7 +402,7 @@ bool DebuggerCore::attach(edb::pid_t pid) {
 			// this can get tricky if the threads decide to spawn new threads
 			// when we are attaching. I wish that linux had an atomic way to do this
 			// all in one shot
-			const edb::tid_t tid = s.toUInt();
+			const yad64::tid_t tid = s.toUInt();
 			if(!threads_.contains(tid) && attach_thread(tid)) {
 				attached = true;
 			}
@@ -431,7 +431,7 @@ void DebuggerCore::detach() {
 	
 		clear_breakpoints();
 		
-		Q_FOREACH(edb::tid_t thread, thread_ids()) {
+		Q_FOREACH(yad64::tid_t thread, thread_ids()) {
 			if(ptrace(PTRACE_DETACH, thread, 0, 0) == 0) {
 				native::waitpid(thread, 0, __WALL);
 			}
@@ -474,16 +474,16 @@ void DebuggerCore::pause() {
 }
 
 //------------------------------------------------------------------------------
-// Name: resume(edb::EVENT_STATUS status)
+// Name: resume(yad64::EVENT_STATUS status)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCore::resume(edb::EVENT_STATUS status) {
+void DebuggerCore::resume(yad64::EVENT_STATUS status) {
 	// TODO: assert that we are paused
 
 	if(attached()) {
-		if(status != edb::DEBUG_STOP) {
-			const edb::tid_t tid = active_thread();
-			const int code = (status == edb::DEBUG_EXCEPTION_NOT_HANDLED) ? resume_code(threads_[tid].status) : 0;
+		if(status != yad64::DEBUG_STOP) {
+			const yad64::tid_t tid = active_thread();
+			const int code = (status == yad64::DEBUG_EXCEPTION_NOT_HANDLED) ? resume_code(threads_[tid].status) : 0;
 			ptrace_continue(tid, code);
 
 			// resume the other threads passing the signal they originally reported had
@@ -497,16 +497,16 @@ void DebuggerCore::resume(edb::EVENT_STATUS status) {
 }
 
 //------------------------------------------------------------------------------
-// Name: step(edb::EVENT_STATUS status)
+// Name: step(yad64::EVENT_STATUS status)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCore::step(edb::EVENT_STATUS status) {
+void DebuggerCore::step(yad64::EVENT_STATUS status) {
 	// TODO: assert that we are paused
 
 	if(attached()) {
-		if(status != edb::DEBUG_STOP) {
-			const edb::tid_t tid = active_thread();
-			const int code = (status == edb::DEBUG_EXCEPTION_NOT_HANDLED) ? resume_code(threads_[tid].status) : 0;
+		if(status != yad64::DEBUG_STOP) {
+			const yad64::tid_t tid = active_thread();
+			const int code = (status == yad64::DEBUG_EXCEPTION_NOT_HANDLED) ? resume_code(threads_[tid].status) : 0;
 			ptrace_step(tid, code);
 		}
 	}
@@ -523,7 +523,7 @@ void DebuggerCore::get_state(State &state) {
 
 	if(attached()) {
 		if(ptrace(PTRACE_GETREGS, active_thread(), 0, &state_impl->regs_) != -1) {
-		#if defined(EDB_X86)
+		#if defined(YAD64_X86)
 			struct user_desc desc;
 			std::memset(&desc, 0, sizeof(desc));
 
@@ -538,7 +538,7 @@ void DebuggerCore::get_state(State &state) {
 			} else {
 				state_impl->fs_base = 0;
 			}
-		#elif defined(EDB_X86_64)
+		#elif defined(YAD64_X86_64)
 		#endif
 		}
 
@@ -661,10 +661,10 @@ bool DebuggerCore::open(const QString &path, const QString &cwd, const QList<QBy
 }
 
 //------------------------------------------------------------------------------
-// Name: set_active_thread(edb::tid_t tid)
+// Name: set_active_thread(yad64::tid_t tid)
 // Desc:
 //------------------------------------------------------------------------------
-void DebuggerCore::set_active_thread(edb::tid_t tid) {
+void DebuggerCore::set_active_thread(yad64::tid_t tid) {
 	if(threads_.contains(tid)) {
 #if 0
 		active_thread_ = tid;
@@ -697,10 +697,10 @@ IState *DebuggerCore::create_state() const {
 }
 
 //------------------------------------------------------------------------------
-// Name: create_region(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, permissions_t permissions)
+// Name: create_region(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, permissions_t permissions)
 // Desc:
 //------------------------------------------------------------------------------
-IRegion *DebuggerCore::create_region(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, IRegion::permissions_t permissions) const {
+IRegion *DebuggerCore::create_region(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, IRegion::permissions_t permissions) const {
 	return new PlatformRegion(start, end, base, name, permissions);
 }
 
@@ -708,8 +708,8 @@ IRegion *DebuggerCore::create_region(edb::address_t start, edb::address_t end, e
 // Name: enumerate_processes() const
 // Desc:
 //------------------------------------------------------------------------------
-QMap<edb::pid_t, Process> DebuggerCore::enumerate_processes() const {
-	QMap<edb::pid_t, Process> ret;
+QMap<yad64::pid_t, Process> DebuggerCore::enumerate_processes() const {
+	QMap<yad64::pid_t, Process> ret;
 	
 	QDir proc_directory("/proc/");
 	QFileInfoList entries = proc_directory.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -754,30 +754,30 @@ QMap<edb::pid_t, Process> DebuggerCore::enumerate_processes() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QString DebuggerCore::process_exe(edb::pid_t pid) const {
-	return edb::v1::symlink_target(QString("/proc/%1/exe").arg(pid));
+QString DebuggerCore::process_exe(yad64::pid_t pid) const {
+	return yad64::v1::symlink_target(QString("/proc/%1/exe").arg(pid));
 }
 
 //------------------------------------------------------------------------------
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QString DebuggerCore::process_cwd(edb::pid_t pid) const {
-	return edb::v1::symlink_target(QString("/proc/%1/cwd").arg(pid));
+QString DebuggerCore::process_cwd(yad64::pid_t pid) const {
+	return yad64::v1::symlink_target(QString("/proc/%1/cwd").arg(pid));
 }
 
 //------------------------------------------------------------------------------
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::pid_t DebuggerCore::parent_pid(edb::pid_t pid) const {
+yad64::pid_t DebuggerCore::parent_pid(yad64::pid_t pid) const {
 
 	QFile file(QString("/proc/%1/stat").arg(pid));
 	if(!file.open(QIODevice::ReadOnly)) {
 		return 0;
 	}
 
-	edb::pid_t ret = 0;
+	yad64::pid_t ret = 0;
 
 	QTextStream in(&file);
 
@@ -830,7 +830,7 @@ QList<MemoryRegion> DebuggerCore::memory_regions() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-QList<QByteArray> DebuggerCore::process_args(edb::pid_t pid) const {
+QList<QByteArray> DebuggerCore::process_args(yad64::pid_t pid) const {
 
 	QList<QByteArray> ret;
 

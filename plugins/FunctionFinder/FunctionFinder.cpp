@@ -57,7 +57,7 @@ QMenu *FunctionFinder::menu(QWidget *parent) {
 void FunctionFinder::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogFunctions(edb::v1::debugger_ui);
+		dialog_ = new DialogFunctions(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

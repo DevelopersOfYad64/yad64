@@ -50,10 +50,10 @@ void DialogThreads::showEvent(QShowEvent *) {
 	ui->thread_table->setSortingEnabled(false);
 	ui->thread_table->setRowCount(0);
 
-	QList<edb::tid_t> threads       = edb::v1::debugger_core->thread_ids();
-	const edb::tid_t current_thread = edb::v1::debugger_core->active_thread();
+	QList<yad64::tid_t> threads       = yad64::v1::debugger_core->thread_ids();
+	const yad64::tid_t current_thread = yad64::v1::debugger_core->active_thread();
 
-	Q_FOREACH(edb::tid_t thread, threads) {
+	Q_FOREACH(yad64::tid_t thread, threads) {
 		const int row = ui->thread_table->rowCount();
 		ui->thread_table->insertRow(row);
 
@@ -79,7 +79,7 @@ void DialogThreads::showEvent(QShowEvent *) {
 // Name: selected_thread()
 // Desc:
 //------------------------------------------------------------------------------
-edb::tid_t DialogThreads::selected_thread() {
+yad64::tid_t DialogThreads::selected_thread() {
 	QList<QTableWidgetItem *> selected = ui->thread_table->selectedItems();
 	if(!selected.isEmpty()) {
 		return selected[0]->data(Qt::UserRole).toUInt();

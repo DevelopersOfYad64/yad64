@@ -28,9 +28,9 @@ public:
 
 public:
 	// thread support stuff (optional)
-	virtual QList<edb::tid_t> thread_ids() const;
-	virtual edb::tid_t active_thread() const;
-	virtual void set_active_thread(edb::tid_t);
+	virtual QList<yad64::tid_t> thread_ids() const;
+	virtual yad64::tid_t active_thread() const;
+	virtual void set_active_thread(yad64::tid_t);
 
 public:
 	virtual bool open(const QString &path, const QString &cwd, const QList<QByteArray> &args);
@@ -38,21 +38,21 @@ public:
 
 public:
 	virtual BreakpointState backup_breakpoints() const;
-	virtual IBreakpoint::pointer add_breakpoint(edb::address_t address);
-	virtual IBreakpoint::pointer find_breakpoint(edb::address_t address);
+	virtual IBreakpoint::pointer add_breakpoint(yad64::address_t address);
+	virtual IBreakpoint::pointer find_breakpoint(yad64::address_t address);
 	virtual int breakpoint_size() const;
 	virtual void clear_breakpoints();
-	virtual void remove_breakpoint(edb::address_t address);
+	virtual void remove_breakpoint(yad64::address_t address);
 
 public:
-	virtual edb::pid_t pid() const;
+	virtual yad64::pid_t pid() const;
 
 protected:
 	bool attached() const;
 
 protected:
-	edb::tid_t      active_thread_;
-	edb::pid_t      pid_;
+	yad64::tid_t      active_thread_;
+	yad64::pid_t      pid_;
 	BreakpointState breakpoints_;
 };
 

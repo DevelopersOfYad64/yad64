@@ -57,7 +57,7 @@ QMenu *ProcessProperties::menu(QWidget *parent) {
 void ProcessProperties::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogProcessProperties(edb::v1::debugger_ui);
+		dialog_ = new DialogProcessProperties(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

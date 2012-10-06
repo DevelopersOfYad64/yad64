@@ -55,9 +55,9 @@ DialogStrings::~DialogStrings() {
 //------------------------------------------------------------------------------
 void DialogStrings::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 	bool ok;
-	const edb::address_t addr = item->data(Qt::UserRole).toULongLong(&ok);
+	const yad64::address_t addr = item->data(Qt::UserRole).toULongLong(&ok);
 	if(ok) {
-		edb::v1::dump_data(addr, false);
+		yad64::v1::dump_data(addr, false);
 	}
 }
 
@@ -67,7 +67,7 @@ void DialogStrings::on_listWidget_itemDoubleClicked(QListWidgetItem *item) {
 //------------------------------------------------------------------------------
 void DialogStrings::showEvent(QShowEvent *) {
 	filter_model_->setFilterKeyColumn(3);
-	filter_model_->setSourceModel(&edb::v1::memory_regions());
+	filter_model_->setSourceModel(&yad64::v1::memory_regions());
 	ui->tableView->setModel(filter_model_);
 
 	ui->progressBar->setValue(0);
@@ -80,7 +80,7 @@ void DialogStrings::showEvent(QShowEvent *) {
 //------------------------------------------------------------------------------
 void DialogStrings::do_find() {
 
-	const int min_string_length = edb::v1::config().min_string_length;
+	const int min_string_length = yad64::v1::config().min_string_length;
 
 	const QItemSelectionModel *const selection_model = ui->tableView->selectionModel();
 	const QModelIndexList sel = selection_model->selectedRows();
@@ -100,26 +100,26 @@ void DialogStrings::do_find() {
 
 		if(const MemoryRegion *const region = reinterpret_cast<const MemoryRegion *>(index.internalPointer())) {
 
-			edb::address_t start_address     = region->start();
-			const edb::address_t end_address = region->end();
-			const edb::address_t orig_start  = start_address;
+			yad64::address_t start_address     = region->start();
+			const yad64::address_t end_address = region->end();
+			const yad64::address_t orig_start  = start_address;
 
 			// do the search for this region!
 			while(start_address < end_address) {
 
 				int string_length = 0;
-				bool ok = edb::v1::get_ascii_string_at_address(start_address, str, min_string_length, 256, string_length);
+				bool ok = yad64::v1::get_ascii_string_at_address(start_address, str, min_string_length, 256, string_length);
 				if(ok) {
-					QListWidgetItem *const item = new QListWidgetItem(QString("%1: [ASCII] %2").arg(edb::v1::format_pointer(start_address)).arg(str));
+					QListWidgetItem *const item = new QListWidgetItem(QString("%1: [ASCII] %2").arg(yad64::v1::format_pointer(start_address)).arg(str));
 					item->setData(Qt::UserRole, start_address);
 					ui->listWidget->addItem(item);
 				} else {
 				
 					if(ui->search_unicode->isChecked()) {
 						string_length = 0;
-						ok = edb::v1::get_utf16_string_at_address(start_address, str, min_string_length, 256, string_length);
+						ok = yad64::v1::get_utf16_string_at_address(start_address, str, min_string_length, 256, string_length);
 						if(ok) {
-							QListWidgetItem *const item = new QListWidgetItem(QString("%1: [UTF16] %2").arg(edb::v1::format_pointer(start_address)).arg(str));
+							QListWidgetItem *const item = new QListWidgetItem(QString("%1: [UTF16] %2").arg(yad64::v1::format_pointer(start_address)).arg(str));
 							item->setData(Qt::UserRole, start_address);
 							ui->listWidget->addItem(item);
 						}

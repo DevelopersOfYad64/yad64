@@ -109,7 +109,7 @@ int DebugEvent::stop_code() const {
 // Name: thread() const
 // Desc: what was the TID for this event
 //------------------------------------------------------------------------------
-edb::tid_t DebugEvent::thread() const {
+yad64::tid_t DebugEvent::thread() const {
 	return event.dwThreadId;
 }
 
@@ -117,7 +117,7 @@ edb::tid_t DebugEvent::thread() const {
 // Name: process() const
 // Desc: what was the PID for this event
 //------------------------------------------------------------------------------
-edb::pid_t DebugEvent::process() const {
+yad64::pid_t DebugEvent::process() const {
 	return event.dwProcessId;
 }
 
@@ -247,9 +247,9 @@ bool DebugEvent::is_error() const {
 DebugEvent::Message DebugEvent::error_description() const {
 	Q_ASSERT(is_error());
 
-	edb::address_t fault_address = static_cast<edb::address_t>(-1);
+	yad64::address_t fault_address = static_cast<yad64::address_t>(-1);
 	if(event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) {
-		fault_address = (edb::address_t)(event.u.Exception.ExceptionRecord.ExceptionInformation[1]);
+		fault_address = (yad64::address_t)(event.u.Exception.ExceptionRecord.ExceptionInformation[1]);
 	}
 
 	switch(stop_code()) {
@@ -258,14 +258,14 @@ DebugEvent::Message DebugEvent::error_description() const {
 			tr("Illegal Access Fault"),
 			tr(
 				"<p>The debugged application encountered a segmentation fault.<br />The address <strong>0x%1</strong> could not be accessed.</p>"
-				"<p>If you would like to pass this exception to the application press Shift+[F7/F8/F9]</p>").arg(edb::v1::format_pointer(fault_address))
+				"<p>If you would like to pass this exception to the application press Shift+[F7/F8/F9]</p>").arg(yad64::v1::format_pointer(fault_address))
 			);
 	case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
 		return Message(
 			tr("Array Bounds Error"),
 			tr(
 				"<p>The debugged application tried to access an out of bounds array element.</p>"
-				"<p>If you would like to pass this exception to the application press Shift+[F7/F8/F9]</p>").arg(edb::v1::format_pointer(fault_address))
+				"<p>If you would like to pass this exception to the application press Shift+[F7/F8/F9]</p>").arg(yad64::v1::format_pointer(fault_address))
 			);
 	case EXCEPTION_DATATYPE_MISALIGNMENT:
 		return Message(

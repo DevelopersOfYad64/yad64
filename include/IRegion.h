@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class MemoryRegions;
 
-class EDB_EXPORT IRegion {
+class YAD64_EXPORT IRegion {
 public:
 	typedef quint32 permissions_t;
 
@@ -39,13 +39,13 @@ public:
 	virtual bool readable() const = 0;
 	virtual bool writable() const = 0;
 	virtual bool executable() const = 0;
-	virtual edb::address_t size() const = 0;
+	virtual yad64::address_t size() const = 0;
 	virtual void set_permissions(bool read, bool write, bool execute) = 0;
 	
 public:
-	virtual edb::address_t start() const = 0;
-	virtual edb::address_t end() const = 0;
-	virtual edb::address_t base() const = 0;
+	virtual yad64::address_t start() const = 0;
+	virtual yad64::address_t end() const = 0;
+	virtual yad64::address_t base() const = 0;
 	virtual QString name() const = 0;
 	virtual permissions_t permissions() const = 0;
 };

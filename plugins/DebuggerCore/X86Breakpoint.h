@@ -23,11 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class X86Breakpoint : public IBreakpoint {
 public:
-	X86Breakpoint(edb::address_t address);
+	X86Breakpoint(yad64::address_t address);
 	~X86Breakpoint();
 
 public:
-	virtual edb::address_t address() const    { return address_; }
+	virtual yad64::address_t address() const    { return address_; }
 	virtual unsigned int hit_count() const    { return hit_count_; }
 	virtual bool enabled() const              { return enabled_; }
 	virtual bool one_time() const             { return one_time_; }
@@ -46,7 +46,7 @@ public:
 
 private:
 	QByteArray     original_bytes_;
-	edb::address_t address_;
+	yad64::address_t address_;
 	unsigned int   hit_count_;
 	bool           enabled_ ;
 	bool           one_time_;

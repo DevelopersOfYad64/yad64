@@ -23,14 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QChar>
 #include <QVector>
 
-namespace edb {
+namespace yad64 {
 namespace internal {
 	void load_function_db();
 }
 }
 
-class EDB_EXPORT FunctionInfo {
-	friend void edb::internal::load_function_db();
+class YAD64_EXPORT FunctionInfo {
+	friend void yad64::internal::load_function_db();
 public:
 	FunctionInfo(const FunctionInfo &other) : params_(other.params_) {
 	}

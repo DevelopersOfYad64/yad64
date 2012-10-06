@@ -51,9 +51,9 @@ void BookmarkWidget::on_tableWidget_cellDoubleClicked(int row, int col) {
 		{
 			if(QTableWidgetItem *const address_item = ui->tableWidget->item(row, 0)) {
 				bool ok;
-				const edb::address_t addr = edb::v1::string_to_address(address_item->text(), ok);
+				const yad64::address_t addr = yad64::v1::string_to_address(address_item->text(), ok);
 				if(ok) {
-					edb::v1::jump_to_address(addr);
+					yad64::v1::jump_to_address(addr);
 				}
 			}
 			break;
@@ -80,8 +80,8 @@ void BookmarkWidget::on_tableWidget_cellDoubleClicked(int row, int col) {
 //------------------------------------------------------------------------------
 void BookmarkWidget::on_btnAdd_clicked() {
 
-	edb::address_t address;
-	if(edb::v1::get_expression_from_user(tr("Bookmark Address"), tr("Address:"), address)) {
+	yad64::address_t address;
+	if(yad64::v1::get_expression_from_user(tr("Bookmark Address"), tr("Address:"), address)) {
 		add_address(address);
 	}
 }
@@ -96,7 +96,7 @@ void BookmarkWidget::on_btnDel_clicked() {
 	if(item.get()) {
 		bool ok;
 		const QString s = item->text();
-		const edb::address_t address = edb::v1::string_to_address(s, ok);
+		const yad64::address_t address = yad64::v1::string_to_address(s, ok);
 		entries_.remove(address);
 	}
 }
@@ -112,12 +112,12 @@ void BookmarkWidget::on_btnClear_clicked() {
 }
 
 //------------------------------------------------------------------------------
-// Name: add_address(edb::address_t address)
+// Name: add_address(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-void BookmarkWidget::add_address(edb::address_t address) {
+void BookmarkWidget::add_address(yad64::address_t address) {
 	if(!entries_.contains(address)) {
-		QTableWidgetItem *const new_item = new QTableWidgetItem(edb::v1::format_pointer(address));
+		QTableWidgetItem *const new_item = new QTableWidgetItem(yad64::v1::format_pointer(address));
 		const int row = ui->tableWidget->rowCount();
 		ui->tableWidget->setRowCount(row + 1);
 		ui->tableWidget->setItem(row, 0, new_item);

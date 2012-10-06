@@ -12,7 +12,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>edb</string>
+   <string>yad64</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -193,7 +193,7 @@
   <action name="action_Open">
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-open.png</normaloff>:/debugger/images/edb22-action-open.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-open.png</normaloff>:/debugger/images/yad6422-action-open.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -231,7 +231,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-run.png</normaloff>:/debugger/images/edb22-action-run.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-run.png</normaloff>:/debugger/images/yad6422-action-run.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Run</string>
@@ -246,7 +246,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-break.png</normaloff>:/debugger/images/edb22-action-break.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-break.png</normaloff>:/debugger/images/yad6422-action-break.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Pause</string>
@@ -283,7 +283,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-stepi.png</normaloff>:/debugger/images/edb22-action-stepi.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-stepi.png</normaloff>:/debugger/images/yad6422-action-stepi.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Step Into</string>
@@ -298,7 +298,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-stepoveri.png</normaloff>:/debugger/images/edb22-action-stepoveri.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-stepoveri.png</normaloff>:/debugger/images/yad6422-action-stepoveri.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Step Over</string>
@@ -368,7 +368,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-stepi.png</normaloff>:/debugger/images/edb22-action-stepi.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-stepi.png</normaloff>:/debugger/images/yad6422-action-stepi.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Step Into (Pass Signal To Application)</string>
@@ -383,7 +383,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-stepover.png</normaloff>:/debugger/images/edb22-action-stepover.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-stepover.png</normaloff>:/debugger/images/yad6422-action-stepover.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Step Over (Pass Signal To Application)</string>
@@ -398,7 +398,7 @@
    </property>
    <property name="icon">
     <iconset resource="debugger.qrc">
-     <normaloff>:/debugger/images/edb22-action-run.png</normaloff>:/debugger/images/edb22-action-run.png</iconset>
+     <normaloff>:/debugger/images/yad6422-action-run.png</normaloff>:/debugger/images/yad6422-action-run.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Run (Pass Signal To Application)</string>

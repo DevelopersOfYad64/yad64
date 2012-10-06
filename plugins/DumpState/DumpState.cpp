@@ -39,7 +39,7 @@ namespace {
 	template <class T>
 	std::string hex_string(T value) {
 		std::stringstream ss;
-		ss << std::hex << std::setw(sizeof(T) * 2) << std::setfill('0') <<  static_cast<edb::reg_t>(value);
+		ss << std::hex << std::setw(sizeof(T) * 2) << std::setfill('0') <<  static_cast<yad64::reg_t>(value);
 		return ss.str();
 	}
 }
@@ -81,15 +81,15 @@ void DumpState::dump_code(const State &state) {
 	QSettings settings;
 	const int instructions_to_print = settings.value("DumpState/instructions_after_ip", 6).toInt();
 
-	const edb::address_t ip = state.instruction_pointer();
-	edb::address_t address = ip;
+	const yad64::address_t ip = state.instruction_pointer();
+	yad64::address_t address = ip;
 
 	for(int i = 0; i < instructions_to_print + 1; ++i) {
-		quint8 buf[edb::Instruction::MAX_SIZE];
+		quint8 buf[yad64::Instruction::MAX_SIZE];
 		int size = sizeof(buf);
 
-		if(edb::v1::get_instruction_bytes(address, buf, size)) {
-			edb::Instruction insn(buf, buf + size, address, std::nothrow);
+		if(yad64::v1::get_instruction_bytes(address, buf, size)) {
+			yad64::Instruction insn(buf, buf + size, address, std::nothrow);
 			if(insn.valid()) {
 				std::cout << ((address == ip) ? "> " : "  ") << hex_string(address) << ": " << edisassm::to_string(insn) << "\n";
 			} else {
@@ -107,7 +107,7 @@ void DumpState::dump_code(const State &state) {
 // Desc:
 //------------------------------------------------------------------------------
 void DumpState::dump_registers(const State &state) {
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	std::cout << "     eax:" << hex_string(*state["eax"]);
 	std::cout << " ebx:" << hex_string(*state["ebx"]);
 	std::cout << "  ecx:" << hex_string(*state["ecx"]);
@@ -137,7 +137,7 @@ void DumpState::dump_registers(const State &state) {
 	std::cout << ((*state["eflags"] & (1 <<  2)) != 0 ? 'P' : 'p') << ' ';
 	std::cout << ((*state["eflags"] & (1 <<  0)) != 0 ? 'C' : 'c');
 	std::cout << "\n";
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	std::cout << "     rax:" << hex_string(*state["rax"]);
 	std::cout << " rbx:" << hex_string(*state["rbx"]);
 	std::cout << "  rcx:" << hex_string(*state["rcx"]);
@@ -182,13 +182,13 @@ void DumpState::dump_registers(const State &state) {
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_lines(edb::address_t address, int lines)
+// Name: dump_lines(yad64::address_t address, int lines)
 // Desc:
 //------------------------------------------------------------------------------
-void DumpState::dump_lines(edb::address_t address, int lines) {
+void DumpState::dump_lines(yad64::address_t address, int lines) {
 	for(int i = 0; i < lines; ++i) {
 		quint8 buf[16];
-		if(edb::v1::debugger_core->read_bytes(address, buf, sizeof(buf))) {
+		if(yad64::v1::debugger_core->read_bytes(address, buf, sizeof(buf))) {
 			std::cout << hex_string(address) << " : ";
 
 			for(int j = 0x00; j < 0x04; ++j) std::cout << hex_string(buf[j]) << " ";
@@ -225,10 +225,10 @@ void DumpState::dump_stack(const State &state) {
 }
 
 //------------------------------------------------------------------------------
-// Name: dump_data(edb::address_t address)
+// Name: dump_data(yad64::address_t address)
 // Desc:
 //------------------------------------------------------------------------------
-void DumpState::dump_data(edb::address_t address) {
+void DumpState::dump_data(yad64::address_t address) {
 	dump_lines(address, 2);
 }
 
@@ -239,14 +239,14 @@ void DumpState::dump_data(edb::address_t address) {
 void DumpState::show_menu() {
 
 	State state;
-	edb::v1::debugger_core->get_state(state);
+	yad64::v1::debugger_core->get_state(state);
 
 	std::cout << "------------------------------------------------------------------------------\n";
 	dump_registers(state);
 	std::cout << "[" << hex_string<quint16>(*state["ss"]) << ":" << hex_string(state.stack_pointer()) << "]---------------------------------------------------------[stack]\n";
 	dump_stack(state);
 
-	const edb::address_t data_address = edb::v1::current_data_view_address();
+	const yad64::address_t data_address = yad64::v1::current_data_view_address();
 	std::cout << "[" << hex_string<quint16>(*state["ds"]) << ":" << hex_string(data_address) << "]---------------------------------------------------------[ data]\n";
 	dump_data(data_address);
 	std::cout << "[" << hex_string<quint16>(*state["cs"]) << ":" << hex_string(state.instruction_pointer()) << "]---------------------------------------------------------[ code]\n";

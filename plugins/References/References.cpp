@@ -57,7 +57,7 @@ QMenu *References::menu(QWidget *parent) {
 void References::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogReferences(edb::v1::debugger_ui);
+		dialog_ = new DialogReferences(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

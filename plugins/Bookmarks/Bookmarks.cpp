@@ -96,8 +96,8 @@ QList<QAction *> Bookmarks::cpu_context_menu() {
 //------------------------------------------------------------------------------
 QVariantList Bookmarks::addresses() const {
 	QVariantList r;
-	QList<edb::address_t> a = bookmark_widget_->entries();
-	Q_FOREACH(edb::address_t x, a) {
+	QList<yad64::address_t> a = bookmark_widget_->entries();
+	Q_FOREACH(yad64::address_t x, a) {
 		r.push_back(x);
 	}
 	return r;
@@ -108,7 +108,7 @@ QVariantList Bookmarks::addresses() const {
 // Desc:
 //------------------------------------------------------------------------------
 void Bookmarks::add_bookmark_menu() {
-	bookmark_widget_->add_address(edb::v1::cpu_selected_address());
+	bookmark_widget_->add_address(yad64::v1::cpu_selected_address());
 }
 
 Q_EXPORT_PLUGIN2(Bookmarks, Bookmarks)

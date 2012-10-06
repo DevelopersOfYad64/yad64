@@ -22,11 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtGlobal>
 #include "Instruction.h"
 
-#define EDB_MAX_HEX 16
-#define EDB_X86_64
-#define EDB_FMT_PTR "%016llx"
+#define YAD64_MAX_HEX 16
+#define YAD64_X86_64
+#define YAD64_FMT_PTR "%016llx"
 
-namespace edb {
+namespace yad64 {
 	typedef quint64                         reg_t;
 	typedef quint64                         address_t;
 	typedef Instruction<edisassm::x86_64>   Instruction;

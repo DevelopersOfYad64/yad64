@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //       we need to figure out a proper way to support (if at all) non
 //       x86 arches
 
-#if !(defined(EDB_X86_64) || defined(EDB_X86))
+#if !(defined(YAD64_X86_64) || defined(YAD64_X86))
 #error "Unsupported Platform"
 #endif
 
@@ -57,10 +57,10 @@ QMenu *HardwareBreakpoints::menu(QWidget *parent) {
 }
 
 //------------------------------------------------------------------------------
-// Name: setup_bp(State &state, int num, bool enabled, edb::address_t addr, int type, int size)
+// Name: setup_bp(State &state, int num, bool enabled, yad64::address_t addr, int type, int size)
 // Desc:
 //------------------------------------------------------------------------------
-void HardwareBreakpoints::setup_bp(State &state, int num, bool enabled, edb::address_t addr, int type, int size) {
+void HardwareBreakpoints::setup_bp(State &state, int num, bool enabled, yad64::address_t addr, int type, int size) {
 
 	const int N1 = 16 + (num * 4);
 	const int N2 = 18 + (num * 4);
@@ -134,47 +134,47 @@ void HardwareBreakpoints::setup_breakpoints() {
 			// we want to be enabled, if we aren't already hooked,
 			// hook it
 			if(old_event_handler_ == 0) {
-				old_event_handler_ = edb::v1::set_debug_event_handler(this);
+				old_event_handler_ = yad64::v1::set_debug_event_handler(this);
 			}
 
 			State state;
 			bool ok;
-			edb::v1::debugger_core->get_state(state);
+			yad64::v1::debugger_core->get_state(state);
 
-			edb::address_t addr;
+			yad64::address_t addr;
 
-			addr = edb::v1::string_to_address(p->ui->txtBP1->text(), ok);
+			addr = yad64::v1::string_to_address(p->ui->txtBP1->text(), ok);
 			if(ok) {
 				setup_bp(state, 0, p->ui->chkBP1->isChecked(), addr, p->ui->cmbType1->currentIndex(), p->ui->cmbSize1->currentIndex());
 			}
 
-			addr = edb::v1::string_to_address(p->ui->txtBP2->text(), ok);
+			addr = yad64::v1::string_to_address(p->ui->txtBP2->text(), ok);
 			if(ok) {
 				setup_bp(state, 1, p->ui->chkBP2->isChecked(), addr, p->ui->cmbType2->currentIndex(), p->ui->cmbSize2->currentIndex());
 			}
 
-			addr = edb::v1::string_to_address(p->ui->txtBP3->text(), ok);
+			addr = yad64::v1::string_to_address(p->ui->txtBP3->text(), ok);
 			if(ok) {
 				setup_bp(state, 2, p->ui->chkBP3->isChecked(), addr, p->ui->cmbType3->currentIndex(), p->ui->cmbSize3->currentIndex());
 			}
 
-			addr = edb::v1::string_to_address(p->ui->txtBP4->text(), ok);
+			addr = yad64::v1::string_to_address(p->ui->txtBP4->text(), ok);
 			if(ok) {
 				setup_bp(state, 3, p->ui->chkBP4->isChecked(), addr, p->ui->cmbType4->currentIndex(), p->ui->cmbSize4->currentIndex());
 			}
 
-			edb::v1::debugger_core->set_state(state);
+			yad64::v1::debugger_core->set_state(state);
 
 		} else {
 
 			State state;
-			edb::v1::debugger_core->get_state(state);
+			yad64::v1::debugger_core->get_state(state);
 			state.set_debug_register(7, 0);
-			edb::v1::debugger_core->set_state(state);
+			yad64::v1::debugger_core->set_state(state);
 
 			// we want to be disabled and we have hooked, so unhook
 			if(old_event_handler_) {
-				edb::v1::set_debug_event_handler(old_event_handler_);
+				yad64::v1::set_debug_event_handler(old_event_handler_);
 				old_event_handler_ = 0;
 			}
 		}
@@ -188,7 +188,7 @@ void HardwareBreakpoints::setup_breakpoints() {
 void HardwareBreakpoints::show_menu() {
 
 	if(!dialog_) {
-		dialog_ = new DialogHWBreakpoints(edb::v1::debugger_ui);
+		dialog_ = new DialogHWBreakpoints(yad64::v1::debugger_ui);
 	}
 
 	if(dialog_->exec() == QDialog::Accepted) {
@@ -201,17 +201,17 @@ void HardwareBreakpoints::show_menu() {
 // Desc: this hooks the debug event handler so we can make the breakpoints
 //       able to be resumed
 //------------------------------------------------------------------------------
-edb::EVENT_STATUS HardwareBreakpoints::handle_event(const DebugEvent &event) {
+yad64::EVENT_STATUS HardwareBreakpoints::handle_event(const DebugEvent &event) {
 
 	if(event.reason() == DebugEvent::EVENT_STOPPED) {
 		if(event.stop_code() == DebugEvent::sigtrap) {
 			// check DR6 to see if it was a HW BP event
 			// if so, set the resume flag
 			State state;
-			edb::v1::debugger_core->get_state(state);
+			yad64::v1::debugger_core->get_state(state);
 			if((state.debug_register(6) & 0x0f) != 0x00) {
 				state.set_flags(state.flags() | (1 << 16));
-				edb::v1::debugger_core->set_state(state);
+				yad64::v1::debugger_core->set_state(state);
 			}
 
 		}

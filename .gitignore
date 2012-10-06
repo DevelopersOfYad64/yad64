@@ -1,2 +1,13 @@
 *.suo
 *.user
+*.sln
+*.exe
+*.dll
+*.exp
+*.lib
+Makefile*
+src/Makefile*
+plugins/Makefile*
+src/debug
+src/release
+src/ui_*

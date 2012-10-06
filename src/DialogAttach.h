@@ -44,7 +44,7 @@ public Q_SLOTS:
 	void on_filter_uid_clicked(bool checked);
 
 public:
-	edb::pid_t selected_pid(bool &ok) const;
+	yad64::pid_t selected_pid(bool &ok) const;
 
 private:
 	 Ui::DialogAttach *const ui;

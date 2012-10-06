@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtGlobal>
 
-namespace edb {
+namespace yad64 {
 	template <char Ch1, char Ch2 = '\0', char Ch3 = '\0', char Ch4 = '\0', char Ch5 = '\0', char Ch6 = '\0', char Ch7 = '\0', char Ch8 = '\0'>
 	struct string_hash {
 		static const quint64 value = 

@@ -84,7 +84,7 @@ void DebuggerUI::update_menu_state(GUI_STATE state) {
 		ui->action_Detach->setEnabled(true);
 		ui->action_Kill->setEnabled(true);
 		add_tab_->setEnabled(true);
-		edb::v1::set_status(tr("paused"));
+		yad64::v1::set_status(tr("paused"));
 		break;
 	case RUNNING:
 		ui->actionRun_Until_Return->setEnabled(false);
@@ -99,7 +99,7 @@ void DebuggerUI::update_menu_state(GUI_STATE state) {
 		ui->action_Detach->setEnabled(true);
 		ui->action_Kill->setEnabled(true);
 		add_tab_->setEnabled(true);
-		edb::v1::set_status(tr("running"));
+		yad64::v1::set_status(tr("running"));
 		break;
 	case TERMINATED:
 		ui->actionRun_Until_Return->setEnabled(false);
@@ -114,7 +114,7 @@ void DebuggerUI::update_menu_state(GUI_STATE state) {
 		ui->action_Detach->setEnabled(false);
 		ui->action_Kill->setEnabled(false);
 		add_tab_->setEnabled(false);
-		edb::v1::set_status(tr("terminated"));
+		yad64::v1::set_status(tr("terminated"));
 		break;
 	}
 
@@ -128,8 +128,8 @@ void DebuggerUI::update_menu_state(GUI_STATE state) {
 QString DebuggerUI::create_tty() {
 #if defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
 	// we attempt to reuse an open output window
-	if(edb::v1::config().tty_enabled && tty_proc_->state() != QProcess::Running) {
-		const QString command = edb::v1::config().tty_command;
+	if(yad64::v1::config().tty_enabled && tty_proc_->state() != QProcess::Running) {
+		const QString command = yad64::v1::config().tty_command;
 
 		if(!command.isEmpty()) {
 
@@ -137,7 +137,7 @@ QString DebuggerUI::create_tty() {
 			// first try to get a 'unique' filename, i would love to use a system
 			// temp file API... but there doesn't seem to be one which will create
 			// a pipe...only ordinary files!
-			const QString temp_pipe = QString("%1/edb_temp_file_%2_%3").arg(QDir::tempPath()).arg(qrand()).arg(getpid());
+			const QString temp_pipe = QString("%1/yad64_temp_file_%2_%3").arg(QDir::tempPath()).arg(qrand()).arg(getpid());
 
 			// make sure it isn't already there, and then make the pipe
 			::unlink(qPrintable(temp_pipe));
@@ -153,17 +153,17 @@ QString DebuggerUI::create_tty() {
 				).arg(temp_pipe);
 
 			// parse up the command from the options, white space delimited
-			QStringList proc_args = edb::v1::parse_command_line(command);
+			QStringList proc_args = yad64::v1::parse_command_line(command);
 			const QString tty_command = proc_args.takeFirst().trimmed();
 
 			// start constructing the arguments for the term
 
 			if(tty_command.endsWith("/gnome-terminal")) {
-				proc_args << "--hide-menubar" << "--title" << tr("edb output") << "-e" << QString("sh -c '%1'").arg(shell_script);
+				proc_args << "--hide-menubar" << "--title" << tr("yad64 output") << "-e" << QString("sh -c '%1'").arg(shell_script);
 			} else if(tty_command.endsWith("/konsole")) {
-				proc_args << "--nofork" << "--title" << tr("edb output") << "-e" << QString("sh -c '%1'").arg(shell_script);
+				proc_args << "--nofork" << "--title" << tr("yad64 output") << "-e" << QString("sh -c '%1'").arg(shell_script);
 			} else {
-				proc_args << "-title" << tr("edb output") << "-e" << QString("sh -c '%1'").arg(shell_script);
+				proc_args << "-title" << tr("yad64 output") << "-e" << QString("sh -c '%1'").arg(shell_script);
 			}
 
 			// make the tty process object and connect it's death signal to our cleanup
@@ -226,7 +226,7 @@ DataViewInfo::pointer DebuggerUI::current_data_view_info() const {
 // Desc: sets the caption part to also show the application name and pid
 //------------------------------------------------------------------------------
 void DebuggerUI::set_debugger_caption(const QString &appname) {
-	setWindowTitle(tr("edb - %1 [%2]").arg(appname).arg(edb::v1::debugger_core->pid()));
+	setWindowTitle(tr("yad64 - %1 [%2]").arg(appname).arg(yad64::v1::debugger_core->pid()));
 }
 
 //------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ void DebuggerUI::create_data_tab() {
 	hexview->setAddressOffset(new_data_view->region.start());
 	hexview->setData(new_data_view->stream);
 
-	const Configuration &config = edb::v1::config();
+	const Configuration &config = yad64::v1::config();
 
 	// set the default view options
 	hexview->setShowAddress(config.data_show_address);
@@ -289,8 +289,8 @@ void DebuggerUI::create_data_tab() {
 
 	// create the tab!
 	ui->tabWidget->addTab(hexview, tr("%1-%2").arg(
-		edb::v1::format_pointer(new_data_view->region.start()),
-		edb::v1::format_pointer(new_data_view->region.end())));
+		yad64::v1::format_pointer(new_data_view->region.start()),
+		yad64::v1::format_pointer(new_data_view->region.end())));
 
 
 	ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
@@ -311,7 +311,7 @@ void DebuggerUI::finish_plugin_setup(const QHash<QString, QObject *> &plugins) {
 	}
 
 	// setup the menu for all plugins that which to do so
-	QPointer<DialogOptions> options = qobject_cast<DialogOptions *>(edb::v1::dialog_options());
+	QPointer<DialogOptions> options = qobject_cast<DialogOptions *>(yad64::v1::dialog_options());
 	Q_FOREACH(QObject *plugin, plugins) {
 		if(IPlugin *const p = qobject_cast<IPlugin *>(plugin)) {
 			if(QMenu *const menu = p->menu(this)) {
@@ -331,10 +331,10 @@ void DebuggerUI::finish_plugin_setup(const QHash<QString, QObject *> &plugins) {
 // Name: get_goto_expression(bool &ok)
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t DebuggerUI::get_goto_expression(bool &ok) {
+yad64::address_t DebuggerUI::get_goto_expression(bool &ok) {
 
-	edb::address_t address;
-	ok = edb::v1::get_expression_from_user(tr("Goto Address"), tr("Address:"), address);
+	yad64::address_t address;
+	ok = yad64::v1::get_expression_from_user(tr("Goto Address"), tr("Address:"), address);
 	return ok ? address : 0;
 }
 
@@ -342,10 +342,10 @@ edb::address_t DebuggerUI::get_goto_expression(bool &ok) {
 // Name: get_follow_register(bool &ok) const
 // Desc:
 //------------------------------------------------------------------------------
-edb::reg_t DebuggerUI::get_follow_register(bool &ok) const {
+yad64::reg_t DebuggerUI::get_follow_register(bool &ok) const {
 	ok = false;
 	if(const QTreeWidgetItem *const i = ui->registerList->currentItem()) {
-		if(const Register reg = edb::v1::arch_processor().value_from_item(*i)) {
+		if(const Register reg = yad64::v1::arch_processor().value_from_item(*i)) {
 			if(reg.type() & (Register::TYPE_GPR | Register::TYPE_IP)) {
 				ok = true;
 				return *reg;

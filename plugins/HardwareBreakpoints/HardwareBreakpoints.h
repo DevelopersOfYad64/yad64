@@ -37,14 +37,14 @@ public:
 
 public:
 	virtual QMenu *menu(QWidget *parent = 0);
-	virtual edb::EVENT_STATUS handle_event(const DebugEvent &event);
+	virtual yad64::EVENT_STATUS handle_event(const DebugEvent &event);
 
 public Q_SLOTS:
 	void show_menu();
 
 private:
 	void setup_breakpoints();
-	void setup_bp(State &state, int num, bool enabled, edb::address_t addr, int type, int size);
+	void setup_bp(State &state, int num, bool enabled, yad64::address_t addr, int type, int size);
 
 private:
 	QMenu *              menu_;

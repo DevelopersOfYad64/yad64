@@ -29,7 +29,7 @@ IRegion::permissions_t permissions_value(bool read, bool write, bool execute) {
 template <size_t N>
 class BackupInfo : public IDebugEventHandler {
 public:
-	BackupInfo(edb::address_t address, IRegion::permissions_t perms, PlatformRegion *region);
+	BackupInfo(yad64::address_t address, IRegion::permissions_t perms, PlatformRegion *region);
 
 private:
 	Q_DISABLE_COPY(BackupInfo)
@@ -43,11 +43,11 @@ public:
 	bool restore();
 
 public:
-	virtual edb::EVENT_STATUS handle_event(const DebugEvent &event);
+	virtual yad64::EVENT_STATUS handle_event(const DebugEvent &event);
 
 public:
 	QAtomicInt             lock_;
-	edb::address_t         address_;
+	yad64::address_t         address_;
 	IRegion::permissions_t premissions_;
 	State                  state_;
 	quint8                 buffer_[N];
@@ -58,11 +58,11 @@ public:
 };
 
 //------------------------------------------------------------------------------
-// Name: BackupInfo(td::size_t size, edb::address_t address, IRegion::permissions_t perms, PlatformRegion *region)
+// Name: BackupInfo(td::size_t size, yad64::address_t address, IRegion::permissions_t perms, PlatformRegion *region)
 // Desc:
 //------------------------------------------------------------------------------
 template <size_t N>
-BackupInfo<N>::BackupInfo(edb::address_t address, IRegion::permissions_t perms, PlatformRegion *region) :
+BackupInfo<N>::BackupInfo(yad64::address_t address, IRegion::permissions_t perms, PlatformRegion *region) :
 		lock_(1), address_(address), premissions_(perms), region_(region), event_handler_(0) {
 }
 
@@ -72,8 +72,8 @@ BackupInfo<N>::BackupInfo(edb::address_t address, IRegion::permissions_t perms, 
 //------------------------------------------------------------------------------
 template <size_t N>
 bool BackupInfo<N>::backup() {
-	edb::v1::debugger_core->get_state(state_);
-	return edb::v1::debugger_core->read_bytes(address_, buffer_, N);
+	yad64::v1::debugger_core->get_state(state_);
+	return yad64::v1::debugger_core->read_bytes(address_, buffer_, N);
 }
 
 //------------------------------------------------------------------------------
@@ -82,8 +82,8 @@ bool BackupInfo<N>::backup() {
 //------------------------------------------------------------------------------
 template <size_t N>
 bool BackupInfo<N>::restore() {
-	edb::v1::debugger_core->set_state(state_);
-	return edb::v1::debugger_core->write_bytes(address_, buffer_, N);
+	yad64::v1::debugger_core->set_state(state_);
+	return yad64::v1::debugger_core->write_bytes(address_, buffer_, N);
 }
 
 //------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ bool BackupInfo<N>::restore() {
 // Desc:
 //------------------------------------------------------------------------------
 template <size_t N>
-edb::EVENT_STATUS BackupInfo<N>::handle_event(const DebugEvent &event) {
+yad64::EVENT_STATUS BackupInfo<N>::handle_event(const DebugEvent &event) {
 	Q_UNUSED(event);
 
 	// TODO: check that the event was caused by a hlt in our shellcode
@@ -104,18 +104,18 @@ edb::EVENT_STATUS BackupInfo<N>::handle_event(const DebugEvent &event) {
 	region_->permissions_ = perms();
 
 	// restore the event handler
-	edb::v1::set_debug_event_handler(event_handler_);
+	yad64::v1::set_debug_event_handler(event_handler_);
 
 	// really shouldn't matter since the return value isn't used at all
 	// we simply want tot catch the event and set the lock to 0
-	return edb::DEBUG_STOP;
+	return yad64::DEBUG_STOP;
 }
 
 //------------------------------------------------------------------------------
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-PlatformRegion::PlatformRegion(edb::address_t start, edb::address_t end, edb::address_t base, const QString &name, permissions_t permissions) : start_(start), end_(end), base_(base), name_(name), permissions_(permissions) {
+PlatformRegion::PlatformRegion(yad64::address_t start, yad64::address_t end, yad64::address_t base, const QString &name, permissions_t permissions) : start_(start), end_(end), base_(base), name_(name), permissions_(permissions) {
 }
 
 //------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ bool PlatformRegion::executable() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t PlatformRegion::size() const {
+yad64::address_t PlatformRegion::size() const {
 	return end_ - start_;
 }
 
@@ -178,10 +178,10 @@ edb::address_t PlatformRegion::size() const {
 // Desc:
 //------------------------------------------------------------------------------
 void PlatformRegion::set_permissions(bool read, bool write, bool execute) {
-	edb::address_t temp_address        = 0;
+	yad64::address_t temp_address        = 0;
 	int count                          = 0;
 	int ret                            = QMessageBox::Yes;
-	const QList<MemoryRegion> &regions = edb::v1::memory_regions().regions();
+	const QList<MemoryRegion> &regions = yad64::v1::memory_regions().regions();
 
 	// search for an executable region to run our shell code
 	Q_FOREACH(const MemoryRegion &region, regions) {
@@ -223,7 +223,7 @@ void PlatformRegion::set_permissions(bool read, bool write, bool execute) {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t PlatformRegion::start() const {
+yad64::address_t PlatformRegion::start() const {
 	return start_;
 }
 
@@ -231,7 +231,7 @@ edb::address_t PlatformRegion::start() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t PlatformRegion::end() const {
+yad64::address_t PlatformRegion::end() const {
 	return end_;
 }
 
@@ -239,7 +239,7 @@ edb::address_t PlatformRegion::end() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-edb::address_t PlatformRegion::base() const {
+yad64::address_t PlatformRegion::base() const {
 	return base_;
 }
 
@@ -263,19 +263,19 @@ IRegion::permissions_t PlatformRegion::permissions() const {
 // Name: 
 // Desc:
 //------------------------------------------------------------------------------
-void PlatformRegion::set_permissions(bool read, bool write, bool execute, edb::address_t temp_address) {
+void PlatformRegion::set_permissions(bool read, bool write, bool execute, yad64::address_t temp_address) {
 	const permissions_t perms              = permissions_value(read, write, execute);
-	const edb::address_t len               = size();
-	const edb::address_t addr              = start();
-	static const edb::address_t syscallnum = __NR_mprotect;
+	const yad64::address_t len               = size();
+	const yad64::address_t addr              = start();
+	static const yad64::address_t syscallnum = __NR_mprotect;
 
 	// start of nowhere near portable code
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 	quint8 shellcode[] = {
 		"\xcd\x80" // int $0x80
 		"\xf4"     // hlt
 	};
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 	quint8 shellcode[] = {
 		"\x0f\x05" // syscall
 		"\xf4"     // hlt
@@ -291,17 +291,17 @@ void PlatformRegion::set_permissions(bool read, bool write, bool execute, edb::a
 
 		if(backup_info.backup()) {
 			// write out our shellcode
-			if(edb::v1::debugger_core->write_bytes(temp_address, shellcode, sizeof(shellcode))) {
+			if(yad64::v1::debugger_core->write_bytes(temp_address, shellcode, sizeof(shellcode))) {
 
 				State state;
 				state.set_instruction_pointer(temp_address);
 
-#if defined(EDB_X86)
+#if defined(YAD64_X86)
 				state.set_register("ebx", len);
 				state.set_register("ecx", addr);
 				state.set_register("edx", perms);
 				state.set_register("eax", syscallnum);
-#elif defined(EDB_X86_64)
+#elif defined(YAD64_X86_64)
 				state.set_register("rsi", len);
 				state.set_register("rdi", addr);
 				state.set_register("rdx", perms);
@@ -309,13 +309,13 @@ void PlatformRegion::set_permissions(bool read, bool write, bool execute, edb::a
 #else
 #error "invalid architecture"
 #endif
-				edb::v1::debugger_core->set_state(state);
+				yad64::v1::debugger_core->set_state(state);
 
-				backup_info.event_handler_ = edb::v1::set_debug_event_handler(&backup_info);
+				backup_info.event_handler_ = yad64::v1::set_debug_event_handler(&backup_info);
 
 				// run and wait for the 'crash' caused by the hlt instruction
 				// should be a SIGSEGV on Linux
-				edb::v1::debugger_core->resume(edb::DEBUG_CONTINUE);
+				yad64::v1::debugger_core->resume(yad64::DEBUG_CONTINUE);
 
 				// we use a spinlock here because we want to be able to
 				// process events while waiting

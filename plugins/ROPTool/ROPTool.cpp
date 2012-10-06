@@ -57,7 +57,7 @@ QMenu *ROPTool::menu(QWidget *parent) {
 void ROPTool::show_menu() {
 
 	if(dialog_ == 0) {
-		dialog_ = new DialogROPTool(edb::v1::debugger_ui);
+		dialog_ = new DialogROPTool(yad64::v1::debugger_ui);
 	}
 
 	dialog_->show();

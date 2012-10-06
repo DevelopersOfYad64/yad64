@@ -59,7 +59,7 @@ DialogMemoryRegions::~DialogMemoryRegions() {
 void DialogMemoryRegions::showEvent(QShowEvent *) {
 
 	filter_model_->setFilterKeyColumn(3);
-	filter_model_->setSourceModel(&edb::v1::memory_regions());
+	filter_model_->setSourceModel(&yad64::v1::memory_regions());
 	ui->regions_table->setModel(filter_model_);
 }
 
@@ -110,7 +110,7 @@ MemoryRegion *DialogMemoryRegions::selected_region() const {
 void DialogMemoryRegions::set_permissions(bool read, bool write, bool execute) {
 	if(MemoryRegion *const region = selected_region()) {
 		region->set_permissions(read, write, execute);
-		edb::v1::memory_regions().sync();
+		yad64::v1::memory_regions().sync();
 	}
 }
 
@@ -184,7 +184,7 @@ void DialogMemoryRegions::set_access_rwx() {
 //------------------------------------------------------------------------------
 void DialogMemoryRegions::view_in_cpu() {
 	if(MemoryRegion *const region = selected_region()) {
-		edb::v1::jump_to_address(region->start());
+		yad64::v1::jump_to_address(region->start());
 	}
 }
 
@@ -194,7 +194,7 @@ void DialogMemoryRegions::view_in_cpu() {
 //------------------------------------------------------------------------------
 void DialogMemoryRegions::view_in_stack() {
 	if(MemoryRegion *const region = selected_region()) {
-		edb::v1::dump_stack(region->start(), true);
+		yad64::v1::dump_stack(region->start(), true);
 	}
 }
 
@@ -204,7 +204,7 @@ void DialogMemoryRegions::view_in_stack() {
 //------------------------------------------------------------------------------
 void DialogMemoryRegions::view_in_dump() {
 	if(MemoryRegion *const region = selected_region()) {
-		edb::v1::dump_data(region->start(), true);
+		yad64::v1::dump_data(region->start(), true);
 	}
 }
 
@@ -215,7 +215,7 @@ void DialogMemoryRegions::view_in_dump() {
 void DialogMemoryRegions::on_regions_table_doubleClicked(const QModelIndex &index) {
 	Q_UNUSED(index);
 	if(MemoryRegion *const region = selected_region()) {
-		edb::v1::dump_data(region->start(), true);
+		yad64::v1::dump_data(region->start(), true);
 	}
 }
 

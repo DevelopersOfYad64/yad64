@@ -6,8 +6,8 @@
 #include <QString>
 
 struct Process {
-	edb::pid_t pid;
-	edb::uid_t uid;
+	yad64::pid_t pid;
+	yad64::uid_t uid;
 	QString    user;
 	QString    name;
 };

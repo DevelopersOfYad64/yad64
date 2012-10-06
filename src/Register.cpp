@@ -26,10 +26,10 @@ Register::Register() : value_(0), type_(TYPE_INVALID) {
 }
 
 //------------------------------------------------------------------------------
-// Name: Register(const QString &name, edb::reg_t value, Type type)
+// Name: Register(const QString &name, yad64::reg_t value, Type type)
 // Desc:
 //------------------------------------------------------------------------------
-Register::Register(const QString &name, edb::reg_t value, Type type) : name_(name), value_(value), type_(type) {
+Register::Register(const QString &name, yad64::reg_t value, Type type) : name_(name), value_(value), type_(type) {
 }
 
 //------------------------------------------------------------------------------
